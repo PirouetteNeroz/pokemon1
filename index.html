@@ -4,96 +4,370 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventaire CardTrader</title>
-    <!-- Vue.js -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <!-- Vuetify 3 via CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.0.0-beta.10/dist/vuetify.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.0-beta.10/dist/vuetify.min.js"></script>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Vuetify CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.css" rel="stylesheet">
+    <!-- Material Design Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
+    <style>
+        .expansion-code {
+            background: #FFD700;
+            color: black;
+            padding: 3px 8px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.5s;
+        }
+        .fade-enter, .fade-leave-to {
+            opacity: 0;
+        }
+    </style>
 </head>
 <body>
     <div id="app">
-        <!-- Votre contenu ici -->
+        <v-app>
+            <v-main>
+                <v-container fluid>
+                    <v-row>
+                        <!-- Sidebar (Filtres) -->
+                        <v-col cols="12" md="3" lg="2">
+                            <v-card class="sidebar pa-3" height="100vh">
+                                <h2 class="text-warning mb-4">Filtres</h2>
+                                <v-text-field v-model="searchQuery" label="Rechercher..." prepend-icon="mdi-magnify" outlined dense></v-text-field>
+                                <v-select v-model="selectedExpansion" :items="expansionOptions" label="Extension" outlined dense></v-select>
+                                <v-select v-model="selectedLanguage" :items="languageOptions" label="Langue" outlined dense></v-select>
+                                <v-select v-model="selectedRarity" :items="rarityOptions" label="Rareté" outlined dense></v-select>
+                                <v-select v-model="selectedReverse" :items="reverseOptions" label="Type de carte" outlined dense></v-select>
+                                <v-select v-model="sortOrder" :items="sortOptions" label="Trier par" outlined dense></v-select>
+                                <v-btn color="warning" block class="mb-3" @click="updateDisplay">Rechercher</v-btn>
+                                <v-btn color="warning" variant="outlined" block class="mb-3" @click="toggleView">Basculer en Liste</v-btn>
+                                <!-- Panier -->
+                                <v-card class="cart mt-4">
+                                    <h2 class="text-warning mb-3">Panier</h2>
+                                    <v-list>
+                                        <v-list-item v-for="item in cart" :key="item.blueprintId">
+                                            <template v-slot:prepend>
+                                                <v-icon>mdi-cards</v-icon>
+                                            </template>
+                                            <v-list-item-title>{{ item.name }} - {{ item.price }} € x {{ item.quantity }}</v-list-item-title>
+                                            <template v-slot:append>
+                                                <v-btn icon="mdi-minus" variant="text" @click="decreaseQuantity(item.blueprintId)"></v-btn>
+                                                <v-btn icon="mdi-plus" variant="text" @click="increaseQuantity(item.blueprintId, item.quantity)"></v-btn>
+                                            </template>
+                                        </v-list-item>
+                                    </v-list>
+                                    <v-card-text class="mt-3">Total: <span class="font-weight-bold">{{ cartTotal.toFixed(2) }}</span> €</v-card-text>
+                                    <v-btn color="error" block @click="clearCart">Vider le panier</v-btn>
+                                    <v-btn color="info" block class="mt-3" @click="downloadCartAsText">Télécharger le panier</v-btn>
+                                </v-card>
+                            </v-card>
+                        </v-col>
+                        <!-- Contenu Principal -->
+                        <v-col cols="12" md="9" lg="10">
+                            <v-card class="content pa-3">
+                                <h2>Inventaire</h2>
+                                <div v-if="viewMode === 'grid'">
+                                    <v-row>
+                                        <v-col v-for="card in paginatedCards" :key="card.blueprint_id" cols="12" sm="6" md="4" lg="3">
+                                            <transition name="fade">
+                                                <v-card class="card" @mouseover="hoveredCard = card.blueprint_id" @mouseleave="hoveredCard = null">
+                                                    <v-img :src="`${imageBaseUrl}${card.blueprint_id}.jpg`" :alt="card.name_en" height="200" cover></v-img>
+                                                    <v-card-title>{{ card.name_en }}</v-card-title>
+                                                    <v-card-text>
+                                                        <span class="expansion-code">{{ expansions[card.expansion.id] }}</span>
+                                                        <p>{{ (card.price_cents / 100).toFixed(2) }} €</p>
+                                                        <p>Quantité: {{ card.quantity || 0 }}</p>
+                                                    </v-card-text>
+                                                    <v-card-actions v-if="hoveredCard === card.blueprint_id">
+                                                        <v-btn color="warning" block @click="addToCart(card)">Ajouter au panier</v-btn>
+                                                    </v-card-actions>
+                                                </v-card>
+                                            </transition>
+                                        </v-col>
+                                    </v-row>
+                                    <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>
+                                </div>
+                                <v-table v-else>
+                                    <thead>
+                                        <tr>
+                                            <th>Image</th>
+                                            <th>Nom</th>
+                                            <th>Code d'Extension</th>
+                                            <th>Prix</th>
+                                            <th>Quantité</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="card in paginatedCards" :key="card.blueprint_id">
+                                            <td><v-img :src="`${imageBaseUrl}${card.blueprint_id}.jpg`" :alt="card.name_en" width="50" height="75"></v-img></td>
+                                            <td>{{ card.name_en }} ({{ expansions[card.expansion.id] }} {{ card.properties_hash.collector_number || 'N/A' }})</td>
+                                            <td>{{ expansions[card.expansion.id] }}</td>
+                                            <td>{{ (card.price_cents / 100).toFixed(2) }} €</td>
+                                            <td>{{ card.quantity || 0 }}</td>
+                                            <td><v-btn color="warning" @click="addToCart(card)">Ajouter au panier</v-btn></td>
+                                        </tr>
+                                    </tbody>
+                                </v-table>
+                            </v-card>
+                        </v-col>
+                    </v-row>
+                </v-container>
+            </v-main>
+        </v-app>
     </div>
-
+    <!-- Vue.js -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Vuetify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js"></script>
     <script>
-        const app = Vue.createApp({
-            data() {
-                return {
-                    searchQuery: '',
-                    selectedExpansion: '',
-                    selectedLanguage: '',
-                    selectedRarity: '',
-                    selectedReverse: '',
-                    cart: [],
-                    viewMode: 'grid',
-                    expansions: {},
-                    inventory: [],
-                    imageBaseUrl: 'https://www.cardtrader.com/images/blueprint/',
-                };
-            },
-            methods: {
-                toggleView() {
-                    this.viewMode = this.viewMode === 'grid' ? 'list' : 'grid';
-                },
-                addToCart(card) {
-                    const item = this.cart.find(c => c.blueprintId === card.blueprint_id);
-                    if (item) {
-                        item.quantity++;  // Augmente la quantité si déjà dans le panier
-                    } else {
-                        this.cart.push({
-                            blueprintId: card.blueprint_id,
-                            name: card.name_en,
-                            price: card.price_cents / 100,
-                            quantity: 1,
-                        });
-                    }
-                },
-                clearCart() {
-                    this.cart = [];
-                },
-                removeFromCart(card) {
-                    const index = this.cart.findIndex(item => item.blueprintId === card.blueprintId);
-                    if (index !== -1) {
-                        this.cart.splice(index, 1);
-                    }
-                },
-                getFilteredInventory() {
-                    return this.inventory.filter(card => {
-                        const matchesQuery = card.name_en.toLowerCase().includes(this.searchQuery.toLowerCase());
-                        const matchesExpansion = !this.selectedExpansion || card.expansion_id === this.selectedExpansion;
-                        const matchesLanguage = !this.selectedLanguage || card.language === this.selectedLanguage;
-                        const matchesRarity = !this.selectedRarity || card.rarity === this.selectedRarity;
-                        const matchesReverse = this.selectedReverse === '' || (this.selectedReverse === 'Oui' ? card.reverse : !card.reverse);
-                        return matchesQuery && matchesExpansion && matchesLanguage && matchesRarity && matchesReverse;
-                    });
-                },
-            },
-            mounted() {
-                fetch('https://api.cardtrader.com/api/v2/products/export')
-                    .then(res => res.json())
-                    .then(data => {
-                        this.inventory = data;
-                    });
+        const { createApp, ref, reactive, computed } = Vue;
 
-                fetch('https://api.cardtrader.com/api/v2/expansions/export')
-                    .then(res => res.json())
-                    .then(data => {
-                        this.expansions = data.reduce((acc, expansion) => {
-                            acc[expansion.id] = expansion.code;
-                            return acc;
-                        }, {});
-                    });
+        const API_PRODUCTS = 'https://api.cardtrader.com/api/v2/products/export';
+        const API_EXPANSIONS = 'https://api.cardtrader.com/api/v2/expansions/export';
+        const API_TOKEN = 'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJjYXJkdHJhZGVyLXByb2R1Y3Rpb24iLCJzdWIiOiJhcHA6MTM5MzgiLCJhdWQiOiJhcHA6MTM5MzgiLCJleHAiOjQ4OTU2MzQ3MTcsImp0aSI6IjQxMjA3NmNjLTcyZTEtNDljOC1iODA2LTE3OTJiNmU3N2JhMyIsImlhdCI6MTczOTk2MTExNywibmFtZSI6Ik5lcm96YnJpY2tzIEFwcCAyMDI1MDIwODE3NDkxOSJ9.PkkEXit3MvxmVij_e5Eyz55k_3EYgQF-2ln9goSfMbQD3mIpDVrSkQa010BfnF9IR1L8fvswAyxk56qiUr2LKm2KXX0iKAvVRR373A3XEDwgNtGGBBAR-rxh8raL1hW8e4AH_bps1tVFTrdZ_W-Odg5egSxLFIxnLgi0a9It5KVeVkjdgLmxYuaCXspgml9TXfgJcJ2GH62izvB5eUsAj4NhobpH5q_Pyfbyw2cJu4HmilQjBSOm4NsmRW7Nd692tNT2semj1Oh1UqV1xel2WewtLaWlUAVHYt2LSMWrEw_kx9Yjk9Kz-rM67tk0nXosKklnIigJpcrmRUXf-O7qJA';
+
+        const vuetify = Vuetify.createVuetify({
+            theme: {
+                defaultTheme: 'dark',
+                themes: {
+                    dark: {
+                        colors: {
+                            primary: '#FFD700',
+                            secondary: '#1E1E1E',
+                            background: '#121212',
+                            surface: '#1E1E1E',
+                            error: '#FF5252',
+                            info: '#2196F3',
+                            success: '#4CAF50',
+                            warning: '#FFC107',
+                        },
+                    },
+                },
             },
         });
 
-        // Utilisation de Vuetify 3 avec Vue 3
-        const vuetify = Vuetify.createVuetify();
-        app.use(vuetify);
+        const app = createApp({
+            setup() {
+                const inventory = ref([]);
+                const expansions = ref({});
+                const viewMode = ref('grid');
+                const cart = ref([]);
 
+                const searchQuery = ref('');
+                const selectedExpansion = ref('');
+                const selectedLanguage = ref('');
+                const selectedRarity = ref('');
+                const selectedReverse = ref('');
+                const sortOrder = ref('');
+
+                const imageBaseUrl = ref('https://www.cardtrader.com/images/blueprint/');
+
+                const hoveredCard = ref(null);
+                const currentPage = ref(1);
+                const itemsPerPage = 20;
+
+                const totalPages = computed(() => {
+                    return Math.ceil(filteredCards.value.length / itemsPerPage);
+                });
+
+                const paginatedCards = computed(() => {
+                    const start = (currentPage.value - 1) * itemsPerPage;
+                    const end = start + itemsPerPage;
+                    return filteredCards.value.slice(start, end);
+                });
+
+                // Options pour les filtres
+                const expansionOptions = computed(() => {
+                    return Object.entries(expansions.value).map(([id, code]) => ({ title: code, value: id }));
+                });
+
+                const languageOptions = [
+                    { title: 'Anglais', value: 'en' },
+                    { title: 'Japonais', value: 'jp' }
+                ];
+
+                const rarityOptions = [
+                    { title: 'Commun', value: 'Common' },
+                    { title: 'Peu Commun', value: 'Uncommon' },
+                    { title: 'Rare', value: 'Rare' }
+                ];
+
+                const reverseOptions = [
+                    { title: 'Cartes Inversées', value: 'true' },
+                    { title: 'Cartes Normales', value: 'false' }
+                ];
+
+                const sortOptions = [
+                    { title: 'Tri Ascendant', value: 'asc' },
+                    { title: 'Tri Descendant', value: 'desc' }
+                ];
+
+                // Charger les extensions
+                async function fetchExpansions() {
+                    try {
+                        const response = await fetch(API_EXPANSIONS, {
+                            method: "GET",
+                            headers: { "Authorization": `Bearer ${API_TOKEN}` }
+                        });
+                        if (!response.ok) throw new Error(`Erreur API Expansions: ${response.status}`);
+                        const data = await response.json();
+                        data.forEach(exp => {
+                            expansions.value[exp.id] = exp.code; // Stocke le code de l'extension
+                        });
+                    } catch (error) {
+                        console.error("Erreur lors du chargement des extensions :", error);
+                    }
+                }
+
+                // Charger l'inventaire
+                async function fetchInventory() {
+                    try {
+                        const response = await fetch(API_PRODUCTS, {
+                            method: 'GET',
+                            headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+                        });
+                        if (!response.ok) throw new Error(`Erreur API Produits: ${response.status}`);
+                        inventory.value = await response.json();
+                    } catch (error) {
+                        console.error("Erreur API :", error);
+                    }
+                }
+
+                // Filtrer les cartes
+                const filteredCards = computed(() => {
+                    let cards = inventory.value.filter(card => {
+                        if (searchQuery.value && !card.name_en.toLowerCase().includes(searchQuery.value.toLowerCase())) return false;
+                        if (selectedExpansion.value && card.expansion.id != selectedExpansion.value) return false;
+                        if (selectedLanguage.value && card.properties_hash.pokemon_language != selectedLanguage.value) return false;
+                        if (selectedRarity.value && card.properties_hash.pokemon_rarity != selectedRarity.value) return false;
+                        if (selectedReverse.value !== "" && card.properties_hash.pokemon_reverse.toString() !== selectedReverse.value) return false;
+                        return true;
+                    });
+
+                    if (sortOrder.value === 'asc') {
+                        cards.sort((a, b) => a.properties_hash.collector_number - b.properties_hash.collector_number);
+                    } else if (sortOrder.value === 'desc') {
+                        cards.sort((a, b) => b.properties_hash.collector_number - a.properties_hash.collector_number);
+                    }
+
+                    return cards;
+                });
+
+                // Ajouter une carte au panier
+                function addToCart(card) {
+                    const existingItem = cart.value.find(item => item.blueprintId === card.blueprint_id);
+                    if (existingItem) {
+                        if (existingItem.quantity >= card.quantity) {
+                            showNotification("Quantité maximale atteinte pour cette carte.", 'error');
+                            return;
+                        }
+                        existingItem.quantity += 1;
+                    } else {
+                        cart.value.push({
+                            blueprintId: card.blueprint_id,
+                            name: `${card.name_en} (${expansions.value[card.expansion.id]} ${card.properties_hash.collector_number || 'N/A'})`,
+                            price: (card.price_cents / 100),
+                            quantity: 1
+                        });
+                    }
+                    showNotification(`${card.name_en} ajoutée au panier.`, 'success');
+                }
+
+                // Calculer le total du panier
+                const cartTotal = computed(() => {
+                    return cart.value.reduce((total, item) => total + item.price * item.quantity, 0);
+                });
+
+                // Diminuer la quantité d'une carte dans le panier
+                function decreaseQuantity(blueprintId) {
+                    const item = cart.value.find(item => item.blueprintId === blueprintId);
+                    if (item) {
+                        if (item.quantity > 1) {
+                            item.quantity -= 1;
+                        } else {
+                            cart.value = cart.value.filter(item => item.blueprintId !== blueprintId);
+                        }
+                    }
+                }
+
+                // Augmenter la quantité d'une carte dans le panier
+                function increaseQuantity(blueprintId, maxQuantity) {
+                    const item = cart.value.find(item => item.blueprintId === blueprintId);
+                    if (item) {
+                        if (item.quantity < maxQuantity) {
+                            item.quantity += 1;
+                        } else {
+                            showNotification("Quantité maximale atteinte pour cette carte.", 'error');
+                        }
+                    }
+                }
+
+                // Vider le panier
+                function clearCart() {
+                    cart.value = [];
+                    showNotification("Le panier a été vidé.", 'info');
+                }
+
+                // Basculer entre les modes d'affichage
+                function toggleView() {
+                    viewMode.value = viewMode.value === 'grid' ? 'list' : 'grid';
+                }
+
+                // Notifications
+                const snackbar = reactive({
+                    show: false,
+                    message: '',
+                    color: 'success',
+                });
+
+                function showNotification(message, color = 'success') {
+                    snackbar.message = message;
+                    snackbar.color = color;
+                    snackbar.show = true;
+                }
+
+                // Charger les données au démarrage
+                fetchExpansions().then(fetchInventory);
+
+                return {
+                    inventory,
+                    expansions,
+                    viewMode,
+                    cart,
+                    searchQuery,
+                    selectedExpansion,
+                    selectedLanguage,
+                    selectedRarity,
+                    selectedReverse,
+                    sortOrder,
+                    imageBaseUrl,
+                    expansionOptions,
+                    languageOptions,
+                    rarityOptions,
+                    reverseOptions,
+                    sortOptions,
+                    filteredCards,
+                    cartTotal,
+                    hoveredCard,
+                    currentPage,
+                    itemsPerPage,
+                    totalPages,
+                    paginatedCards,
+                    snackbar,
+                    addToCart,
+                    decreaseQuantity,
+                    increaseQuantity,
+                    clearCart,
+                    toggleView,
+                    showNotification,
+                };
+            }
+        });
+
+        app.use(vuetify);
         app.mount('#app');
     </script>
 </body>
