@@ -1,4 +1,5 @@
 const { createApp, ref, reactive, computed } = Vue;
+const { VApp, VContainer, VRow, VCol, VCard, VCardTitle, VCardText, VBtn, VIcon, VTextField, VSelect } = Vuetify;
 
 const API_PRODUCTS = 'https://api.cardtrader.com/api/v2/products/export';
 const API_EXPANSIONS = 'https://api.cardtrader.com/api/v2/expansions/export';
@@ -26,7 +27,6 @@ createApp({
                     method: "GET",
                     headers: { "Authorization": `Bearer ${API_TOKEN}` }
                 });
-                if (!response.ok) throw new Error(`Erreur API Expansions: ${response.status}`);
                 const data = await response.json();
                 data.forEach(exp => {
                     expansions.value[exp.id] = exp.code;
@@ -42,7 +42,6 @@ createApp({
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${API_TOKEN}` }
                 });
-                if (!response.ok) throw new Error(`Erreur API Produits: ${response.status}`);
                 inventory.value = await response.json();
             } catch (error) {
                 console.error("Erreur API :", error);
@@ -143,4 +142,4 @@ createApp({
             toggleView
         };
     }
-}).mount('#app');
+}).use(Vuetify).mount('#app');
