@@ -4,68 +4,97 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventaire CardTrader</title>
-    <!-- Vuetify CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/@vuetifyjs/vuetify@2.6.4/dist/vuetify.min.css" rel="stylesheet">
     <!-- Vue.js -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.36/dist/vue.global.js"></script>
-    <!-- Vuetify JS -->
-    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.6.4/dist/vuetify.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Vuetify 3 via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.0.0-beta.10/dist/vuetify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.0-beta.10/dist/vuetify.min.js"></script>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
     <div id="app">
-        <v-app>
-            <!-- Conteneur global -->
-            <v-container fluid>
-                <v-row>
-                    <!-- Sidebar (Filtres) -->
-                    <v-col cols="12" md="3">
-                        <v-card class="elevation-2" color="grey lighten-4">
-                            <v-card-title class="text-h6">Filtres</v-card-title>
-                            <v-divider></v-divider>
-                            <v-form>
-                                <!-- Recherche -->
-                                <v-text-field v-model="searchQuery" label="Rechercher" clearable dense outlined></v-text-field>
-                                <!-- Filtres -->
-                                <v-select v-model="selectedExpansion" :items="Object.values(expansions)" label="Expansion" outlined dense></v-select>
-                                <v-select v-model="selectedLanguage" :items="['Français', 'Anglais']" label="Langue" outlined dense></v-select>
-                                <v-select v-model="selectedRarity" :items="['Commun', 'Rare', 'Ultra Rare']" label="Rareté" outlined dense></v-select>
-                                <v-select v-model="selectedReverse" :items="['Oui', 'Non']" label="Reverse" outlined dense></v-select>
-                                <!-- Bouton pour changer de vue -->
-                                <v-btn @click="toggleView" block outlined color="primary" class="mt-4">
-                                    Passer en {{ viewMode === 'grid' ? 'liste' : 'grille' }}
-                                </v-btn>
-                            </v-form>
-                        </v-card>
-                    </v-col>
-
-                    <!-- Contenu Principal (Cartes) -->
-                    <v-col cols="12" md="9">
-                        <v-row>
-                            <v-col v-for="card in inventory" :key="card.blueprint_id" :cols="viewMode === 'grid' ? 12 : 4" class="d-flex justify-center">
-                                <v-card @click="addToCart(card)" class="elevation-2 hoverable" max-width="300" outlined>
-                                    <v-img :src="imageBaseUrl + card.image_url" :alt="card.name_en" height="300px">
-                                        <template v-slot:placeholder>
-                                            <v-row align="center" justify="center">
-                                                <v-progress-circular indeterminate size="64"></v-progress-circular>
-                                            </v-row>
-                                        </template>
-                                    </v-img>
-                                    <v-card-title class="text-h6">{{ card.name_en }}</v-card-title>
-                                    <v-card-subtitle class="text-body-2">Prix: {{ (card.price_cents / 100).toFixed(2) }} €</v-card-subtitle>
-                                    <v-card-actions>
-                                        <v-btn @click.stop="addToCart(card)" color="primary" small>
-                                            Ajouter au panier
-                                        </v-btn>
-                                    </v-card-actions>
-                                </v-card>
-                            </v-col>
-                        </v-row>
-                    </v-col>
-                </v-row>
-            </v-container>
-        </v-app>
+        <!-- Votre contenu ici -->
     </div>
 
-    <script src="js/app.js"></script>
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    searchQuery: '',
+                    selectedExpansion: '',
+                    selectedLanguage: '',
+                    selectedRarity: '',
+                    selectedReverse: '',
+                    cart: [],
+                    viewMode: 'grid',
+                    expansions: {},
+                    inventory: [],
+                    imageBaseUrl: 'https://www.cardtrader.com/images/blueprint/',
+                };
+            },
+            methods: {
+                toggleView() {
+                    this.viewMode = this.viewMode === 'grid' ? 'list' : 'grid';
+                },
+                addToCart(card) {
+                    const item = this.cart.find(c => c.blueprintId === card.blueprint_id);
+                    if (item) {
+                        item.quantity++;  // Augmente la quantité si déjà dans le panier
+                    } else {
+                        this.cart.push({
+                            blueprintId: card.blueprint_id,
+                            name: card.name_en,
+                            price: card.price_cents / 100,
+                            quantity: 1,
+                        });
+                    }
+                },
+                clearCart() {
+                    this.cart = [];
+                },
+                removeFromCart(card) {
+                    const index = this.cart.findIndex(item => item.blueprintId === card.blueprintId);
+                    if (index !== -1) {
+                        this.cart.splice(index, 1);
+                    }
+                },
+                getFilteredInventory() {
+                    return this.inventory.filter(card => {
+                        const matchesQuery = card.name_en.toLowerCase().includes(this.searchQuery.toLowerCase());
+                        const matchesExpansion = !this.selectedExpansion || card.expansion_id === this.selectedExpansion;
+                        const matchesLanguage = !this.selectedLanguage || card.language === this.selectedLanguage;
+                        const matchesRarity = !this.selectedRarity || card.rarity === this.selectedRarity;
+                        const matchesReverse = this.selectedReverse === '' || (this.selectedReverse === 'Oui' ? card.reverse : !card.reverse);
+                        return matchesQuery && matchesExpansion && matchesLanguage && matchesRarity && matchesReverse;
+                    });
+                },
+            },
+            mounted() {
+                fetch('https://api.cardtrader.com/api/v2/products/export')
+                    .then(res => res.json())
+                    .then(data => {
+                        this.inventory = data;
+                    });
+
+                fetch('https://api.cardtrader.com/api/v2/expansions/export')
+                    .then(res => res.json())
+                    .then(data => {
+                        this.expansions = data.reduce((acc, expansion) => {
+                            acc[expansion.id] = expansion.code;
+                            return acc;
+                        }, {});
+                    });
+            },
+        });
+
+        // Utilisation de Vuetify 3 avec Vue 3
+        const vuetify = Vuetify.createVuetify();
+        app.use(vuetify);
+
+        app.mount('#app');
+    </script>
 </body>
 </html>
