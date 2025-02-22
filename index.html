@@ -15,6 +15,97 @@
     <div id="app">
         <!-- Contenu de la page -->
         <!-- Sidebar, Panier et Inventaire (les mêmes sections que dans ton code original) -->
+         <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar (Filtres) -->
+                <div class="col-md-3 col-lg-2 sidebar p-3">
+                    <h2 class="text-warning">Filtres</h2>
+                    <input type="text" v-model="searchQuery" class="form-control mb-3" placeholder="🔍 Rechercher...">
+                    <select v-model="selectedExpansion" class="form-select mb-3">
+                        <option value="">Toutes les Extensions</option>
+                        <option v-for="(code, id) in expansions" :value="id">{{ code }}</option>
+                    </select>
+                    <select v-model="selectedLanguage" class="form-select mb-3">
+                        <option value="">Toutes les Langues</option>
+                        <option value="en">Anglais</option>
+                        <option value="jp">Japonais</option>
+                    </select>
+                    <select v-model="selectedRarity" class="form-select mb-3">
+                        <option value="">Toutes les Raretés</option>
+                        <option value="Common">Commun</option>
+                        <option value="Uncommon">Peu Commun</option>
+                        <option value="Rare">Rare</option>
+                    </select>
+                    <select v-model="selectedReverse" class="form-select mb-3">
+                        <option value="">Toutes les Cartes</option>
+                        <option value="true">Cartes Inversées</option>
+                        <option value="false">Cartes Normales</option>
+                    </select>
+                    <select v-model="sortOrder" class="form-select mb-3">
+                        <option value="">Aucun Tri</option>
+                        <option value="asc">Tri Ascendant</option>
+                        <option value="desc">Tri Descendant</option>
+                    </select>
+                    <button class="btn btn-warning w-100 mb-3" @click="updateDisplay">Rechercher</button>
+                    <button class="btn btn-outline-warning w-100 mb-3" @click="toggleView">Basculer en Liste</button>
+                    <!-- Panier -->
+                    <div class="cart mt-4">
+                        <h2 class="text-warning">Panier</h2>
+                        <ul class="list-group">
+                            <li v-for="item in cart" :key="item.blueprintId" class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ item.name }} - {{ item.price }} € x {{ item.quantity }}
+                                <div>
+                                    <button class="btn btn-sm btn-outline-danger" @click="decreaseQuantity(item.blueprintId)">-</button>
+                                    <button class="btn btn-sm btn-outline-success" @click="increaseQuantity(item.blueprintId, item.quantity)">+</button>
+                                </div>
+                            </li>
+                        </ul>
+                        <p class="mt-3">Total: <span class="fw-bold">{{ cartTotal.toFixed(2) }}</span> €</p>
+                        <button class="btn btn-danger w-100" @click="clearCart">Vider le panier</button>
+                    </div>
+                </div>
+                <!-- Contenu Principal -->
+                <div class="col-md-9 col-lg-10 content p-3">
+                    <h2>Inventaire</h2>
+                    <div v-if="viewMode === 'grid'" class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+                        <div v-for="card in filteredCards" :key="card.blueprint_id" class="col">
+                            <div class="card h-100">
+                                <img :src="`${imageBaseUrl}${card.blueprint_id}.jpg`" :alt="card.name_en" class="card-img-top">
+                                <div class="card-body">
+                                    <h3 class="card-title">{{ card.name_en }} ({{ expansions[card.expansion.id] }} {{ card.properties_hash.collector_number || 'N/A' }})</h3>
+                                    <span class="expansion-code">{{ expansions[card.expansion.id] }}</span>
+                                    <p class="card-text">{{ (card.price_cents / 100).toFixed(2) }} €</p>
+                                    <p class="card-text">Quantité: {{ card.quantity || 0 }}</p>
+                                    <button class="btn btn-warning w-100" @click="addToCart(card)">Ajouter au panier</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <table v-else class="table table-dark table-striped">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Nom</th>
+                                <th>Code d'Extension</th>
+                                <th>Prix</th>
+                                <th>Quantité</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="card in filteredCards" :key="card.blueprint_id">
+                                <td><img :src="`${imageBaseUrl}${card.blueprint_id}.jpg`" :alt="card.name_en" style="width: 50px; height: 75px;"></td>
+                                <td>{{ card.name_en }} ({{ expansions[card.expansion.id] }} {{ card.properties_hash.collector_number || 'N/A' }})</td>
+                                <td>{{ expansions[card.expansion.id] }}</td>
+                                <td>{{ (card.price_cents / 100).toFixed(2) }} €</td>
+                                <td>{{ card.quantity || 0 }}</td>
+                                <td><button class="btn btn-warning" @click="addToCart(card)">Ajouter au panier</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Vue.js -->
