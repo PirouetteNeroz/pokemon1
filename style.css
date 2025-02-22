@@ -1,0 +1,35 @@
+body {
+    background: #121212;
+    color: white;
+}
+
+.sidebar {
+    background: #1e1e1e;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.card {
+    background: #1e1e1e;
+    border: 1px solid #FFD700;
+    transition: transform 0.3s ease-in-out;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+.card img {
+    border-bottom: 3px solid #FFD700;
+}
+
+.expansion-code {
+    background: #FFD700;
+    color: black;
+}
+
+.list-card img {
+    width: 100px;
+    height: 150px;
+    object-fit: contain;
+}
