@@ -4,21 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventaire CardTrader</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Lien vers le CSS externe -->
+    <link href="css/style.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Styles Personnalisés -->
-    <link href="assets/css/styles.css" rel="stylesheet">
 </head>
 <body>
     <div id="app">
-        <!-- Contenu de la page -->
-        <!-- Sidebar, Panier et Inventaire (les mêmes sections que dans ton code original) -->
-         <div class="container-fluid">
+        <div class="container-fluid">
             <div class="row">
                 <!-- Sidebar (Filtres) -->
-                <div class="col-md-3 col-lg-2 sidebar p-3">
+               <div class="col-md-3 col-lg-2 sidebar p-3">
                     <h2 class="text-warning">Filtres</h2>
                     <input type="text" v-model="searchQuery" class="form-control mb-3" placeholder="🔍 Rechercher...">
                     <select v-model="selectedExpansion" class="form-select mb-3">
@@ -48,22 +44,6 @@
                     </select>
                     <button class="btn btn-warning w-100 mb-3" @click="updateDisplay">Rechercher</button>
                     <button class="btn btn-outline-warning w-100 mb-3" @click="toggleView">Basculer en Liste</button>
-                    <!-- Panier -->
-                    <div class="cart mt-4">
-                        <h2 class="text-warning">Panier</h2>
-                        <ul class="list-group">
-                            <li v-for="item in cart" :key="item.blueprintId" class="list-group-item d-flex justify-content-between align-items-center">
-                                {{ item.name }} - {{ item.price }} € x {{ item.quantity }}
-                                <div>
-                                    <button class="btn btn-sm btn-outline-danger" @click="decreaseQuantity(item.blueprintId)">-</button>
-                                    <button class="btn btn-sm btn-outline-success" @click="increaseQuantity(item.blueprintId, item.quantity)">+</button>
-                                </div>
-                            </li>
-                        </ul>
-                        <p class="mt-3">Total: <span class="fw-bold">{{ cartTotal.toFixed(2) }}</span> €</p>
-                        <button class="btn btn-danger w-100" @click="clearCart">Vider le panier</button>
-                    </div>
-                </div>
                 <!-- Contenu Principal -->
                 <div class="col-md-9 col-lg-10 content p-3">
                     <h2>Inventaire</h2>
@@ -81,35 +61,12 @@
                             </div>
                         </div>
                     </div>
-                    <table v-else class="table table-dark table-striped">
-                        <thead>
-                            <tr>
-                                <th>Image</th>
-                                <th>Nom</th>
-                                <th>Code d'Extension</th>
-                                <th>Prix</th>
-                                <th>Quantité</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="card in filteredCards" :key="card.blueprint_id">
-                                <td><img :src="`${imageBaseUrl}${card.blueprint_id}.jpg`" :alt="card.name_en" style="width: 50px; height: 75px;"></td>
-                                <td>{{ card.name_en }} ({{ expansions[card.expansion.id] }} {{ card.properties_hash.collector_number || 'N/A' }})</td>
-                                <td>{{ expansions[card.expansion.id] }}</td>
-                                <td>{{ (card.price_cents / 100).toFixed(2) }} €</td>
-                                <td>{{ card.quantity || 0 }}</td>
-                                <td><button class="btn btn-warning" @click="addToCart(card)">Ajouter au panier</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
             </div>
         </div>
     </div>
-
-    <!-- Vue.js -->
+    <!-- Lien vers Vue.js -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="assets/css/app.js"></script>
+    <!-- Lien vers le JS externe -->
+    <script src="js/app.js"></script>
 </body>
 </html>
