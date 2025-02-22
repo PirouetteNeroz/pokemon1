@@ -1,8 +1,9 @@
 const { createApp, ref, reactive, computed } = Vue;
+const { VApp, VContainer, VRow, VCol, VCard, VCardTitle, VCardText, VBtn, VIcon, VTextField, VSelect } = Vuetify;
 
 const API_PRODUCTS = 'https://api.cardtrader.com/api/v2/products/export';
 const API_EXPANSIONS = 'https://api.cardtrader.com/api/v2/expansions/export';
-const API_TOKEN = 'YOUR_API_TOKEN';
+const API_TOKEN = 'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJjYXJkdHJhZGVyLXByb2R1Y3Rpb24iLCJzdWIiOiJhcHA6MTM5MzgiLCJhdWQiOiJhcHA6MTM5MzgiLCJleHAiOjQ4OTU2MzQ3MTcsImp0aSI6IjQxMjA3NmNjLTcyZTEtNDljOC1iODA2LTE3OTJiNmU3N2JhMyIsImlhdCI6MTczOTk2MTExNywibmFtZSI6Ik5lcm96YnJpY2tzIEFwcCAyMDI1MDIwODE3NDkxOSJ9.PkkEXit3MvxmVij_e5Eyz55k_3EYgQF-2ln9goSfMbQD3mIpDVrSkQa010BfnF9IR1L8fvswAyxk56qiUr2LKm2KXX0iKAvVRR373A3XEDwgNtGGBBAR-rxh8raL1hW8e4AH_bps1tVFTrdZ_W-Odg5egSxLFIxnLgi0a9It5KVeVkjdgLmxYuaCXspgml9TXfgJcJ2GH62izvB5eUsAj4NhobpH5q_Pyfbyw2cJu4HmilQjBSOm4NsmRW7Nd692tNT2semj1Oh1UqV1xel2WewtLaWlUAVHYt2LSMWrEw_kx9Yjk9Kz-rM67tk0nXosKklnIigJpcrmRUXf-O7qJA';
 
 createApp({
     setup() {
@@ -26,7 +27,6 @@ createApp({
                     method: "GET",
                     headers: { "Authorization": `Bearer ${API_TOKEN}` }
                 });
-                if (!response.ok) throw new Error(`Erreur API Expansions: ${response.status}`);
                 const data = await response.json();
                 data.forEach(exp => {
                     expansions.value[exp.id] = exp.code;
@@ -42,7 +42,6 @@ createApp({
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${API_TOKEN}` }
                 });
-                if (!response.ok) throw new Error(`Erreur API Produits: ${response.status}`);
                 inventory.value = await response.json();
             } catch (error) {
                 console.error("Erreur API :", error);
@@ -143,4 +142,4 @@ createApp({
             toggleView
         };
     }
-}).mount('#app');
+}).use(Vuetify).mount('#app');
