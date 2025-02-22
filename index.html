@@ -4,21 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventaire CardTrader</title>
-    
-    <!-- Lien vers Vuetify CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.0.0-beta.8/dist/vuetify.min.css" rel="stylesheet">
-    
-    <!-- Lien vers Vue.js -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    
-    <!-- Lien vers Vuetify JS -->
-    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.0-beta.8/dist/vuetify.min.js"></script>
-    
-    <!-- Lien vers le CSS personnalisé -->
-    <link href="css/style.css" rel="stylesheet">
-    
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Vuetify CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/@vuetifyjs/vuetify@2.6.4/dist/vuetify.min.css" rel="stylesheet">
+    <!-- Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.36/dist/vue.global.js"></script>
+    <!-- Vuetify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.6.4/dist/vuetify.min.js"></script>
 </head>
 <body>
     <div id="app">
@@ -34,13 +25,11 @@
                             <v-form>
                                 <!-- Recherche -->
                                 <v-text-field v-model="searchQuery" label="Rechercher" clearable dense outlined></v-text-field>
-                                
                                 <!-- Filtres -->
                                 <v-select v-model="selectedExpansion" :items="Object.values(expansions)" label="Expansion" outlined dense></v-select>
                                 <v-select v-model="selectedLanguage" :items="['Français', 'Anglais']" label="Langue" outlined dense></v-select>
                                 <v-select v-model="selectedRarity" :items="['Commun', 'Rare', 'Ultra Rare']" label="Rareté" outlined dense></v-select>
                                 <v-select v-model="selectedReverse" :items="['Oui', 'Non']" label="Reverse" outlined dense></v-select>
-
                                 <!-- Bouton pour changer de vue -->
                                 <v-btn @click="toggleView" block outlined color="primary" class="mt-4">
                                     Passer en {{ viewMode === 'grid' ? 'liste' : 'grille' }}
@@ -52,7 +41,7 @@
                     <!-- Contenu Principal (Cartes) -->
                     <v-col cols="12" md="9">
                         <v-row>
-                            <v-col v-for="card in filteredCards" :key="card.blueprint_id" :cols="viewMode === 'grid' ? 12 : 4" class="d-flex justify-center">
+                            <v-col v-for="card in inventory" :key="card.blueprint_id" :cols="viewMode === 'grid' ? 12 : 4" class="d-flex justify-center">
                                 <v-card @click="addToCart(card)" class="elevation-2 hoverable" max-width="300" outlined>
                                     <v-img :src="imageBaseUrl + card.image_url" :alt="card.name_en" height="300px">
                                         <template v-slot:placeholder>
@@ -74,49 +63,9 @@
                     </v-col>
                 </v-row>
             </v-container>
-
-            <!-- Panier -->
-            <v-bottom-sheet v-model="showCart" height="400">
-                <v-card>
-                    <v-card-title class="text-h6">Panier</v-card-title>
-                    <v-divider></v-divider>
-                    <v-list>
-                        <v-list-item-group v-if="cart.length > 0">
-                            <v-list-item v-for="(item, index) in cart" :key="index">
-                                <v-list-item-content>
-                                    <v-list-item-title>{{ item.name }}</v-list-item-title>
-                                    <v-list-item-subtitle>{{ item.quantity }} x {{ item.price.toFixed(2) }} €</v-list-item-subtitle>
-                                </v-list-item-content>
-                                <v-list-item-action>
-                                    <v-btn @click="decreaseQuantity(item.blueprintId)" icon>
-                                        <v-icon>mdi-minus-circle</v-icon>
-                                    </v-btn>
-                                    <v-btn @click="increaseQuantity(item.blueprintId, 10)" icon>
-                                        <v-icon>mdi-plus-circle</v-icon>
-                                    </v-btn>
-                                </v-list-item-action>
-                            </v-list-item>
-                        </v-list-item-group>
-                        <v-list-item v-else>
-                            <v-list-item-content>
-                                <v-list-item-title>Aucun article dans le panier</v-list-item-title>
-                            </v-list-item-content>
-                        </v-list-item>
-                    </v-list>
-
-                    <!-- Total et bouton pour vider le panier -->
-                    <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn @click="clearCart" color="red" outlined>Vider le panier</v-btn>
-                        <v-btn @click="checkout" color="primary" :disabled="cart.length === 0">Commander</v-btn>
-                    </v-card-actions>
-                </v-card>
-            </v-bottom-sheet>
         </v-app>
     </div>
 
     <script src="js/app.js"></script>
 </body>
-
-
 </html>
