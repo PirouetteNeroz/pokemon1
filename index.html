@@ -8,6 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.css" rel="stylesheet">
     <!-- Material Design Icons -->
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .floating-cart-button {
             position: fixed;
@@ -203,6 +205,8 @@
                                 <!-- Boutons pour vider le panier et télécharger -->
                                 <v-btn color="error" block @click="clearCart" v-if="cart.length > 0">Vider le panier</v-btn>
                                 <v-btn color="info" block class="mt-3" @click="downloadCartAsText" v-if="cart.length > 0">Télécharger le panier</v-btn>
+                                <!-- Bouton pour valider le panier -->
+                                <v-btn color="success" block class="mt-3" @click="validateCart" v-if="cart.length > 0">Valider le panier</v-btn>
                             </v-card>
                         </v-window-item>
                     </v-window>
@@ -223,15 +227,24 @@
             </div>
         </v-app>
     </div>
+
     <!-- Vue.js -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <!-- Vuetify JS -->
     <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js"></script>
     <script>
         const { createApp, ref, reactive, computed, watch } = Vue;
+        const { createClient } = supabase;
+
+        // Configuration Supabase
+        const supabaseUrl = 'https://aibrhuoxwqwqbkhjhote.supabase.co'; // Remplacez par votre URL Supabase
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpYnJodW94d3F3cWJraGpob3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA1MTUxNzIsImV4cCI6MjA1NjA5MTE3Mn0.Lz_P5ZIUwL5mqIuMjJn3pxWnYV8SwprKUuDEnSOHii0'; // Remplacez par votre clé Supabase
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
         const API_PRODUCTS = 'https://api.cardtrader.com/api/v2/products/export';
         const API_EXPANSIONS = 'https://api.cardtrader.com/api/v2/expansions/export';
-        const API_TOKEN = 'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJjYXJkdHJhZGVyLXByb2R1Y3Rpb24iLCJzdWIiOiJhcHA6MTM5MzgiLCJhdWQiOiJhcHA6MTM5MzgiLCJleHAiOjQ4OTU2MzQ3MTcsImp0aSI6IjQxMjA3NmNjLTcyZTEtNDljOC1iODA2LTE3OTJiNmU3N2JhMyIsImlhdCI6MTczOTk2MTExNywibmFtZSI6Ik5lcm96YnJpY2tzIEFwcCAyMDI1MDIwODE3NDkxOSJ9.PkkEXit3MvxmVij_e5Eyz55k_3EYgQF-2ln9goSfMbQD3mIpDVrSkQa010BfnF9IR1L8fvswAyxk56qiUr2LKm2KXX0iKAvVRR373A3XEDwgNtGGBBAR-rxh8raL1hW8e4AH_bps1tVFTrdZ_W-Odg5egSxLFIxnLgi0a9It5KVeVkjdgLmxYuaCXspgml9TXfgJcJ2GH62izvB5eUsAj4NhobpH5q_Pyfbyw2cJu4HmilQjBSOm4NsmRW7Nd692tNT2semj1Oh1UqV1xel2WewtLaWlUAVHYt2LSMWrEw_kx9Yjk9Kz-rM67tk0nXosKklnIigJpcrmRUXf-O7qJA';
+        const API_TOKEN = 'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJjYXJkdHJhZGVyLXByb2R1Y3Rpb24iLCJzdWIiOiJhcHA6MTM5MzgiLCJhdWQiOiJhcHA6MTM5MzgiLCJleHAiOjQ4OTU2MzQ3MTcsImp0aSI6IjQxMjA3NmNjLTcyZTEtNDljOC1iODA2LTE3OTJiNmU3N2JhMyIsImlhdCI6MTczOTk2MTExNywibmFtZSI6Ik5lcm96YnJpY2tzIEFwcCAyMDI1MDIwODE3NDkxOSJ9.PkkEXit3MvxmVij_e5Eyz55k_3EYgQF-2ln9goSfMbQD3mIpDVrSkQa010BfnF9IR1L8fvswAyxk56qiUr2LKm2KXX0iKAvVRR373A3XEDwgNtGGBBAR-rxh8raL1hW8e4AH_bps1tVFTrdZ_W-Odg5egSxLFIxnLgi0a9It5KVeVkjdgLmxYuaCXspgml9TXfgJcJ2GH62izvB5eUsAj4NhobpH5q_Pyfbyw2cJu4HmilQjBSOm4NsmRW7Nd692tNT2semj1Oh1UqV1xel2WewtLaWlUAVHYt2LSMWrEw_kx9Yjk9Kz-rM67tk0nXosKklnIigJpcrmRUXf-O7qJA'; // Remplacez par votre token API
+
         const vuetify = Vuetify.createVuetify({
             theme: {
                 defaultTheme: 'dark',
@@ -251,12 +264,14 @@
                 },
             },
         });
+
         const app = createApp({
             setup() {
                 const inventory = ref([]);
                 const expansions = ref({});
-                const cart = ref(JSON.parse(localStorage.getItem('cart')) || []);
-                const tab = ref('inventory'); // Onglet actif
+                const cart = ref([]);
+                const userId = ref(generateUserId()); // Génère un ID unique pour l'utilisateur anonyme
+                const tab = ref('inventory');
                 const searchQuery = ref('');
                 const selectedExpansion = ref('');
                 const selectedLanguage = ref('');
@@ -266,6 +281,164 @@
                 const imageBaseUrl = ref('https://www.cardtrader.com/images/blueprint/');
                 const currentPage = ref(1);
                 const itemsPerPage = 20;
+
+                // Récupérer le panier au chargement de la page
+                fetchCartFromSupabase(userId.value).then(savedCart => {
+                    if (savedCart) {
+                        cart.value = savedCart; // Met à jour le panier uniquement si des données sont trouvées
+                    } else {
+                        cart.value = []; // Initialise le panier à vide si aucun panier n'est trouvé
+                    }
+                });
+
+                // Fonction pour sauvegarder le panier dans Supabase
+                async function saveCartToSupabase() {
+                    const { data, error } = await supabaseClient
+                        .from('carts')
+                        .upsert([
+                            { user_id: userId.value, cart_data: cart.value }
+                        ]);
+
+                    if (error) {
+                        console.error('Erreur lors de la sauvegarde du panier:', error);
+                    } else {
+                        console.log('Panier sauvegardé avec succès:', data);
+                    }
+                }
+
+                // Fonction pour récupérer le panier depuis Supabase
+                async function fetchCartFromSupabase(userId) {
+                    const { data, error } = await supabaseClient
+                        .from('carts')
+                        .select('cart_data')
+                        .eq('user_id', userId)
+                        .maybeSingle(); // Utilisez maybeSingle()
+
+                    if (error) {
+                        console.error('Erreur lors de la récupération du panier:', error);
+                        return null;
+                    } else if (!data) {
+                        console.log('Aucun panier trouvé pour cet utilisateur.');
+                        return null; // Retourne null si aucune donnée n'est trouvée
+                    } else {
+                        return data.cart_data; // Retourne les données du panier
+                    }
+                }
+
+                // Fonction pour valider le panier
+                async function validateCart() {
+                    if (cart.value.length === 0) {
+                        showNotification('Votre panier est vide.', 'error');
+                        return;
+                    }
+
+                    // Envoyer le panier à Supabase
+                    const { data, error } = await supabaseClient
+                        .from('orders')
+                        .insert([
+                            {
+                                user_id: userId.value, // Utilise l'ID unique temporaire
+                                cart_data: cart.value, // Données du panier
+                                status: 'pending' // Statut de la commande
+                            }
+                        ]);
+
+                    if (error) {
+                        console.error('Erreur lors de la validation du panier:', error);
+                        showNotification('Erreur lors de la validation du panier.', 'error');
+                    } else {
+                        console.log('Panier validé avec succès:', data);
+                        showNotification('Votre panier a été validé avec succès.', 'success');
+                        clearCart(); // Vider le panier après validation
+                    }
+                }
+
+                // Fonction pour générer un ID unique
+                function generateUserId() {
+                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                        const r = Math.random() * 16 | 0;
+                        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
+                    });
+                }
+
+                // Fonction pour ajouter une carte au panier
+                function addToCart(card) {
+                    const existingItem = cart.value.find(item => item.blueprintId === card.blueprint_id);
+                    if (existingItem) {
+                        if (existingItem.quantity >= card.quantity) {
+                            showNotification("Quantité maximale atteinte pour cette carte.", 'error');
+                            return;
+                        }
+                        existingItem.quantity += 1;
+                    } else {
+                        cart.value.push({
+                            blueprintId: card.blueprint_id,
+                            name: `${card.name_en} (${expansions.value[card.expansion.id]} ${card.properties_hash.collector_number || 'N/A'})`,
+                            price: (card.price_cents / 100),
+                            quantity: 1
+                        });
+                    }
+                    showNotification(`${card.name_en} ajoutée au panier.`, 'success');
+                    saveCartToSupabase(); // Sauvegarder le panier dans Supabase
+                }
+
+                // Fonction pour diminuer la quantité d'un article dans le panier
+                function decreaseQuantity(blueprintId) {
+                    const item = cart.value.find(item => item.blueprintId === blueprintId);
+                    if (item) {
+                        if (item.quantity > 1) {
+                            item.quantity -= 1;
+                        } else {
+                            cart.value = cart.value.filter(item => item.blueprintId !== blueprintId);
+                        }
+                    }
+                    saveCartToSupabase(); // Sauvegarder le panier dans Supabase
+                }
+
+                // Fonction pour augmenter la quantité d'un article dans le panier
+                function increaseQuantity(blueprintId, maxQuantity) {
+                    const item = cart.value.find(item => item.blueprintId === blueprintId);
+                    if (item) {
+                        if (item.quantity < maxQuantity) {
+                            item.quantity += 1;
+                        } else {
+                            showNotification("Quantité maximale atteinte pour cette carte.", 'error');
+                        }
+                    }
+                    saveCartToSupabase(); // Sauvegarder le panier dans Supabase
+                }
+
+                // Fonction pour vider le panier
+                function clearCart() {
+                    cart.value = [];
+                    showNotification("Le panier a été vidé.", 'info');
+                    saveCartToSupabase(); // Sauvegarder le panier dans Supabase
+                }
+
+                // Fonction pour réinitialiser les filtres
+                function resetFilters() {
+                    searchQuery.value = '';
+                    selectedExpansion.value = '';
+                    selectedLanguage.value = '';
+                    selectedRarity.value = '';
+                    selectedReverse.value = '';
+                    sortOrder.value = '';
+                }
+
+                // Fonction pour afficher des notifications
+                const snackbar = reactive({
+                    show: false,
+                    message: '',
+                    color: 'success',
+                });
+                function showNotification(message, color = 'success') {
+                    snackbar.message = message;
+                    snackbar.color = color;
+                    snackbar.show = true;
+                }
+
+                // Calcul des propriétés calculées
                 const totalPages = computed(() => Math.ceil(filteredCards.value.length / itemsPerPage));
                 const paginatedCards = computed(() => {
                     const start = (currentPage.value - 1) * itemsPerPage;
@@ -290,31 +463,10 @@
                     { title: 'Tri Ascendant', value: 'asc' },
                     { title: 'Tri Descendant', value: 'desc' }
                 ];
-                async function fetchExpansions() {
-                    try {
-                        const response = await fetch(API_EXPANSIONS, {
-                            method: "GET",
-                            headers: { "Authorization": `Bearer ${API_TOKEN}` }
-                        });
-                        if (!response.ok) throw new Error(`Erreur API Expansions: ${response.status}`);
-                        const data = await response.json();
-                        data.forEach(exp => expansions.value[exp.id] = exp.code);
-                    } catch (error) {
-                        console.error("Erreur lors du chargement des extensions :", error);
-                    }
-                }
-                async function fetchInventory() {
-                    try {
-                        const response = await fetch(API_PRODUCTS, {
-                            method: 'GET',
-                            headers: { 'Authorization': `Bearer ${API_TOKEN}` }
-                        });
-                        if (!response.ok) throw new Error(`Erreur API Produits: ${response.status}`);
-                        inventory.value = await response.json();
-                    } catch (error) {
-                        console.error("Erreur API :", error);
-                    }
-                }
+                const cartTotal = computed(() => cart.value.reduce((total, item) => total + item.price * item.quantity, 0));
+                const totalItemsInCart = computed(() => cart.value.reduce((total, item) => total + item.quantity, 0));
+
+                // Fonction pour filtrer les cartes
                 const filteredCards = computed(() => {
                     let cards = inventory.value.filter(card => {
                         if (searchQuery.value && !card.name_en.toLowerCase().includes(searchQuery.value.toLowerCase())) return false;
@@ -331,77 +483,38 @@
                     }
                     return cards;
                 });
-                function addToCart(card) {
-                    const existingItem = cart.value.find(item => item.blueprintId === card.blueprint_id);
-                    if (existingItem) {
-                        if (existingItem.quantity >= card.quantity) {
-                            showNotification("Quantité maximale atteinte pour cette carte.", 'error');
-                            return;
-                        }
-                        existingItem.quantity += 1;
-                    } else {
-                        cart.value.push({
-                            blueprintId: card.blueprint_id,
-                            name: `${card.name_en} (${expansions.value[card.expansion.id]} ${card.properties_hash.collector_number || 'N/A'})`,
-                            price: (card.price_cents / 100),
-                            quantity: 1
+
+                // Charger les extensions et l'inventaire
+                async function fetchExpansions() {
+                    try {
+                        const response = await fetch(API_EXPANSIONS, {
+                            method: "GET",
+                            headers: { "Authorization": `Bearer ${API_TOKEN}` }
                         });
+                        if (!response.ok) throw new Error(`Erreur API Expansions: ${response.status}`);
+                        const data = await response.json();
+                        data.forEach(exp => expansions.value[exp.id] = exp.code);
+                    } catch (error) {
+                        console.error("Erreur lors du chargement des extensions :", error);
                     }
-                    showNotification(`${card.name_en} ajoutée au panier.`, 'success');
-                    saveCartToLocalStorage();
                 }
-                const cartTotal = computed(() => cart.value.reduce((total, item) => total + item.price * item.quantity, 0));
-                const totalItemsInCart = computed(() => cart.value.reduce((total, item) => total + item.quantity, 0));
-                function decreaseQuantity(blueprintId) {
-                    const item = cart.value.find(item => item.blueprintId === blueprintId);
-                    if (item) {
-                        if (item.quantity > 1) {
-                            item.quantity -= 1;
-                        } else {
-                            cart.value = cart.value.filter(item => item.blueprintId !== blueprintId);
-                        }
+
+                async function fetchInventory() {
+                    try {
+                        const response = await fetch(API_PRODUCTS, {
+                            method: 'GET',
+                            headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+                        });
+                        if (!response.ok) throw new Error(`Erreur API Produits: ${response.status}`);
+                        inventory.value = await response.json();
+                    } catch (error) {
+                        console.error("Erreur API :", error);
                     }
-                    saveCartToLocalStorage();
                 }
-                function increaseQuantity(blueprintId, maxQuantity) {
-                    const item = cart.value.find(item => item.blueprintId === blueprintId);
-                    if (item) {
-                        if (item.quantity < maxQuantity) {
-                            item.quantity += 1;
-                        } else {
-                            showNotification("Quantité maximale atteinte pour cette carte.", 'error');
-                        }
-                    }
-                    saveCartToLocalStorage();
-                }
-                function clearCart() {
-                    cart.value = [];
-                    showNotification("Le panier a été vidé.", 'info');
-                    saveCartToLocalStorage();
-                }
-                function resetFilters() {
-                    searchQuery.value = '';
-                    selectedExpansion.value = '';
-                    selectedLanguage.value = '';
-                    selectedRarity.value = '';
-                    selectedReverse.value = '';
-                    sortOrder.value = '';
-                }
-                const snackbar = reactive({
-                    show: false,
-                    message: '',
-                    color: 'success',
-                });
-                function showNotification(message, color = 'success') {
-                    snackbar.message = message;
-                    snackbar.color = color;
-                    snackbar.show = true;
-                }
-                function saveCartToLocalStorage() {
-                    localStorage.setItem('cart', JSON.stringify(cart.value));
-                }
-                watch(cart, saveCartToLocalStorage);
+
+                // Initialisation
                 fetchExpansions().then(fetchInventory);
+
                 return {
                     inventory,
                     expansions,
@@ -414,18 +527,17 @@
                     selectedReverse,
                     sortOrder,
                     imageBaseUrl,
+                    currentPage,
+                    itemsPerPage,
+                    totalPages,
+                    paginatedCards,
                     expansionOptions,
                     languageOptions,
                     rarityOptions,
                     reverseOptions,
                     sortOptions,
-                    filteredCards,
                     cartTotal,
                     totalItemsInCart,
-                    currentPage,
-                    itemsPerPage,
-                    totalPages,
-                    paginatedCards,
                     snackbar,
                     addToCart,
                     decreaseQuantity,
@@ -433,9 +545,11 @@
                     clearCart,
                     resetFilters,
                     showNotification,
+                    validateCart, // Ajout de la fonction validateCart
                 };
             }
         });
+
         app.use(vuetify);
         app.mount('#app');
     </script>
