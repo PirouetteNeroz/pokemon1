@@ -202,6 +202,15 @@
                                 <v-alert v-else type="info" class="mt-3">Votre panier est vide.</v-alert>
                                 <!-- Total du panier -->
                                 <v-card-text class="mt-3" v-if="cart.length > 0">Total: <span class="font-weight-bold">{{ cartTotal.toFixed(2) }}</span> €</v-card-text>
+                                <!-- Champ pour le pseudo -->
+                                <v-text-field
+                                    v-model="pseudo"
+                                    label="Votre pseudo"
+                                    outlined
+                                    dense
+                                    class="mt-3"
+                                    v-if="cart.length > 0"
+                                ></v-text-field>
                                 <!-- Boutons pour vider le panier et télécharger -->
                                 <v-btn color="error" block @click="clearCart" v-if="cart.length > 0">Vider le panier</v-btn>
                                 <v-btn color="info" block class="mt-3" @click="downloadCartAsText" v-if="cart.length > 0">Télécharger le panier</v-btn>
@@ -281,6 +290,7 @@
                 const imageBaseUrl = ref('https://www.cardtrader.com/images/blueprint/');
                 const currentPage = ref(1);
                 const itemsPerPage = 20;
+                const pseudo = ref(''); // Variable pour stocker le pseudo
 
                 // Récupérer le panier au chargement de la page
                 fetchCartFromSupabase(userId.value).then(savedCart => {
@@ -332,12 +342,18 @@
                         return;
                     }
 
+                    if (!pseudo.value) {
+                        showNotification('Veuillez entrer un pseudo pour valider votre panier.', 'error');
+                        return;
+                    }
+
                     // Envoyer le panier à Supabase
                     const { data, error } = await supabaseClient
                         .from('orders')
                         .insert([
                             {
                                 user_id: userId.value, // Utilise l'ID unique temporaire
+                                pseudo: pseudo.value, // Pseudo de l'utilisateur
                                 cart_data: cart.value, // Données du panier
                                 status: 'pending' // Statut de la commande
                             }
@@ -350,6 +366,7 @@
                         console.log('Panier validé avec succès:', data);
                         showNotification('Votre panier a été validé avec succès.', 'success');
                         clearCart(); // Vider le panier après validation
+                        pseudo.value = ''; // Réinitialiser le champ pseudo
                     }
                 }
 
@@ -539,6 +556,7 @@
                     cartTotal,
                     totalItemsInCart,
                     snackbar,
+                    pseudo,
                     addToCart,
                     decreaseQuantity,
                     increaseQuantity,
