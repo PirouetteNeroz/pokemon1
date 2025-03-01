@@ -3,7 +3,7 @@ import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 
 // Importez Vuetify depuis un CDN
 import { createVuetify } from 'https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.mjs';
-import 'https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.css'; // Importez les styles de Vuetify
+
 
 // Importez Supabase
 import { supabaseClient } from './supabase.js';
