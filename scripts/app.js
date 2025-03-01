@@ -1,7 +1,7 @@
-import { createApp, ref, reactive, computed, watch } from 'vue';
-import { createVuetify } from 'vuetify';
-import { supabaseClient } from './supabase.js';
-import { API_PRODUCTS, API_EXPANSIONS, API_TOKEN } from './api.js';
+const supabaseClient = window.supabaseClient;
+const API_PRODUCTS = window.API_PRODUCTS;
+const API_EXPANSIONS = window.API_EXPANSIONS;
+const API_TOKEN = window.API_TOKEN;
 
 const vuetify = createVuetify({
     theme: {
