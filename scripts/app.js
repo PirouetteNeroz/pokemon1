@@ -1,7 +1,8 @@
 console.log(window.supabaseClient); // Doit afficher le client Supabase
-const API_PRODUCTS = window.API_PRODUCTS;
-const API_EXPANSIONS = window.API_EXPANSIONS;
-const API_TOKEN = window.API_TOKEN;
+// Utilisez directement les variables globales
+console.log(window.API_PRODUCTS); // Doit afficher l'URL de l'API des produits
+console.log(window.API_EXPANSIONS); // Doit afficher l'URL de l'API des extensions
+console.log(window.API_TOKEN); // Doit afficher le token API
 
 const vuetify = createVuetify({
     theme: {
@@ -40,7 +41,6 @@ const app = createApp({
         const currentPage = ref(1);
         const itemsPerPage = 20;
         const pseudo = ref(''); // Variable pour stocker le pseudo
-        console.log(window.supabaseClient);
 
         // Animation pour l'ajout au panier
         const showCartAnimation = ref(false);
