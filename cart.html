@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panier Carameche</title>
+    <!-- Vuetify CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.css" rel="stylesheet">
+    <!-- Material Design Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Styles CSS ici */
+    </style>
+</head>
+<body>
+    <div id="app">
+        <v-app>
+            <!-- Notifications visuelles (toasts) -->
+            <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+                {{ snackbar.message }}
+                <template v-slot:action="{ attrs }">
+                    <v-btn text v-bind="attrs" @click="snackbar.show = false">Fermer</v-btn>
+                </template>
+            </v-snackbar>
+
+            <!-- Header avec barre de recherche et accès rapide -->
+            <v-app-bar app color="primary" dark>
+                <!-- Titre cliquable pour revenir à l'inventaire -->
+                <v-toolbar-title>
+                    <v-btn text @click="tab = 'inventory'">Carameche</v-btn>
+                </v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-btn icon @click="tab = 'inventory'">
+                    <v-icon>mdi-home</v-icon>
+                </v-btn>
+                <v-btn icon @click="tab = 'cart'">
+                    <v-icon>mdi-cart</v-icon>
+                    <span>{{ totalItemsInCart }}</span>
+                </v-btn>
+            </v-app-bar>
+
+            <!-- Barre de navigation avec onglets -->
+            <v-tabs v-model="tab" grow>
+                <v-tab value="inventory">Inventaire</v-tab>
+                <v-tab value="cart">Panier</v-tab>
+            </v-tabs>
+            <v-main>
+                <v-container fluid>
+                    <!-- Contenu de l'onglet Panier -->
+                    <v-window v-model="tab">
+                        <transition name="fade" mode="out-in">
+                            <v-window-item value="cart">
+                                <v-card class="cart pa-3">
+                                    <h2 class="text-warning mb-3">Panier</h2>
+                                    <!-- Liste des cartes dans le panier -->
+                                    <v-list v-if="cart.length > 0">
+                                        <v-list-item v-for="item in cart" :key="item.blueprintId">
+                                            <template v-slot:prepend>
+                                                <v-icon>mdi-cards</v-icon>
+                                            </template>
+                                            <v-list-item-title>{{ item.name }} - {{ item.price }} € x {{ item.quantity }}</v-list-item-title>
+                                            <template v-slot:append>
+                                                <v-btn icon="mdi-minus" variant="text" @click="decreaseQuantity(item.blueprintId)"></v-btn>
+                                                <v-btn icon="mdi-plus" variant="text" @click="increaseQuantity(item.blueprintId, item.quantity)"></v-btn>
+                                            </template>
+                                        </v-list-item>
+                                    </v-list>
+                                    <!-- Message si le panier est vide -->
+                                    <v-alert v-else type="info" class="mt-3">Votre panier est vide.</v-alert>
+                                    <!-- Total du panier -->
+                                    <v-card-text class="mt-3" v-if="cart.length > 0">Total: <span class="font-weight-bold">{{ cartTotal.toFixed(2) }}</span> €</v-card-text>
+                                    <!-- Champ pour le pseudo -->
+                                    <v-text-field
+                                        v-model="pseudo"
+                                        label="Votre pseudo"
+                                        outlined
+                                        dense
+                                        class="mt-3"
+                                        v-if="cart.length > 0"
+                                    ></v-text-field>
+                                    <!-- Boutons pour vider le panier -->
+                                    <v-btn color="error" block @click="clearCart" v-if="cart.length > 0">Vider le panier</v-btn>
+                                    <!-- Bouton pour valider le panier -->
+                                    <v-btn color="success" block class="mt-3" @click="validateCart" v-if="cart.length > 0">Valider le panier</v-btn>
+                                </v-card>
+                            </v-window-item>
+                        </transition>
+                    </v-window>
+                </v-container>
+            </v-main>
+        </v-app>
+    </div>
+
+    <!-- Vue.js -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Vuetify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js"></script>
+    <!-- Shared JS -->
+    <script type="module">
+        import { generateUserId, saveCartToLocalStorage, getCartFromLocalStorage, saveCartToSupabase, validateCart } from './shared.js';
+
+        const { createApp, ref, reactive, computed } = Vue;
+        const vuetify = Vuetify.createVuetify({
+            theme: {
+                defaultTheme: 'dark',
+                themes: {
+                    dark: {
+                        colors: {
+                            primary: '#FFD700',
+                            secondary: '#1E1E1E',
+                            background: '#121212',
+                            surface: '#1E1E1E',
+                            error: '#FF5252',
+                            info: '#2196F3',
+                            success: '#4CAF50',
+                            warning: '#FFC107',
+                        },
+                    },
+                },
+            },
+        });
+
+        const app = createApp({
+            setup() {
+                const cart = ref(getCartFromLocalStorage());
+                const userId = ref(generateUserId());
+                const tab = ref('cart');
+                const pseudo = ref('');
+                const snackbar = reactive({
+                    show: false,
+                    message: '',
+                    color: 'success',
+                });
+
+                // Fonction pour afficher des notifications
+                function showNotification(message, color = 'success') {
+                    snackbar.message = message;
+                    snackbar.color = color;
+                    snackbar.show = true;
+
+                    // Masquer la notification après 3 secondes
+                    setTimeout(() => {
+                        snackbar.show = false;
+                    }, 3000);
+                }
+
+                // Fonction pour diminuer la quantité d'un article dans le panier
+                function decreaseQuantity(blueprintId) {
+                    const item = cart.value.find(item => item.blueprintId === blueprintId);
+                    if (item) {
+                        if (item.quantity > 1) {
+                            item.quantity -= 1;
+                        } else {
+                            cart.value = cart.value.filter(item => item.blueprintId !== blueprintId);
+                        }
+                    }
+                    saveCartToLocalStorage(cart.value); // Sauvegarder le panier dans le localStorage
+                }
+
+                // Fonction pour augmenter la quantité d'un article dans le panier
+                function increaseQuantity(blueprintId, maxQuantity) {
+                    const item = cart.value.find(item => item.blueprintId === blueprintId);
+                    if (item) {
+                        if (item.quantity < maxQuantity) {
+                            item.quantity += 1;
+                        } else {
+                            showNotification("Quantité maximale atteinte pour cette carte.", 'error');
+                        }
+                    }
+                    saveCartToLocalStorage(cart.value); // Sauvegarder le panier dans le localStorage
+                }
+
+                // Fonction pour vider le panier
+                function clearCart() {
+                    cart.value = [];
+                    showNotification("Le panier a été vidé.", 'info');
+                    saveCartToLocalStorage(cart.value); // Sauvegarder le panier dans le localStorage
+                }
+
+                // Fonction pour valider le panier
+                async function validateCart() {
+                    const result = await validateCart(userId.value, cart.value, pseudo.value);
+                    if (result.success) {
+                        showNotification(result.message, 'success');
+                        clearCart(); // Vider le panier après validation
+                        pseudo.value = ''; // Réinitialiser le champ pseudo
+                    } else {
+                        showNotification(result.message, 'error');
+                    }
+                }
+
+                // Calcul des propriétés calculées
+                const cartTotal = computed(() => cart.value.reduce((total, item) => total + item.price * item.quantity, 0));
+                const totalItemsInCart = computed(() => cart.value.reduce((total, item) => total + item.quantity, 0));
+
+                return {
+                    cart,
+                    tab,
+                    pseudo,
+                    snackbar,
+                    cartTotal,
+                    totalItemsInCart,
+                    decreaseQuantity,
+                    increaseQuantity,
+                    clearCart,
+                    validateCart,
+                    showNotification,
+                };
+            }
+        });
+
+        app.use(vuetify);
+        app.mount('#app');
+    </script>
+</body>
+</html>
