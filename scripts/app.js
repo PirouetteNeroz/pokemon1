@@ -1,4 +1,4 @@
-const supabaseClient = window.supabaseClient;
+console.log(window.supabaseClient); // Doit afficher le client Supabase
 const API_PRODUCTS = window.API_PRODUCTS;
 const API_EXPANSIONS = window.API_EXPANSIONS;
 const API_TOKEN = window.API_TOKEN;
