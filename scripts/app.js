@@ -1,8 +1,14 @@
-console.log(window.supabaseClient); // Doit afficher le client Supabase
-// Utilisez directement les variables globales
-console.log(window.API_PRODUCTS); // Doit afficher l'URL de l'API des produits
-console.log(window.API_EXPANSIONS); // Doit afficher l'URL de l'API des extensions
-console.log(window.API_TOKEN); // Doit afficher le token API
+// Importez Vue et Vuetify
+import { createApp } from 'vue';
+import { createVuetify } from 'vuetify';
+import 'vuetify/styles'; // Importez les styles de Vuetify
+
+// Importez Supabase
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+
+// Importez vos fichiers JavaScript
+import { supabaseClient } from './supabase.js';
+import { API_PRODUCTS, API_EXPANSIONS, API_TOKEN } from './api.js';
 
 const vuetify = createVuetify({
     theme: {
