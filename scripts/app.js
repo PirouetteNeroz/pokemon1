@@ -9,7 +9,7 @@ import { createVuetify } from 'https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/v
 import { supabaseClient } from './supabase.js';
 import { API_PRODUCTS, API_EXPANSIONS, API_TOKEN } from './api.js';
 
-const vuetify = createVuetify({
+const vuetify = new Vuetify({
     theme: {
         defaultTheme: 'dark',
         themes: {
