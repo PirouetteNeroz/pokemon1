@@ -1,12 +1,11 @@
-// Importez Vue et Vuetify
-import { createApp } from 'vue';
-import { createVuetify } from 'vuetify';
-import 'vuetify/styles'; // Importez les styles de Vuetify
+// Importez Vue depuis un CDN
+import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+
+// Importez Vuetify depuis un CDN
+import { createVuetify } from 'https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.mjs';
+import 'https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.css'; // Importez les styles de Vuetify
 
 // Importez Supabase
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-
-// Importez vos fichiers JavaScript
 import { supabaseClient } from './supabase.js';
 import { API_PRODUCTS, API_EXPANSIONS, API_TOKEN } from './api.js';
 
