@@ -11,36 +11,6 @@
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        .floating-cart-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            background-color: #FFC107;
-            color: white;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-        }
-        .cart-summary {
-            position: absolute;
-            bottom: 80px;
-            right: 20px;
-            background-color: white;
-            color: black;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            display: none;
-        }
-        .floating-cart-button:hover .cart-summary {
-            display: block;
-        }
         .card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
@@ -71,11 +41,34 @@
             border: 2px solid rgba(0, 123, 255, 0.5);
             border-radius: 10px;
         }
+        /* Animation pour l'ajout au panier */
+        .add-to-cart-animation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.5s;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
     </style>
 </head>
 <body>
     <div id="app">
         <v-app>
+            <!-- Animation pour l'ajout au panier -->
+            <transition name="fade">
+                <v-alert v-if="showAddToCartAnimation" type="success" class="add-to-cart-animation">
+                    {{ addToCartMessage }}
+                </v-alert>
+            </transition>
+
             <!-- Header avec barre de recherche et accès rapide -->
             <v-app-bar app color="primary" dark>
                 <v-app-bar-nav-icon></v-app-bar-nav-icon>
@@ -211,9 +204,8 @@
                                     class="mt-3"
                                     v-if="cart.length > 0"
                                 ></v-text-field>
-                                <!-- Boutons pour vider le panier et télécharger -->
+                                <!-- Boutons pour vider le panier -->
                                 <v-btn color="error" block @click="clearCart" v-if="cart.length > 0">Vider le panier</v-btn>
-                                <v-btn color="info" block class="mt-3" @click="downloadCartAsText" v-if="cart.length > 0">Télécharger le panier</v-btn>
                                 <!-- Bouton pour valider le panier -->
                                 <v-btn color="success" block class="mt-3" @click="validateCart" v-if="cart.length > 0">Valider le panier</v-btn>
                             </v-card>
@@ -221,19 +213,6 @@
                     </v-window>
                 </v-container>
             </v-main>
-            <!-- Bouton flottant pour le panier -->
-            <div class="floating-cart-button" @click="tab = 'cart'">
-                <v-icon>mdi-cart</v-icon>
-                <span>{{ totalItemsInCart }}</span>
-                <!-- Résumé du panier en survolant l'icône du panier -->
-                <div class="cart-summary" v-if="cart.length > 0">
-                    <h3>Résumé du panier</h3>
-                    <ul>
-                        <li v-for="item in cart" :key="item.blueprintId">{{ item.name }} - {{ item.price }} € x {{ item.quantity }}</li>
-                    </ul>
-                    <p>Total: {{ cartTotal.toFixed(2) }} €</p>
-                </div>
-            </div>
         </v-app>
     </div>
 
@@ -292,14 +271,20 @@
                 const itemsPerPage = 20;
                 const pseudo = ref(''); // Variable pour stocker le pseudo
 
-                // Récupérer le panier au chargement de la page
-                fetchCartFromSupabase(userId.value).then(savedCart => {
-                    if (savedCart) {
-                        cart.value = savedCart; // Met à jour le panier uniquement si des données sont trouvées
-                    } else {
-                        cart.value = []; // Initialise le panier à vide si aucun panier n'est trouvé
-                    }
-                });
+                // Animation pour l'ajout au panier
+                const showAddToCartAnimation = ref(false);
+                const addToCartMessage = ref('');
+
+                // Récupérer le panier depuis le localStorage au chargement de la page
+                const savedCart = localStorage.getItem('cart');
+                if (savedCart) {
+                    cart.value = JSON.parse(savedCart);
+                }
+
+                // Fonction pour sauvegarder le panier dans le localStorage
+                function saveCartToLocalStorage() {
+                    localStorage.setItem('cart', JSON.stringify(cart.value));
+                }
 
                 // Fonction pour sauvegarder le panier dans Supabase
                 async function saveCartToSupabase() {
@@ -313,25 +298,6 @@
                         console.error('Erreur lors de la sauvegarde du panier:', error);
                     } else {
                         console.log('Panier sauvegardé avec succès:', data);
-                    }
-                }
-
-                // Fonction pour récupérer le panier depuis Supabase
-                async function fetchCartFromSupabase(userId) {
-                    const { data, error } = await supabaseClient
-                        .from('carts')
-                        .select('cart_data')
-                        .eq('user_id', userId)
-                        .maybeSingle(); // Utilisez maybeSingle()
-
-                    if (error) {
-                        console.error('Erreur lors de la récupération du panier:', error);
-                        return null;
-                    } else if (!data) {
-                        console.log('Aucun panier trouvé pour cet utilisateur.');
-                        return null; // Retourne null si aucune donnée n'est trouvée
-                    } else {
-                        return data.cart_data; // Retourne les données du panier
                     }
                 }
 
@@ -396,8 +362,18 @@
                             quantity: 1
                         });
                     }
-                    showNotification(`${card.name_en} ajoutée au panier.`, 'success');
-                    saveCartToSupabase(); // Sauvegarder le panier dans Supabase
+
+                    // Afficher l'animation
+                    addToCartMessage.value = `${card.name_en} ajoutée au panier.`;
+                    showAddToCartAnimation.value = true;
+
+                    // Masquer l'animation après 2 secondes
+                    setTimeout(() => {
+                        showAddToCartAnimation.value = false;
+                    }, 2000);
+
+                    showNotification(addToCartMessage.value, 'success');
+                    saveCartToLocalStorage(); // Sauvegarder le panier dans le localStorage
                 }
 
                 // Fonction pour diminuer la quantité d'un article dans le panier
@@ -410,7 +386,7 @@
                             cart.value = cart.value.filter(item => item.blueprintId !== blueprintId);
                         }
                     }
-                    saveCartToSupabase(); // Sauvegarder le panier dans Supabase
+                    saveCartToLocalStorage(); // Sauvegarder le panier dans le localStorage
                 }
 
                 // Fonction pour augmenter la quantité d'un article dans le panier
@@ -423,14 +399,14 @@
                             showNotification("Quantité maximale atteinte pour cette carte.", 'error');
                         }
                     }
-                    saveCartToSupabase(); // Sauvegarder le panier dans Supabase
+                    saveCartToLocalStorage(); // Sauvegarder le panier dans le localStorage
                 }
 
                 // Fonction pour vider le panier
                 function clearCart() {
                     cart.value = [];
                     showNotification("Le panier a été vidé.", 'info');
-                    saveCartToSupabase(); // Sauvegarder le panier dans Supabase
+                    saveCartToLocalStorage(); // Sauvegarder le panier dans le localStorage
                 }
 
                 // Fonction pour réinitialiser les filtres
@@ -557,6 +533,8 @@
                     totalItemsInCart,
                     snackbar,
                     pseudo,
+                    showAddToCartAnimation,
+                    addToCartMessage,
                     addToCart,
                     decreaseQuantity,
                     increaseQuantity,
