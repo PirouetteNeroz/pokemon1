@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventaire CardTrader</title>
+    <title>Inventaire Carameche</title>
     <!-- Vuetify CSS -->
     <link href="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.css" rel="stylesheet">
     <!-- Material Design Icons -->
@@ -41,38 +41,48 @@
             border: 2px solid rgba(0, 123, 255, 0.5);
             border-radius: 10px;
         }
-        /* Animation pour l'ajout au panier */
-        .add-to-cart-animation {
+        /* Animation pour l'icône du panier */
+        .cart-animation-icon {
             position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            font-size: 24px;
+            color: #FFC107; /* Couleur de l'icône */
             z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
+            transition: all 0.8s ease-in-out; /* Durée et effet de l'animation */
         }
-        .fade-enter-active, .fade-leave-active {
-            transition: opacity 0.5s;
+        /* Animation d'entrée et de sortie */
+        .slide-fade-enter-active {
+            transition: all 0.8s ease;
         }
-        .fade-enter-from, .fade-leave-to {
+        .slide-fade-leave-active {
+            transition: all 0.5s ease;
+        }
+        .slide-fade-enter-from,
+        .slide-fade-leave-to {
             opacity: 0;
+            transform: translateY(20px); /* Déplacement vers le bas */
         }
     </style>
 </head>
 <body>
     <div id="app">
         <v-app>
-            <!-- Animation pour l'ajout au panier -->
-            <transition name="fade">
-                <v-alert v-if="showAddToCartAnimation" type="success" class="add-to-cart-animation">
-                    {{ addToCartMessage }}
-                </v-alert>
+            <!-- Icône animée pour l'ajout au panier -->
+            <transition name="slide-fade">
+                <v-icon
+                    v-if="showCartAnimation"
+                    class="cart-animation-icon"
+                    :style="cartAnimationStyle"
+                >
+                    mdi-cart
+                </v-icon>
             </transition>
 
             <!-- Header avec barre de recherche et accès rapide -->
             <v-app-bar app color="primary" dark>
-                <v-app-bar-nav-icon></v-app-bar-nav-icon>
-                <v-toolbar-title>CardTrader</v-toolbar-title>
+                <!-- Titre cliquable pour revenir à l'inventaire -->
+                <v-toolbar-title>
+                    <v-btn text @click="tab = 'inventory'">Carameche</v-btn>
+                </v-toolbar-title>
                 <v-spacer></v-spacer>
                 <v-text-field
                     v-model="searchQuery"
@@ -159,7 +169,7 @@
                                                         </v-row>
                                                         <!-- Bouton "Ajouter au panier" (toujours visible) -->
                                                         <v-card-actions>
-                                                            <v-btn color="warning" block @click="addToCart(card)">
+                                                            <v-btn color="warning" block @click="addToCart(card, $event)">
                                                                 <v-icon left>mdi-cart</v-icon>
                                                                 Ajouter au panier
                                                             </v-btn>
@@ -272,8 +282,8 @@
                 const pseudo = ref(''); // Variable pour stocker le pseudo
 
                 // Animation pour l'ajout au panier
-                const showAddToCartAnimation = ref(false);
-                const addToCartMessage = ref('');
+                const showCartAnimation = ref(false);
+                const cartAnimationStyle = ref({});
 
                 // Récupérer le panier depuis le localStorage au chargement de la page
                 const savedCart = localStorage.getItem('cart');
@@ -346,7 +356,7 @@
                 }
 
                 // Fonction pour ajouter une carte au panier
-                function addToCart(card) {
+                function addToCart(card, event) {
                     const existingItem = cart.value.find(item => item.blueprintId === card.blueprint_id);
                     if (existingItem) {
                         if (existingItem.quantity >= card.quantity) {
@@ -363,17 +373,33 @@
                         });
                     }
 
-                    // Afficher l'animation
-                    addToCartMessage.value = `${card.name_en} ajoutée au panier.`;
-                    showAddToCartAnimation.value = true;
+                    // Déclencher l'animation
+                    triggerCartAnimation(event);
 
-                    // Masquer l'animation après 2 secondes
-                    setTimeout(() => {
-                        showAddToCartAnimation.value = false;
-                    }, 2000);
-
-                    showNotification(addToCartMessage.value, 'success');
+                    showNotification(`${card.name_en} ajoutée au panier.`, 'success');
                     saveCartToLocalStorage(); // Sauvegarder le panier dans le localStorage
+                }
+
+                // Fonction pour déclencher l'animation
+                function triggerCartAnimation(event) {
+                    // Récupérer la position du bouton cliqué
+                    const buttonRect = event.target.getBoundingClientRect();
+                    const buttonX = buttonRect.left + buttonRect.width / 2;
+                    const buttonY = buttonRect.top + buttonRect.height / 2;
+
+                    // Position de départ de l'icône animée
+                    cartAnimationStyle.value = {
+                        left: `${buttonX}px`,
+                        top: `${buttonY}px`,
+                    };
+
+                    // Afficher l'icône animée
+                    showCartAnimation.value = true;
+
+                    // Masquer l'icône après l'animation
+                    setTimeout(() => {
+                        showCartAnimation.value = false;
+                    }, 800); // Durée de l'animation
                 }
 
                 // Fonction pour diminuer la quantité d'un article dans le panier
@@ -533,8 +559,8 @@
                     totalItemsInCart,
                     snackbar,
                     pseudo,
-                    showAddToCartAnimation,
-                    addToCartMessage,
+                    showCartAnimation,
+                    cartAnimationStyle,
                     addToCart,
                     decreaseQuantity,
                     increaseQuantity,
