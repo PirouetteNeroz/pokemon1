@@ -61,6 +61,13 @@
             opacity: 0;
             transform: translateY(20px); /* Déplacement vers le bas */
         }
+        /* Animation fade */
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.5s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
     </style>
 </head>
 <body>
@@ -76,6 +83,14 @@
                     mdi-cart
                 </v-icon>
             </transition>
+
+            <!-- Notifications visuelles (toasts) -->
+            <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+                {{ snackbar.message }}
+                <template v-slot:action="{ attrs }">
+                    <v-btn text v-bind="attrs" @click="snackbar.show = false">Fermer</v-btn>
+                </template>
+            </v-snackbar>
 
             <!-- Header avec barre de recherche et accès rapide -->
             <v-app-bar app color="primary" dark>
@@ -111,115 +126,119 @@
                 <v-container fluid>
                     <!-- Contenu de l'onglet Inventaire -->
                     <v-window v-model="tab">
-                        <v-window-item value="inventory">
-                            <v-row>
-                                <!-- Sidebar (Filtres) -->
-                                <v-col cols="12" md="3" lg="2">
-                                    <v-card class="sidebar pa-3">
-                                        <h2 class="text-warning mb-4">Filtres</h2>
-                                        <v-text-field v-model="searchQuery" label="Rechercher..." prepend-icon="mdi-magnify" outlined dense class="mb-3"></v-text-field>
-                                        <v-select v-model="selectedExpansion" :items="expansionOptions" label="Extension" outlined dense class="mb-3"></v-select>
-                                        <v-select v-model="selectedLanguage" :items="languageOptions" label="Langue" outlined dense class="mb-3"></v-select>
-                                        <v-select v-model="selectedRarity" :items="rarityOptions" label="Rareté" outlined dense class="mb-3"></v-select>
-                                        <v-select v-model="selectedReverse" :items="reverseOptions" label="Type de carte" outlined dense class="mb-3"></v-select>
-                                        <v-select v-model="sortOrder" :items="sortOptions" label="Trier par" outlined dense class="mb-3"></v-select>
-                                        <v-btn color="warning" block class="mb-3" @click="updateDisplay">Rechercher</v-btn>
-                                        <v-btn color="error" block class="mb-3" @click="resetFilters">Réinitialiser les filtres</v-btn>
-                                    </v-card>
-                                </v-col>
-                                <!-- Contenu Principal -->
-                                <v-col cols="12" md="9" lg="10">
-                                    <v-card class="content pa-3">
-                                        <h2>Inventaire</h2>
-                                        <!-- Affichage des cartes en grille -->
-                                        <v-row>
-                                            <v-col v-for="card in paginatedCards" :key="card.blueprint_id" cols="12" sm="6" md="4" lg="3">
-                                                <transition name="fade">
-                                                    <v-card class="card">
-                                                        <!-- Conteneur pour l'image et les détails -->
-                                                        <v-row no-gutters>
-                                                            <!-- Image de la carte -->
-                                                            <v-col cols="6">
-                                                                <div class="ribbon-container">
-                                                                    <v-img
-                                                                        :src="`${imageBaseUrl}${card.blueprint_id}.jpg`"
-                                                                        :alt="card.name_en"
-                                                                        height="200"
-                                                                        contain
-                                                                        class="card-image"
-                                                                        :class="{ 'reverse-glow': card.properties_hash.pokemon_reverse }"
-                                                                    ></v-img>
-                                                                    <!-- Ribbon "Reverse Foil" -->
-                                                                    <div v-if="card.properties_hash.pokemon_reverse" class="ribbon">Reverse</div>
-                                                                </div>
-                                                            </v-col>
-                                                            <!-- Détails de la carte -->
-                                                            <v-col cols="6" class="card-details">
-                                                                <h3 class="text-h6">
-                                                                    {{ card.name_en }}
-                                                                    <v-icon v-if="card.properties_hash.pokemon_reverse" color="blue lighten-2" class="ml-2">
-                                                                        mdi-star-four-points
-                                                                    </v-icon>
-                                                                </h3>
-                                                                <p><strong>Extension :</strong> {{ expansions[card.expansion.id] }}</p>
-                                                                <p><strong>Rareté :</strong> {{ card.properties_hash.pokemon_rarity }}, #{{ card.properties_hash.collector_number || 'N/A' }}</p>
-                                                                <p><strong>Prix :</strong> {{ (card.price_cents / 100).toFixed(2) }} €</p>
-                                                                <p><strong>Quantité disponible :</strong> {{ card.quantity || 0 }}</p>
-                                                            </v-col>
-                                                        </v-row>
-                                                        <!-- Bouton "Ajouter au panier" (toujours visible) -->
-                                                        <v-card-actions>
-                                                            <v-btn color="warning" block @click="addToCart(card, $event)">
-                                                                <v-icon left>mdi-cart</v-icon>
-                                                                Ajouter au panier
-                                                            </v-btn>
-                                                        </v-card-actions>
-                                                    </v-card>
-                                                </transition>
-                                            </v-col>
-                                        </v-row>
-                                        <!-- Pagination -->
-                                        <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>
-                                    </v-card>
-                                </v-col>
-                            </v-row>
-                        </v-window-item>
+                        <transition name="fade" mode="out-in">
+                            <v-window-item value="inventory">
+                                <v-row>
+                                    <!-- Sidebar (Filtres) -->
+                                    <v-col cols="12" md="3" lg="2">
+                                        <v-card class="sidebar pa-3">
+                                            <h2 class="text-warning mb-4">Filtres</h2>
+                                            <v-text-field v-model="searchQuery" label="Rechercher..." prepend-icon="mdi-magnify" outlined dense class="mb-3"></v-text-field>
+                                            <v-select v-model="selectedExpansion" :items="expansionOptions" label="Extension" outlined dense class="mb-3"></v-select>
+                                            <v-select v-model="selectedLanguage" :items="languageOptions" label="Langue" outlined dense class="mb-3"></v-select>
+                                            <v-select v-model="selectedRarity" :items="rarityOptions" label="Rareté" outlined dense class="mb-3"></v-select>
+                                            <v-select v-model="selectedReverse" :items="reverseOptions" label="Type de carte" outlined dense class="mb-3"></v-select>
+                                            <v-select v-model="sortOrder" :items="sortOptions" label="Trier par" outlined dense class="mb-3"></v-select>
+                                            <v-btn color="warning" block class="mb-3" @click="updateDisplay">Rechercher</v-btn>
+                                            <v-btn color="error" block class="mb-3" @click="resetFilters">Réinitialiser les filtres</v-btn>
+                                        </v-card>
+                                    </v-col>
+                                    <!-- Contenu Principal -->
+                                    <v-col cols="12" md="9" lg="10">
+                                        <v-card class="content pa-3">
+                                            <h2>Inventaire</h2>
+                                            <!-- Affichage des cartes en grille -->
+                                            <v-row>
+                                                <v-col v-for="card in paginatedCards" :key="card.blueprint_id" cols="12" sm="6" md="4" lg="3">
+                                                    <transition name="fade">
+                                                        <v-card class="card">
+                                                            <!-- Conteneur pour l'image et les détails -->
+                                                            <v-row no-gutters>
+                                                                <!-- Image de la carte -->
+                                                                <v-col cols="6">
+                                                                    <div class="ribbon-container">
+                                                                        <v-img
+                                                                            :src="`${imageBaseUrl}${card.blueprint_id}.jpg`"
+                                                                            :alt="card.name_en"
+                                                                            height="200"
+                                                                            contain
+                                                                            class="card-image"
+                                                                            :class="{ 'reverse-glow': card.properties_hash.pokemon_reverse }"
+                                                                        ></v-img>
+                                                                        <!-- Ribbon "Reverse Foil" -->
+                                                                        <div v-if="card.properties_hash.pokemon_reverse" class="ribbon">Reverse</div>
+                                                                    </div>
+                                                                </v-col>
+                                                                <!-- Détails de la carte -->
+                                                                <v-col cols="6" class="card-details">
+                                                                    <h3 class="text-h6">
+                                                                        {{ card.name_fr || card.name_en }}
+                                                                        <v-icon v-if="card.properties_hash.pokemon_reverse" color="blue lighten-2" class="ml-2">
+                                                                            mdi-star-four-points
+                                                                        </v-icon>
+                                                                    </h3>
+                                                                    <p><strong>Extension :</strong> {{ expansions[card.expansion.id] }}</p>
+                                                                    <p><strong>Rareté :</strong> {{ card.properties_hash.pokemon_rarity }}, #{{ card.properties_hash.collector_number || 'N/A' }}</p>
+                                                                    <p><strong>Prix :</strong> {{ (card.price_cents / 100).toFixed(2) }} €</p>
+                                                                    <p><strong>Quantité disponible :</strong> {{ card.quantity || 0 }}</p>
+                                                                </v-col>
+                                                            </v-row>
+                                                            <!-- Bouton "Ajouter au panier" (toujours visible) -->
+                                                            <v-card-actions>
+                                                                <v-btn color="warning" block @click="addToCart(card, $event)">
+                                                                    <v-icon left>mdi-cart</v-icon>
+                                                                    Ajouter au panier
+                                                                </v-btn>
+                                                            </v-card-actions>
+                                                        </v-card>
+                                                    </transition>
+                                                </v-col>
+                                            </v-row>
+                                            <!-- Pagination -->
+                                            <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>
+                                        </v-card>
+                                    </v-col>
+                                </v-row>
+                            </v-window-item>
+                        </transition>
                         <!-- Contenu de l'onglet Panier -->
-                        <v-window-item value="cart">
-                            <v-card class="cart pa-3">
-                                <h2 class="text-warning mb-3">Panier</h2>
-                                <!-- Liste des cartes dans le panier -->
-                                <v-list v-if="cart.length > 0">
-                                    <v-list-item v-for="item in cart" :key="item.blueprintId">
-                                        <template v-slot:prepend>
-                                            <v-icon>mdi-cards</v-icon>
-                                        </template>
-                                        <v-list-item-title>{{ item.name }} - {{ item.price }} € x {{ item.quantity }}</v-list-item-title>
-                                        <template v-slot:append>
-                                            <v-btn icon="mdi-minus" variant="text" @click="decreaseQuantity(item.blueprintId)"></v-btn>
-                                            <v-btn icon="mdi-plus" variant="text" @click="increaseQuantity(item.blueprintId, item.quantity)"></v-btn>
-                                        </template>
-                                    </v-list-item>
-                                </v-list>
-                                <!-- Message si le panier est vide -->
-                                <v-alert v-else type="info" class="mt-3">Votre panier est vide.</v-alert>
-                                <!-- Total du panier -->
-                                <v-card-text class="mt-3" v-if="cart.length > 0">Total: <span class="font-weight-bold">{{ cartTotal.toFixed(2) }}</span> €</v-card-text>
-                                <!-- Champ pour le pseudo -->
-                                <v-text-field
-                                    v-model="pseudo"
-                                    label="Votre pseudo"
-                                    outlined
-                                    dense
-                                    class="mt-3"
-                                    v-if="cart.length > 0"
-                                ></v-text-field>
-                                <!-- Boutons pour vider le panier -->
-                                <v-btn color="error" block @click="clearCart" v-if="cart.length > 0">Vider le panier</v-btn>
-                                <!-- Bouton pour valider le panier -->
-                                <v-btn color="success" block class="mt-3" @click="validateCart" v-if="cart.length > 0">Valider le panier</v-btn>
-                            </v-card>
-                        </v-window-item>
+                        <transition name="fade" mode="out-in">
+                            <v-window-item value="cart">
+                                <v-card class="cart pa-3">
+                                    <h2 class="text-warning mb-3">Panier</h2>
+                                    <!-- Liste des cartes dans le panier -->
+                                    <v-list v-if="cart.length > 0">
+                                        <v-list-item v-for="item in cart" :key="item.blueprintId">
+                                            <template v-slot:prepend>
+                                                <v-icon>mdi-cards</v-icon>
+                                            </template>
+                                            <v-list-item-title>{{ item.name }} - {{ item.price }} € x {{ item.quantity }}</v-list-item-title>
+                                            <template v-slot:append>
+                                                <v-btn icon="mdi-minus" variant="text" @click="decreaseQuantity(item.blueprintId)"></v-btn>
+                                                <v-btn icon="mdi-plus" variant="text" @click="increaseQuantity(item.blueprintId, item.quantity)"></v-btn>
+                                            </template>
+                                        </v-list-item>
+                                    </v-list>
+                                    <!-- Message si le panier est vide -->
+                                    <v-alert v-else type="info" class="mt-3">Votre panier est vide.</v-alert>
+                                    <!-- Total du panier -->
+                                    <v-card-text class="mt-3" v-if="cart.length > 0">Total: <span class="font-weight-bold">{{ cartTotal.toFixed(2) }}</span> €</v-card-text>
+                                    <!-- Champ pour le pseudo -->
+                                    <v-text-field
+                                        v-model="pseudo"
+                                        label="Votre pseudo"
+                                        outlined
+                                        dense
+                                        class="mt-3"
+                                        v-if="cart.length > 0"
+                                    ></v-text-field>
+                                    <!-- Boutons pour vider le panier -->
+                                    <v-btn color="error" block @click="clearCart" v-if="cart.length > 0">Vider le panier</v-btn>
+                                    <!-- Bouton pour valider le panier -->
+                                    <v-btn color="success" block class="mt-3" @click="validateCart" v-if="cart.length > 0">Valider le panier</v-btn>
+                                </v-card>
+                            </v-window-item>
+                        </transition>
                     </v-window>
                 </v-container>
             </v-main>
@@ -284,6 +303,39 @@
                 // Animation pour l'ajout au panier
                 const showCartAnimation = ref(false);
                 const cartAnimationStyle = ref({});
+
+                // Notifications visuelles (toasts)
+                const snackbar = reactive({
+                    show: false,
+                    message: '',
+                    color: 'success',
+                });
+
+                // Fonction pour afficher des notifications
+                function showNotification(message, color = 'success') {
+                    snackbar.message = message;
+                    snackbar.color = color;
+                    snackbar.show = true;
+
+                    // Masquer la notification après 3 secondes
+                    setTimeout(() => {
+                        snackbar.show = false;
+                    }, 3000);
+                }
+
+                // Fonction pour récupérer les noms des Pokémon en français
+                async function fetchFrenchPokemonName(pokemonName) {
+                    try {
+                        const response = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonName}`);
+                        if (!response.ok) throw new Error(`Erreur API PokeAPI: ${response.status}`);
+                        const data = await response.json();
+                        const frenchName = data.names.find(name => name.language.name === 'fr');
+                        return frenchName ? frenchName.name : pokemonName; // Retourne le nom français ou le nom anglais par défaut
+                    } catch (error) {
+                        console.error("Erreur lors de la récupération du nom français :", error);
+                        return pokemonName; // Retourne le nom anglais en cas d'erreur
+                    }
+                }
 
                 // Récupérer le panier depuis le localStorage au chargement de la page
                 const savedCart = localStorage.getItem('cart');
@@ -367,16 +419,18 @@
                     } else {
                         cart.value.push({
                             blueprintId: card.blueprint_id,
-                            name: `${card.name_en} (${expansions.value[card.expansion.id]} ${card.properties_hash.collector_number || 'N/A'})`,
+                            name: `${card.name_fr || card.name_en} (${expansions.value[card.expansion.id]} ${card.properties_hash.collector_number || 'N/A'})`,
                             price: (card.price_cents / 100),
                             quantity: 1
                         });
                     }
 
+                    // Afficher une notification
+                    showNotification(`${card.name_fr || card.name_en} ajoutée au panier.`, 'success');
+
                     // Déclencher l'animation
                     triggerCartAnimation(event);
 
-                    showNotification(`${card.name_en} ajoutée au panier.`, 'success');
                     saveCartToLocalStorage(); // Sauvegarder le panier dans le localStorage
                 }
 
@@ -443,18 +497,6 @@
                     selectedRarity.value = '';
                     selectedReverse.value = '';
                     sortOrder.value = '';
-                }
-
-                // Fonction pour afficher des notifications
-                const snackbar = reactive({
-                    show: false,
-                    message: '',
-                    color: 'success',
-                });
-                function showNotification(message, color = 'success') {
-                    snackbar.message = message;
-                    snackbar.color = color;
-                    snackbar.show = true;
                 }
 
                 // Calcul des propriétés calculées
@@ -525,7 +567,11 @@
                             headers: { 'Authorization': `Bearer ${API_TOKEN}` }
                         });
                         if (!response.ok) throw new Error(`Erreur API Produits: ${response.status}`);
-                        inventory.value = await response.json();
+                        const data = await response.json();
+                        inventory.value = await Promise.all(data.map(async (card) => {
+                            const frenchName = await fetchFrenchPokemonName(card.name_en.toLowerCase());
+                            return { ...card, name_fr: frenchName };
+                        }));
                     } catch (error) {
                         console.error("Erreur API :", error);
                     }
