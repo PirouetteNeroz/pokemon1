@@ -40,6 +40,7 @@ const app = createApp({
         const currentPage = ref(1);
         const itemsPerPage = 20;
         const pseudo = ref(''); // Variable pour stocker le pseudo
+        console.log(window.supabaseClient);
 
         // Animation pour l'ajout au panier
         const showCartAnimation = ref(false);
