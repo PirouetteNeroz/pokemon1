@@ -8,32 +8,57 @@
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        .cart-item-image {
-            width: 50px;
-            height: 50px;
-            cursor: pointer;
-            margin-right: 10px;
-            border-radius: 5px;
-        }
         .cart-item {
             display: flex;
             align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            transition: background-color 0.3s ease;
         }
         .cart-item:hover {
-            background-color: #f9f9f9;
+            background-color: #f5f5f5;
+        }
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+        .cart-item-details {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .cart-item-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .cart-item-extension {
+            font-size: 0.9em;
+            color: #666;
         }
         .cart-item-quantity {
-            margin-right: 10px;
+            margin: 10px 0;
         }
-        .cart-total {
-            font-size: 1.2em;
+        .cart-item-quantity select {
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .cart-item-price {
+            font-size: 1.1em;
             font-weight: bold;
-            margin-top: 20px;
+            color: #4CAF50; /* Couleur verte pour le prix */
+            margin-left: 20px;
         }
-        .cart-actions {
-            margin-top: 20px;
+        .cart-item-actions {
+            margin-left: 20px;
+        }
+        .cart-item-actions .v-btn {
+            color: #ff5252; /* Couleur rouge pour le bouton de suppression */
         }
     </style>
 </head>
@@ -96,18 +121,26 @@
                                                  @mouseover="item.hovered = true"
                                                  @mouseout="item.hovered = false">
 
-                                            <!-- Quantité -->
-                                            <select v-model="item.quantity" @change="updateQuantity(item.blueprintId, item.quantity)" class="cart-item-quantity">
-                                                <option v-for="qty in item.maxQuantity" :value="qty">{{ qty }}</option>
-                                            </select>
+                                            <!-- Détails (Nom, extension, quantité) -->
+                                            <div class="cart-item-details">
+                                                <div class="cart-item-name">{{ item.name }}</div>
+                                                <div class="cart-item-extension">{{ item.extension }}</div>
+                                                <div class="cart-item-quantity">
+                                                    <select v-model="item.quantity" @change="updateQuantity(item.blueprintId, item.quantity)">
+                                                        <option v-for="qty in item.maxQuantity" :value="qty">{{ qty }}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
 
-                                            <!-- Nom et extension -->
-                                            <v-list-item-title>{{ item.name }} - {{ item.extension }}</v-list-item-title>
+                                            <!-- Prix -->
+                                            <div class="cart-item-price">{{ item.price.toFixed(2) }} €</div>
 
                                             <!-- Bouton pour supprimer l'article -->
-                                            <v-btn icon @click="removeItem(item.blueprintId)">
-                                                <v-icon color="error">mdi-delete</v-icon>
-                                            </v-btn>
+                                            <div class="cart-item-actions">
+                                                <v-btn icon @click="removeItem(item.blueprintId)">
+                                                    <v-icon>mdi-delete</v-icon>
+                                                </v-btn>
+                                            </div>
                                         </v-list-item>
                                     </v-list>
                                     <v-alert v-else type="info" class="mt-3">Votre panier est vide.</v-alert>
@@ -160,11 +193,11 @@
             },
         });
 
-        // Initialiser Supabase
+                // Configuration Supabase
         const supabaseUrl = 'https://aibrhuoxwqwqbkhjhote.supabase.co'; // Remplacez par votre URL Supabase
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpYnJodW94d3F3cWJraGpob3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA1MTUxNzIsImV4cCI6MjA1NjA5MTE3Mn0.Lz_P5ZIUwL5mqIuMjJn3pxWnYV8SwprKUuDEnSOHii0'; // Remplacez par votre clé publique Supabase
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpYnJodW94d3F3cWJraGpob3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA1MTUxNzIsImV4cCI6MjA1NjA5MTE3Mn0.Lz_P5ZIUwL5mqIuMjJn3pxWnYV8SwprKUuDEnSOHii0'; // Remplacez par votre clé Supabase
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+        
         const app = createApp({
             setup() {
                 const cart = ref(getCartFromLocalStorage().map(item => ({
