@@ -14,6 +14,9 @@
             cursor: pointer;
             margin-right: 10px;
         }
+        .cart-item-quantity {
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -68,6 +71,7 @@
                                     <h2 class="text-warning mb-3">Panier</h2>
                                     <v-list v-if="cart.length > 0">
                                         <v-list-item v-for="item in cart" :key="item.blueprintId">
+                                            <!-- Photo du Pokémon -->
                                             <template v-slot:prepend>
                                                 <img :src="item.hovered ? item.hoverImage : item.originalImage" 
                                                      :alt="item.name" 
@@ -75,11 +79,17 @@
                                                      @mouseover="item.hovered = true"
                                                      @mouseout="item.hovered = false">
                                             </template>
-                                            <v-list-item-title>{{ item.name }} - {{ item.price }} €</v-list-item-title>
-                                            <template v-slot:append>
+
+                                            <!-- Quantité -->
+                                            <template v-slot:default>
                                                 <select v-model="item.quantity" @change="updateQuantity(item.blueprintId, item.quantity)">
                                                     <option v-for="qty in item.maxQuantity" :value="qty">{{ qty }}</option>
                                                 </select>
+                                            </template>
+
+                                            <!-- Nom et extension -->
+                                            <template v-slot:append>
+                                                <v-list-item-title>{{ item.name }} - {{ item.extension }}</v-list-item-title>
                                             </template>
                                         </v-list-item>
                                     </v-list>
@@ -130,7 +140,7 @@
             },
         });
 
-        // Initialiser Supabase
+                // Initialiser Supabase
         const supabaseUrl = 'https://aibrhuoxwqwqbkhjhote.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpYnJodW94d3F3cWJraGpob3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA1MTUxNzIsImV4cCI6MjA1NjA5MTE3Mn0.Lz_P5ZIUwL5mqIuMjJn3pxWnYV8SwprKUuDEnSOHii0';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
@@ -175,7 +185,6 @@
                     saveCartToLocalStorage(cart.value);
                 }
 
-                // Fonction pour valider le panier
                 async function validateCart() {
                     if (cart.value.length === 0) {
                         showNotification('Votre panier est vide.', 'error');
@@ -192,10 +201,10 @@
                         .from('orders')
                         .insert([
                             {
-                                user_id: userId.value, // Utilise l'ID unique temporaire
-                                pseudo: pseudo.value, // Pseudo de l'utilisateur
-                                cart_data: cart.value, // Données du panier
-                                status: 'pending' // Statut de la commande
+                                user_id: userId.value,
+                                pseudo: pseudo.value,
+                                cart_data: cart.value,
+                                status: 'pending'
                             }
                         ]);
 
@@ -205,12 +214,11 @@
                     } else {
                         console.log('Panier validé avec succès:', data);
                         showNotification('Votre panier a été validé avec succès.', 'success');
-                        clearCart(); // Vider le panier après validation
-                        pseudo.value = ''; // Réinitialiser le champ pseudo
+                        clearCart();
+                        pseudo.value = '';
                     }
                 }
 
-                // Fonction pour générer un ID unique
                 function generateUserId() {
                     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
                         const r = Math.random() * 16 | 0;
