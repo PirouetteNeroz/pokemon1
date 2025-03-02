@@ -107,7 +107,7 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js"></script>
     <script type="module">
-        import { fetchFrenchPokemonName, generateUserId, saveCartToLocalStorage, getCartFromLocalStorage, saveCartToSupabase, validateCart } from './shared.js';
+        import { fetchFrenchPokemonName, saveCartToLocalStorage, getCartFromLocalStorage } from './shared.js';
 
         const { createApp, ref, reactive, computed } = Vue;
         const vuetify = Vuetify.createVuetify({
@@ -129,6 +129,11 @@
                 },
             },
         });
+
+        // Initialiser Supabase
+        const supabaseUrl = 'https://aibrhuoxwqwqbkhjhote.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpYnJodW94d3F3cWJraGpob3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA1MTUxNzIsImV4cCI6MjA1NjA5MTE3Mn0.Lz_P5ZIUwL5mqIuMjJn3pxWnYV8SwprKUuDEnSOHii0';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
         const app = createApp({
             setup() {
@@ -170,25 +175,48 @@
                     saveCartToLocalStorage(cart.value);
                 }
 
+                // Fonction pour valider le panier
                 async function validateCart() {
-                    try {
-                        if (cart.value.length === 0) {
-                            showNotification("Le panier est vide.", 'error');
-                            return;
-                        }
-
-                        const result = await validateCart(userId.value, cart.value, pseudo.value);
-                        if (result.success) {
-                            showNotification(result.message, 'success');
-                            clearCart();
-                            pseudo.value = '';
-                        } else {
-                            showNotification(result.message, 'error');
-                        }
-                    } catch (error) {
-                        console.error("Erreur lors de la validation du panier :", error);
-                        showNotification("Une erreur s'est produite lors de la validation du panier.", 'error');
+                    if (cart.value.length === 0) {
+                        showNotification('Votre panier est vide.', 'error');
+                        return;
                     }
+
+                    if (!pseudo.value) {
+                        showNotification('Veuillez entrer un pseudo pour valider votre panier.', 'error');
+                        return;
+                    }
+
+                    // Envoyer le panier à Supabase
+                    const { data, error } = await supabaseClient
+                        .from('orders')
+                        .insert([
+                            {
+                                user_id: userId.value, // Utilise l'ID unique temporaire
+                                pseudo: pseudo.value, // Pseudo de l'utilisateur
+                                cart_data: cart.value, // Données du panier
+                                status: 'pending' // Statut de la commande
+                            }
+                        ]);
+
+                    if (error) {
+                        console.error('Erreur lors de la validation du panier:', error);
+                        showNotification('Erreur lors de la validation du panier.', 'error');
+                    } else {
+                        console.log('Panier validé avec succès:', data);
+                        showNotification('Votre panier a été validé avec succès.', 'success');
+                        clearCart(); // Vider le panier après validation
+                        pseudo.value = ''; // Réinitialiser le champ pseudo
+                    }
+                }
+
+                // Fonction pour générer un ID unique
+                function generateUserId() {
+                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                        const r = Math.random() * 16 | 0;
+                        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
+                    });
                 }
 
                 const cartTotal = computed(() => cart.value.reduce((total, item) => total + item.price * item.quantity, 0));
