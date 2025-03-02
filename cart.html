@@ -134,9 +134,9 @@
             setup() {
                 const cart = ref(getCartFromLocalStorage().map(item => ({
                     ...item,
-                    hovered: false, // Ajouter une propriété hovered
-                    originalImage: item.image, // Conserver l'image originale
-                    hoverImage: item.hoverImage || item.image, // Image au survol (si disponible)
+                    hovered: false,
+                    originalImage: item.image,
+                    hoverImage: item.hoverImage || item.image,
                 })));
                 const userId = ref(generateUserId());
                 const tab = ref('cart');
@@ -171,13 +171,23 @@
                 }
 
                 async function validateCart() {
-                    const result = await validateCart(userId.value, cart.value, pseudo.value);
-                    if (result.success) {
-                        showNotification(result.message, 'success');
-                        clearCart();
-                        pseudo.value = '';
-                    } else {
-                        showNotification(result.message, 'error');
+                    try {
+                        if (cart.value.length === 0) {
+                            showNotification("Le panier est vide.", 'error');
+                            return;
+                        }
+
+                        const result = await validateCart(userId.value, cart.value, pseudo.value);
+                        if (result.success) {
+                            showNotification(result.message, 'success');
+                            clearCart();
+                            pseudo.value = '';
+                        } else {
+                            showNotification(result.message, 'error');
+                        }
+                    } catch (error) {
+                        console.error("Erreur lors de la validation du panier :", error);
+                        showNotification("Une erreur s'est produite lors de la validation du panier.", 'error');
                     }
                 }
 
