@@ -11,64 +11,7 @@
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        .card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-        /* Conteneur pour la ribbon */
-        .ribbon-container {
-            position: relative;
-        }
-        /* Ribbon en haut à gauche */
-        .ribbon {
-            position: absolute;
-            top: 10px;
-            left: -10px;
-            background: blue;
-            color: white;
-            padding: 5px 15px;
-            font-size: 12px;
-            font-weight: bold;
-            transform: rotate(-20deg);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
-        /* Effet lumineux sur les Reverse Foil */
-        .reverse-glow {
-            box-shadow: 0 0 10px rgba(0, 123, 255, 0.8);
-            border: 2px solid rgba(0, 123, 255, 0.5);
-            border-radius: 10px;
-        }
-        /* Animation pour l'icône du panier */
-        .cart-animation-icon {
-            position: fixed;
-            font-size: 24px;
-            color: #FFC107; /* Couleur de l'icône */
-            z-index: 1000;
-            transition: all 0.8s ease-in-out; /* Durée et effet de l'animation */
-        }
-        /* Animation d'entrée et de sortie */
-        .slide-fade-enter-active {
-            transition: all 0.8s ease;
-        }
-        .slide-fade-leave-active {
-            transition: all 0.5s ease;
-        }
-        .slide-fade-enter-from,
-        .slide-fade-leave-to {
-            opacity: 0;
-            transform: translateY(20px); /* Déplacement vers le bas */
-        }
-        /* Animation fade */
-        .fade-enter-active, .fade-leave-active {
-            transition: opacity 0.5s ease;
-        }
-        .fade-enter-from, .fade-leave-to {
-            opacity: 0;
-        }
-
+        /* Styles CSS ici */
     </style>
 </head>
 <body>
@@ -214,7 +157,7 @@
     <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js"></script>
     <!-- Shared JS -->
     <script type="module">
-        import { generateUserId, saveCartToLocalStorage, getCartFromLocalStorage, saveCartToSupabase, validateCart, API_PRODUCTS, API_EXPANSIONS, API_TOKEN, supabaseClient } from './shared.js';
+        import { fetchFrenchPokemonName, generateUserId, saveCartToLocalStorage, getCartFromLocalStorage, saveCartToSupabase, validateCart, API_PRODUCTS, API_EXPANSIONS, API_TOKEN, supabaseClient } from './shared.js';
 
         const { createApp, ref, reactive, computed, watch } = Vue;
         const vuetify = Vuetify.createVuetify({
@@ -404,30 +347,15 @@
                         });
                         if (!response.ok) throw new Error(`Erreur API Produits: ${response.status}`);
                         const data = await response.json();
-                        inventory.value = data;
+                        inventory.value = await Promise.all(data.map(async (card) => {
+                            const frenchName = await fetchFrenchPokemonName(card.name_en.toLowerCase());
+                            return { ...card, name_fr: frenchName };
+                        }));
                     } catch (error) {
                         console.error("Erreur API :", error);
                     }
                 }
-                
-async function fetchInventory() {
-    try {
-        const response = await fetch(API_PRODUCTS, {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${API_TOKEN}` }
-        });
-        if (!response.ok) throw new Error(`Erreur API Produits: ${response.status}`);
-        const data = await response.json();
 
-        // Traduire les noms des Pokémon
-        inventory.value = await Promise.all(data.map(async (card) => {
-            const frenchName = await fetchFrenchPokemonName(card.name_en.toLowerCase());
-            return { ...card, name_fr: frenchName };
-        }));
-    } catch (error) {
-        console.error("Erreur API :", error);
-    }
-}
                 // Initialisation
                 fetchExpansions().then(fetchInventory);
 
