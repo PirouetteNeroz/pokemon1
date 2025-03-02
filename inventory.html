@@ -160,7 +160,7 @@
                                                                     <div class="ribbon-container">
                                                                         <v-img
                                                                             :src="`${imageBaseUrl}${card.blueprint_id}.jpg`"
-                                                                            :alt="card.name_en"
+                                                                            :alt="card.name_fr || card.name_en"
                                                                             height="200"
                                                                             contain
                                                                             class="card-image"
@@ -409,7 +409,25 @@
                         console.error("Erreur API :", error);
                     }
                 }
+                
+async function fetchInventory() {
+    try {
+        const response = await fetch(API_PRODUCTS, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+        });
+        if (!response.ok) throw new Error(`Erreur API Produits: ${response.status}`);
+        const data = await response.json();
 
+        // Traduire les noms des Pokémon
+        inventory.value = await Promise.all(data.map(async (card) => {
+            const frenchName = await fetchFrenchPokemonName(card.name_en.toLowerCase());
+            return { ...card, name_fr: frenchName };
+        }));
+    } catch (error) {
+        console.error("Erreur API :", error);
+    }
+}
                 // Initialisation
                 fetchExpansions().then(fetchInventory);
 
