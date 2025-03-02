@@ -11,6 +11,7 @@
         .cart-item {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 15px;
             border-bottom: 1px solid #e0e0e0;
             transition: background-color 0.3s ease;
@@ -21,20 +22,21 @@
         .cart-item-details {
             flex-grow: 1;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
         .cart-item-name {
             font-size: 1.1em;
             font-weight: bold;
-            margin-bottom: 5px;
         }
         .cart-item-extension {
             font-size: 0.9em;
             color: #666;
         }
         .cart-item-quantity {
-            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .cart-item-quantity select {
             padding: 5px;
@@ -45,13 +47,26 @@
             font-size: 1.1em;
             font-weight: bold;
             color: #4CAF50; /* Couleur verte pour le prix */
-            margin-left: 20px;
         }
         .cart-item-actions {
-            margin-left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .cart-item-actions .v-btn {
             color: #ff5252; /* Couleur rouge pour le bouton de suppression */
+        }
+        .cart-total {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: right;
+        }
+        .cart-actions {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
     </style>
 </head>
@@ -109,13 +124,14 @@
                                         <v-list-item v-for="item in cart" :key="item.blueprintId" class="cart-item">
                                             <!-- Détails (Nom, extension, quantité) -->
                                             <div class="cart-item-details">
-                                                <div class="cart-item-name">{{ item.name }}</div>
-                                                <div class="cart-item-extension">{{ item.extension }}</div>
-                                                <div class="cart-item-quantity">
-                                                    <select v-model="item.quantity" @change="updateQuantity(item.blueprintId, item.quantity)">
-                                                        <option v-for="qty in item.maxQuantity" :value="qty">{{ qty }}</option>
-                                                    </select>
-                                                </div>
+                                                <div class="cart-item-name">{{ item.name }} <span class="cart-item-extension">- {{ item.extension }}</span></div>
+                                            </div>
+
+                                            <!-- Quantité -->
+                                            <div class="cart-item-quantity">
+                                                <select v-model="item.quantity" @change="updateQuantity(item.blueprintId, item.quantity)">
+                                                    <option v-for="qty in item.maxQuantity" :value="qty">{{ qty }}</option>
+                                                </select>
                                             </div>
 
                                             <!-- Prix -->
