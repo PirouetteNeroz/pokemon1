@@ -11,18 +11,16 @@
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-               .card {
+        .card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .card:hover {
             transform: scale(1.05);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
-        /* Conteneur pour la ribbon */
         .ribbon-container {
             position: relative;
         }
-        /* Ribbon en haut à gauche */
         .ribbon {
             position: absolute;
             top: 10px;
@@ -35,21 +33,18 @@
             transform: rotate(-20deg);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
-        /* Effet lumineux sur les Reverse Foil */
         .reverse-glow {
             box-shadow: 0 0 10px rgba(0, 123, 255, 0.8);
             border: 2px solid rgba(0, 123, 255, 0.5);
             border-radius: 10px;
         }
-        /* Animation pour l'icône du panier */
         .cart-animation-icon {
             position: fixed;
             font-size: 24px;
-            color: #FFC107; /* Couleur de l'icône */
+            color: #FFC107;
             z-index: 1000;
-            transition: all 0.8s ease-in-out; /* Durée et effet de l'animation */
+            transition: all 0.8s ease-in-out;
         }
-        /* Animation d'entrée et de sortie */
         .slide-fade-enter-active {
             transition: all 0.8s ease;
         }
@@ -59,22 +54,25 @@
         .slide-fade-enter-from,
         .slide-fade-leave-to {
             opacity: 0;
-            transform: translateY(20px); /* Déplacement vers le bas */
+            transform: translateY(20px);
         }
-        /* Animation fade */
         .fade-enter-active, .fade-leave-active {
             transition: opacity 0.5s ease;
         }
         .fade-enter-from, .fade-leave-to {
             opacity: 0;
         }
-
+        .cart-item-image {
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
     <div id="app">
         <v-app>
-            <!-- Notifications visuelles (toasts) -->
             <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
                 {{ snackbar.message }}
                 <template v-slot:action="{ attrs }">
@@ -82,68 +80,63 @@
                 </template>
             </v-snackbar>
 
-            <!-- Header avec barre de recherche et accès rapide -->
-<v-app-bar app color="primary" dark>
-    <!-- Titre cliquable pour revenir à l'inventaire -->
-    <v-toolbar-title>
-        <a href="/inventory.html" style="text-decoration: none; color: inherit;">
-            <v-btn text>Carameche</v-btn>
-        </a>
-    </v-toolbar-title>
-    <v-spacer></v-spacer>
-    <v-text-field
-        v-model="searchQuery"
-        label="Rechercher..."
-        prepend-icon="mdi-magnify"
-        outlined
-        dense
-        hide-details
-        class="mr-4"
-    ></v-text-field>
-    <a href="/inventory.html" style="text-decoration: none; color: inherit;">
-        <v-btn icon>
-            <v-icon>mdi-home</v-icon>
-        </v-btn>
-    </a>
-    <a href="/cart.html" style="text-decoration: none; color: inherit;">
-        <v-btn icon>
-            <v-icon>mdi-cart</v-icon>
-            <span>{{ totalItemsInCart }}</span>
-        </v-btn>
-    </a>
-</v-app-bar>
+            <v-app-bar app color="primary" dark>
+                <v-toolbar-title>
+                    <a href="/inventory.html" style="text-decoration: none; color: inherit;">
+                        <v-btn text>Carameche</v-btn>
+                    </a>
+                </v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-text-field
+                    v-model="searchQuery"
+                    label="Rechercher..."
+                    prepend-icon="mdi-magnify"
+                    outlined
+                    dense
+                    hide-details
+                    class="mr-4"
+                ></v-text-field>
+                <a href="/inventory.html" style="text-decoration: none; color: inherit;">
+                    <v-btn icon>
+                        <v-icon>mdi-home</v-icon>
+                    </v-btn>
+                </a>
+                <a href="/cart.html" style="text-decoration: none; color: inherit;">
+                    <v-btn icon>
+                        <v-icon>mdi-cart</v-icon>
+                        <span>{{ totalItemsInCart }}</span>
+                    </v-btn>
+                </a>
+            </v-app-bar>
 
-            <!-- Barre de navigation avec onglets -->
             <v-tabs v-model="tab" grow>
                 <v-tab value="inventory">Inventaire</v-tab>
                 <v-tab value="cart">Panier</v-tab>
             </v-tabs>
             <v-main>
                 <v-container fluid>
-                    <!-- Contenu de l'onglet Panier -->
                     <v-window v-model="tab">
                         <transition name="fade" mode="out-in">
                             <v-window-item value="cart">
                                 <v-card class="cart pa-3">
                                     <h2 class="text-warning mb-3">Panier</h2>
-                                    <!-- Liste des cartes dans le panier -->
                                     <v-list v-if="cart.length > 0">
                                         <v-list-item v-for="item in cart" :key="item.blueprintId">
                                             <template v-slot:prepend>
-                                                <v-icon>mdi-cards</v-icon>
+                                                <img :src="item.image" :alt="item.name" class="cart-item-image"
+                                                     @mouseover="item.image = item.hoverImage"
+                                                     @mouseout="item.image = item.originalImage">
                                             </template>
-                                            <v-list-item-title>{{ item.name }} - {{ item.price }} € x {{ item.quantity }}</v-list-item-title>
+                                            <v-list-item-title>{{ item.name }} - {{ item.price }} €</v-list-item-title>
                                             <template v-slot:append>
-                                                <v-btn icon="mdi-minus" variant="text" @click="decreaseQuantity(item.blueprintId)"></v-btn>
-                                                <v-btn icon="mdi-plus" variant="text" @click="increaseQuantity(item.blueprintId, item.quantity)"></v-btn>
+                                                <select v-model="item.quantity" @change="updateQuantity(item.blueprintId, item.quantity)">
+                                                    <option v-for="qty in item.maxQuantity" :value="qty">{{ qty }}</option>
+                                                </select>
                                             </template>
                                         </v-list-item>
                                     </v-list>
-                                    <!-- Message si le panier est vide -->
                                     <v-alert v-else type="info" class="mt-3">Votre panier est vide.</v-alert>
-                                    <!-- Total du panier -->
                                     <v-card-text class="mt-3" v-if="cart.length > 0">Total: <span class="font-weight-bold">{{ cartTotal.toFixed(2) }}</span> €</v-card-text>
-                                    <!-- Champ pour le pseudo -->
                                     <v-text-field
                                         v-model="pseudo"
                                         label="Votre pseudo"
@@ -152,9 +145,7 @@
                                         class="mt-3"
                                         v-if="cart.length > 0"
                                     ></v-text-field>
-                                    <!-- Boutons pour vider le panier -->
                                     <v-btn color="error" block @click="clearCart" v-if="cart.length > 0">Vider le panier</v-btn>
-                                    <!-- Bouton pour valider le panier -->
                                     <v-btn color="success" block class="mt-3" @click="validateCart" v-if="cart.length > 0">Valider le panier</v-btn>
                                 </v-card>
                             </v-window-item>
@@ -165,11 +156,8 @@
         </v-app>
     </div>
 
-    <!-- Vue.js -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <!-- Vuetify JS -->
     <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js"></script>
-    <!-- Shared JS -->
     <script type="module">
         import { fetchFrenchPokemonName, generateUserId, saveCartToLocalStorage, getCartFromLocalStorage, saveCartToSupabase, validateCart } from './shared.js';
 
@@ -206,64 +194,40 @@
                     color: 'success',
                 });
 
-                // Fonction pour afficher des notifications
                 function showNotification(message, color = 'success') {
                     snackbar.message = message;
                     snackbar.color = color;
                     snackbar.show = true;
-
-                    // Masquer la notification après 3 secondes
                     setTimeout(() => {
                         snackbar.show = false;
                     }, 3000);
                 }
 
-                // Fonction pour diminuer la quantité d'un article dans le panier
-                function decreaseQuantity(blueprintId) {
+                function updateQuantity(blueprintId, quantity) {
                     const item = cart.value.find(item => item.blueprintId === blueprintId);
                     if (item) {
-                        if (item.quantity > 1) {
-                            item.quantity -= 1;
-                        } else {
-                            cart.value = cart.value.filter(item => item.blueprintId !== blueprintId);
-                        }
+                        item.quantity = quantity;
+                        saveCartToLocalStorage(cart.value);
                     }
-                    saveCartToLocalStorage(cart.value); // Sauvegarder le panier dans le localStorage
                 }
 
-                // Fonction pour augmenter la quantité d'un article dans le panier
-                function increaseQuantity(blueprintId, maxQuantity) {
-                    const item = cart.value.find(item => item.blueprintId === blueprintId);
-                    if (item) {
-                        if (item.quantity < maxQuantity) {
-                            item.quantity += 1;
-                        } else {
-                            showNotification("Quantité maximale atteinte pour cette carte.", 'error');
-                        }
-                    }
-                    saveCartToLocalStorage(cart.value); // Sauvegarder le panier dans le localStorage
-                }
-
-                // Fonction pour vider le panier
                 function clearCart() {
                     cart.value = [];
                     showNotification("Le panier a été vidé.", 'info');
-                    saveCartToLocalStorage(cart.value); // Sauvegarder le panier dans le localStorage
+                    saveCartToLocalStorage(cart.value);
                 }
 
-                // Fonction pour valider le panier
                 async function validateCart() {
                     const result = await validateCart(userId.value, cart.value, pseudo.value);
                     if (result.success) {
                         showNotification(result.message, 'success');
-                        clearCart(); // Vider le panier après validation
-                        pseudo.value = ''; // Réinitialiser le champ pseudo
+                        clearCart();
+                        pseudo.value = '';
                     } else {
                         showNotification(result.message, 'error');
                     }
                 }
 
-                // Calcul des propriétés calculées
                 const cartTotal = computed(() => cart.value.reduce((total, item) => total + item.price * item.quantity, 0));
                 const totalItemsInCart = computed(() => cart.value.reduce((total, item) => total + item.quantity, 0));
 
@@ -274,8 +238,7 @@
                     snackbar,
                     cartTotal,
                     totalItemsInCart,
-                    decreaseQuantity,
-                    increaseQuantity,
+                    updateQuantity,
                     clearCart,
                     validateCart,
                     showNotification,
