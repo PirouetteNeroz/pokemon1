@@ -182,12 +182,7 @@
 
         const app = createApp({
             setup() {
-                const cart = ref(getCartFromLocalStorage().map(item => ({
-                    ...item,
-                    hovered: false,
-                    originalImage: item.image,
-                    hoverImage: item.hoverImage || item.image,
-                })));
+                const cart = ref(getCartFromLocalStorage());
                 const userId = ref(generateUserId());
                 const tab = ref('cart');
                 const pseudo = ref('');
