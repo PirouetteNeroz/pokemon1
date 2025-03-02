@@ -13,9 +13,27 @@
             height: 50px;
             cursor: pointer;
             margin-right: 10px;
+            border-radius: 5px;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .cart-item:hover {
+            background-color: #f9f9f9;
         }
         .cart-item-quantity {
             margin-right: 10px;
+        }
+        .cart-total {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .cart-actions {
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -70,31 +88,30 @@
                                 <v-card class="cart pa-3">
                                     <h2 class="text-warning mb-3">Panier</h2>
                                     <v-list v-if="cart.length > 0">
-                                        <v-list-item v-for="item in cart" :key="item.blueprintId">
+                                        <v-list-item v-for="item in cart" :key="item.blueprintId" class="cart-item">
                                             <!-- Photo du Pokémon -->
-                                            <template v-slot:prepend>
-                                                <img :src="item.hovered ? item.hoverImage : item.originalImage" 
-                                                     :alt="item.name" 
-                                                     class="cart-item-image"
-                                                     @mouseover="item.hovered = true"
-                                                     @mouseout="item.hovered = false">
-                                            </template>
+                                            <img :src="item.hovered ? item.hoverImage : item.originalImage" 
+                                                 :alt="item.name" 
+                                                 class="cart-item-image"
+                                                 @mouseover="item.hovered = true"
+                                                 @mouseout="item.hovered = false">
 
                                             <!-- Quantité -->
-                                            <template v-slot:default>
-                                                <select v-model="item.quantity" @change="updateQuantity(item.blueprintId, item.quantity)">
-                                                    <option v-for="qty in item.maxQuantity" :value="qty">{{ qty }}</option>
-                                                </select>
-                                            </template>
+                                            <select v-model="item.quantity" @change="updateQuantity(item.blueprintId, item.quantity)" class="cart-item-quantity">
+                                                <option v-for="qty in item.maxQuantity" :value="qty">{{ qty }}</option>
+                                            </select>
 
                                             <!-- Nom et extension -->
-                                            <template v-slot:append>
-                                                <v-list-item-title>{{ item.name }} - {{ item.extension }}</v-list-item-title>
-                                            </template>
+                                            <v-list-item-title>{{ item.name }} - {{ item.extension }}</v-list-item-title>
+
+                                            <!-- Bouton pour supprimer l'article -->
+                                            <v-btn icon @click="removeItem(item.blueprintId)">
+                                                <v-icon color="error">mdi-delete</v-icon>
+                                            </v-btn>
                                         </v-list-item>
                                     </v-list>
                                     <v-alert v-else type="info" class="mt-3">Votre panier est vide.</v-alert>
-                                    <v-card-text class="mt-3" v-if="cart.length > 0">Total: <span class="font-weight-bold">{{ cartTotal.toFixed(2) }}</span> €</v-card-text>
+                                    <v-card-text class="cart-total" v-if="cart.length > 0">Total: <span class="font-weight-bold">{{ cartTotal.toFixed(2) }}</span> €</v-card-text>
                                     <v-text-field
                                         v-model="pseudo"
                                         label="Votre pseudo"
@@ -103,8 +120,11 @@
                                         class="mt-3"
                                         v-if="cart.length > 0"
                                     ></v-text-field>
-                                    <v-btn color="error" block @click="clearCart" v-if="cart.length > 0">Vider le panier</v-btn>
-                                    <v-btn color="success" block class="mt-3" @click="validateCart" v-if="cart.length > 0">Valider le panier</v-btn>
+                                    <div class="cart-actions">
+                                        <v-btn color="error" block @click="clearCart" v-if="cart.length > 0">Vider le panier</v-btn>
+                                        <v-btn color="success" block class="mt-3" @click="validateCart" v-if="cart.length > 0">Valider le panier</v-btn>
+                                        <v-btn color="primary" block class="mt-3" @click="continueShopping" v-if="cart.length > 0">Continuer mes achats</v-btn>
+                                    </div>
                                 </v-card>
                             </v-window-item>
                         </transition>
@@ -140,11 +160,11 @@
             },
         });
 
-                // Initialiser Supabase
-        const supabaseUrl = 'https://aibrhuoxwqwqbkhjhote.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpYnJodW94d3F3cWJraGpob3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA1MTUxNzIsImV4cCI6MjA1NjA5MTE3Mn0.Lz_P5ZIUwL5mqIuMjJn3pxWnYV8SwprKUuDEnSOHii0';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
+        // Configuration Supabase
+        const supabaseUrl = 'https://aibrhuoxwqwqbkhjhote.supabase.co'; // Remplacez par votre URL Supabase
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpYnJodW94d3F3cWJraGpob3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA1MTUxNzIsImV4cCI6MjA1NjA5MTE3Mn0.Lz_P5ZIUwL5mqIuMjJn3pxWnYV8SwprKUuDEnSOHii0'; // Remplacez par votre clé Supabase
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+        
         const app = createApp({
             setup() {
                 const cart = ref(getCartFromLocalStorage().map(item => ({
@@ -179,10 +199,20 @@
                     }
                 }
 
+                function removeItem(blueprintId) {
+                    cart.value = cart.value.filter(item => item.blueprintId !== blueprintId);
+                    showNotification("L'article a été supprimé du panier.", 'info');
+                    saveCartToLocalStorage(cart.value);
+                }
+
                 function clearCart() {
                     cart.value = [];
                     showNotification("Le panier a été vidé.", 'info');
                     saveCartToLocalStorage(cart.value);
+                }
+
+                function continueShopping() {
+                    window.location.href = '/inventory.html';
                 }
 
                 async function validateCart() {
@@ -238,7 +268,9 @@
                     cartTotal,
                     totalItemsInCart,
                     updateQuantity,
+                    removeItem,
                     clearCart,
+                    continueShopping,
                     validateCart,
                     showNotification,
                 };
