@@ -94,29 +94,35 @@
             </v-snackbar>
 
             <!-- Header avec barre de recherche et accès rapide -->
-            <v-app-bar app color="primary" dark>
-                <!-- Titre cliquable pour revenir à l'inventaire -->
-                <v-toolbar-title>
-                    <v-btn text @click="tab = 'inventory'">Carameche</v-btn>
-                </v-toolbar-title>
-                <v-spacer></v-spacer>
-                <v-text-field
-                    v-model="searchQuery"
-                    label="Rechercher..."
-                    prepend-icon="mdi-magnify"
-                    outlined
-                    dense
-                    hide-details
-                    class="mr-4"
-                ></v-text-field>
-                <v-btn icon @click="tab = 'inventory'">
-                    <v-icon>mdi-home</v-icon>
-                </v-btn>
-                <v-btn icon @click="tab = 'cart'">
-                    <v-icon>mdi-cart</v-icon>
-                    <span>{{ totalItemsInCart }}</span>
-                </v-btn>
-            </v-app-bar>
+<v-app-bar app color="primary" dark>
+    <!-- Titre cliquable pour revenir à l'inventaire -->
+    <v-toolbar-title>
+        <a href="/inventory.html" style="text-decoration: none; color: inherit;">
+            <v-btn text>Carameche</v-btn>
+        </a>
+    </v-toolbar-title>
+    <v-spacer></v-spacer>
+    <v-text-field
+        v-model="searchQuery"
+        label="Rechercher..."
+        prepend-icon="mdi-magnify"
+        outlined
+        dense
+        hide-details
+        class="mr-4"
+    ></v-text-field>
+    <a href="/inventory.html" style="text-decoration: none; color: inherit;">
+        <v-btn icon>
+            <v-icon>mdi-home</v-icon>
+        </v-btn>
+    </a>
+    <a href="/cart.html" style="text-decoration: none; color: inherit;">
+        <v-btn icon>
+            <v-icon>mdi-cart</v-icon>
+            <span>{{ totalItemsInCart }}</span>
+        </v-btn>
+    </a>
+</v-app-bar>
 
             <!-- Barre de navigation avec onglets -->
             <v-tabs v-model="tab" grow>
