@@ -4,64 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panier Carameche</title>
-    <!-- Vuetify CSS -->
     <link href="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.css" rel="stylesheet">
-    <!-- Material Design Icons -->
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
-    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        .card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-        .ribbon-container {
-            position: relative;
-        }
-        .ribbon {
-            position: absolute;
-            top: 10px;
-            left: -10px;
-            background: blue;
-            color: white;
-            padding: 5px 15px;
-            font-size: 12px;
-            font-weight: bold;
-            transform: rotate(-20deg);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
-        .reverse-glow {
-            box-shadow: 0 0 10px rgba(0, 123, 255, 0.8);
-            border: 2px solid rgba(0, 123, 255, 0.5);
-            border-radius: 10px;
-        }
-        .cart-animation-icon {
-            position: fixed;
-            font-size: 24px;
-            color: #FFC107;
-            z-index: 1000;
-            transition: all 0.8s ease-in-out;
-        }
-        .slide-fade-enter-active {
-            transition: all 0.8s ease;
-        }
-        .slide-fade-leave-active {
-            transition: all 0.5s ease;
-        }
-        .slide-fade-enter-from,
-        .slide-fade-leave-to {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        .fade-enter-active, .fade-leave-active {
-            transition: opacity 0.5s ease;
-        }
-        .fade-enter-from, .fade-leave-to {
-            opacity: 0;
-        }
         .cart-item-image {
             width: 50px;
             height: 50px;
@@ -123,9 +69,11 @@
                                     <v-list v-if="cart.length > 0">
                                         <v-list-item v-for="item in cart" :key="item.blueprintId">
                                             <template v-slot:prepend>
-                                                <img :src="item.image" :alt="item.name" class="cart-item-image"
-                                                     @mouseover="item.image = item.hoverImage"
-                                                     @mouseout="item.image = item.originalImage">
+                                                <img :src="item.hovered ? item.hoverImage : item.originalImage" 
+                                                     :alt="item.name" 
+                                                     class="cart-item-image"
+                                                     @mouseover="item.hovered = true"
+                                                     @mouseout="item.hovered = false">
                                             </template>
                                             <v-list-item-title>{{ item.name }} - {{ item.price }} €</v-list-item-title>
                                             <template v-slot:append>
@@ -184,7 +132,12 @@
 
         const app = createApp({
             setup() {
-                const cart = ref(getCartFromLocalStorage());
+                const cart = ref(getCartFromLocalStorage().map(item => ({
+                    ...item,
+                    hovered: false, // Ajouter une propriété hovered
+                    originalImage: item.image, // Conserver l'image originale
+                    hoverImage: item.hoverImage || item.image, // Image au survol (si disponible)
+                })));
                 const userId = ref(generateUserId());
                 const tab = ref('cart');
                 const pseudo = ref('');
