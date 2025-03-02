@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - CardTrader</title>
+    <!-- Vuetify CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.css" rel="stylesheet">
+    <!-- Material Design Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .admin {
+            background-color: #1E1E1E;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div id="admin-app">
+        <v-app>
+            <!-- Barre d'outils pour l'admin -->
+            <v-app-bar app color="primary" dark>
+                <v-toolbar-title>Admin - CardTrader</v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-btn icon @click="logout">
+                    <v-icon>mdi-logout</v-icon>
+                </v-btn>
+            </v-app-bar>
+
+            <!-- Contenu principal -->
+            <v-main>
+                <v-container fluid>
+                    <v-card class="admin pa-3">
+                        <h2 class="text-warning mb-3">Commandes validées</h2>
+
+                        <!-- Filtres et tri -->
+                        <v-row>
+                            <v-col cols="12" md="4">
+                                <v-select
+                                    v-model="selectedCollection"
+                                    :items="collectionOptions"
+                                    label="Filtrer par collection"
+                                    outlined
+                                    dense
+                                    clearable
+                                ></v-select>
+                            </v-col>
+                            <v-col cols="12" md="4">
+                                <v-radio-group v-model="sortOrder" row>
+                                    <v-radio label="Ascendant" value="asc"></v-radio>
+                                    <v-radio label="Descendant" value="desc"></v-radio>
+                                </v-radio-group>
+                            </v-col>
+                        </v-row>
+
+                        <!-- Liste des commandes -->
+                        <v-list v-if="filteredOrders.length > 0">
+                            <v-expansion-panels>
+                                <v-expansion-panel v-for="order in filteredOrders" :key="order.id">
+                                    <v-expansion-panel-title>
+                                        <v-list-item>
+                                            <template v-slot:prepend>
+                                                <v-icon>mdi-cart</v-icon>
+                                            </template>
+                                            <v-list-item-title>{{ order.pseudo }} - {{ order.status }}</v-list-item-title>
+                                        </v-list-item>
+                                    </v-expansion-panel-title>
+                                    <v-expansion-panel-text>
+                                        <!-- Détails des cartes dans le panier -->
+                                        <v-list>
+                                            <v-list-item v-for="(item, index) in order.cart_data" :key="index">
+                                                <template v-slot:prepend>
+                                                    <v-img :src="getCardImageUrl(item.blueprintId)" width="50" height="70" class="mr-3"></v-img>
+                                                </template>
+                                                <v-list-item-title>{{ item.name }} - {{ item.price }} € x {{ item.quantity }}</v-list-item-title>
+                                            </v-list-item>
+                                        </v-list>
+                                        <v-card-text class="mt-3">Total: <span class="font-weight-bold">{{ calculateOrderTotal(order.cart_data).toFixed(2) }}</span> €</v-card-text>
+                                    </v-expansion-panel-text>
+                                </v-expansion-panel>
+                            </v-expansion-panels>
+                        </v-list>
+                        <!-- Message si aucune commande n'est trouvée -->
+                        <v-alert v-else type="info" class="mt-3">Aucune commande correspondante.</v-alert>
+                    </v-card>
+                </v-container>
+            </v-main>
+        </v-app>
+    </div>
+
+    <!-- Vue.js -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Vuetify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js"></script>
+    <script>
+        const { createApp, ref, computed } = Vue;
+        const { createClient } = supabase;
+
+        // Configuration Supabase
+        const supabaseUrl = 'https://aibrhuoxwqwqbkhjhote.supabase.co'; // Remplacez par votre URL Supabase
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpYnJodW94d3F3cWJraGpob3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA1MTUxNzIsImV4cCI6MjA1NjA5MTE3Mn0.Lz_P5ZIUwL5mqIuMjJn3pxWnYV8SwprKUuDEnSOHii0'; // Remplacez par votre clé Supabase
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+        const vuetify = Vuetify.createVuetify({
+            theme: {
+                defaultTheme: 'dark',
+                themes: {
+                    dark: {
+                        colors: {
+                            primary: '#FFD700',
+                            secondary: '#1E1E1E',
+                            background: '#121212',
+                            surface: '#1E1E1E',
+                            error: '#FF5252',
+                            info: '#2196F3',
+                            success: '#4CAF50',
+                            warning: '#FFC107',
+                        },
+                    },
+                },
+            },
+        });
+
+        const app = createApp({
+            setup() {
+                const orders = ref([]);
+                const selectedCollection = ref('');
+                const sortOrder = ref('asc');
+                const collectionOptions = ref([]);
+
+                // Récupérer les commandes validées
+                async function fetchOrders() {
+                    const { data, error } = await supabaseClient
+                        .from('orders')
+                        .select('*')
+                        .eq('status', 'pending'); // ou 'completed' selon votre logique
+
+                    if (error) {
+                        console.error('Erreur lors de la récupération des commandes:', error);
+                    } else {
+                        orders.value = data;
+                        collectionOptions.value = extractCollections(data); // Extraire les collections
+                    }
+                }
+
+                // Extraire les collections disponibles
+                function extractCollections(orders) {
+                    const collections = new Set();
+                    orders.forEach(order => {
+                        order.cart_data.forEach(item => {
+                            const collection = item.name.split('(')[1]?.split(')')[0] || 'Inconnue';
+                            collections.add(collection);
+                        });
+                    });
+                    return Array.from(collections).map(collection => ({ title: collection, value: collection }));
+                }
+
+                // Filtrer et trier les commandes
+                const filteredOrders = computed(() => {
+                    let filtered = orders.value;
+
+                    // Filtrer par collection
+                    if (selectedCollection.value) {
+                        filtered = filtered.filter(order =>
+                            order.cart_data.some(item => {
+                                const collection = item.name.split('(')[1]?.split(')')[0] || 'Inconnue';
+                                return collection === selectedCollection.value;
+                            })
+                        );
+                    }
+
+                    // Trier par numéro de collection
+                    if (sortOrder.value === 'asc') {
+                        filtered.sort((a, b) =>
+                            a.cart_data[0].name.localeCompare(b.cart_data[0].name)
+                        );
+                    } else if (sortOrder.value === 'desc') {
+                        filtered.sort((a, b) =>
+                            b.cart_data[0].name.localeCompare(a.cart_data[0].name)
+                        );
+                    }
+
+                    return filtered;
+                });
+
+                // Calculer le total d'une commande
+                function calculateOrderTotal(cartData) {
+                    return cartData.reduce((total, item) => total + item.price * item.quantity, 0);
+                }
+
+                // Générer l'URL de l'image de la carte
+                function getCardImageUrl(blueprintId) {
+                    return `https://www.cardtrader.com/images/blueprint/${blueprintId}.jpg`;
+                }
+
+                // Déconnexion de l'admin
+                function logout() {
+                    localStorage.removeItem('admin-token'); // Supprimer le token d'authentification
+                    window.location.href = 'index.html'; // Rediriger vers la page d'accueil
+                }
+
+                // Charger les commandes au démarrage
+                fetchOrders();
+
+                return {
+                    orders,
+                    selectedCollection,
+                    sortOrder,
+                    collectionOptions,
+                    filteredOrders,
+                    calculateOrderTotal,
+                    getCardImageUrl,
+                    logout,
+                };
+            }
+        });
+
+        app.use(vuetify);
+        app.mount('#admin-app');
+    </script>
+</body>
+</html>
