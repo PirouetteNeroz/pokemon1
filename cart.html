@@ -8,53 +8,30 @@
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        .cart-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 15px;
+        .cart-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .cart-table th, .cart-table td {
+            padding: 12px;
+            text-align: left;
             border-bottom: 1px solid #e0e0e0;
-            transition: background-color 0.3s ease;
         }
-        .cart-item:hover {
+        .cart-table th {
             background-color: #f5f5f5;
-        }
-        .cart-item-details {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .cart-item-name {
-            font-size: 1.1em;
             font-weight: bold;
         }
-        .cart-item-extension {
-            font-size: 0.9em;
-            color: #666;
+        .cart-table tr:hover {
+            background-color: #f9f9f9;
         }
-        .cart-item-quantity {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .cart-item-quantity select {
+        .cart-table select {
             padding: 5px;
             border-radius: 4px;
             border: 1px solid #ccc;
         }
-        .cart-item-price {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #4CAF50; /* Couleur verte pour le prix */
-        }
-        .cart-item-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .cart-item-actions .v-btn {
-            color: #ff5252; /* Couleur rouge pour le bouton de suppression */
+        .cart-table .actions {
+            text-align: center;
         }
         .cart-total {
             font-size: 1.2em;
@@ -120,31 +97,34 @@
                             <v-window-item value="cart">
                                 <v-card class="cart pa-3">
                                     <h2 class="text-warning mb-3">Panier</h2>
-                                    <v-list v-if="cart.length > 0">
-                                        <v-list-item v-for="item in cart" :key="item.blueprintId" class="cart-item">
-                                            <!-- Détails (Nom, extension, quantité) -->
-                                            <div class="cart-item-details">
-                                                <div class="cart-item-name">{{ item.name }} <span class="cart-item-extension">- {{ item.extension }}</span></div>
-                                            </div>
-
-                                            <!-- Quantité -->
-                                            <div class="cart-item-quantity">
-                                                <select v-model="item.quantity" @change="updateQuantity(item.blueprintId, item.quantity)">
-                                                    <option v-for="qty in item.maxQuantity" :value="qty">{{ qty }}</option>
-                                                </select>
-                                            </div>
-
-                                            <!-- Prix -->
-                                            <div class="cart-item-price">{{ item.price.toFixed(2) }} €</div>
-
-                                            <!-- Bouton pour supprimer l'article -->
-                                            <div class="cart-item-actions">
-                                                <v-btn icon @click="removeItem(item.blueprintId)">
-                                                    <v-icon>mdi-delete</v-icon>
-                                                </v-btn>
-                                            </div>
-                                        </v-list-item>
-                                    </v-list>
+                                    <table class="cart-table" v-if="cart.length > 0">
+                                        <thead>
+                                            <tr>
+                                                <th>Nom</th>
+                                                <th>Extension</th>
+                                                <th>Quantité</th>
+                                                <th>Prix</th>
+                                                <th class="actions">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="item in cart" :key="item.blueprintId">
+                                                <td>{{ item.name }}</td>
+                                                <td>{{ item.extension }}</td>
+                                                <td>
+                                                    <select v-model="item.quantity" @change="updateQuantity(item.blueprintId, item.quantity)">
+                                                        <option v-for="qty in item.maxQuantity" :value="qty">{{ qty }}</option>
+                                                    </select>
+                                                </td>
+                                                <td>{{ item.price.toFixed(2) }} €</td>
+                                                <td class="actions">
+                                                    <v-btn icon @click="removeItem(item.blueprintId)">
+                                                        <v-icon color="error">mdi-delete</v-icon>
+                                                    </v-btn>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                     <v-alert v-else type="info" class="mt-3">Votre panier est vide.</v-alert>
                                     <v-card-text class="cart-total" v-if="cart.length > 0">Total: <span class="font-weight-bold">{{ cartTotal.toFixed(2) }}</span> €</v-card-text>
                                     <v-text-field
