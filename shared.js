@@ -45,6 +45,17 @@ async function saveCartToSupabase(userId, cart) {
     }
 }
 
+    // Exemple d'utilisation de fetchFrenchPokemonName
+    async function loadPokemonNames() {
+        const pokemonNames = ['pikachu', 'bulbasaur', 'charmander'];
+        for (const name of pokemonNames) {
+            const frenchName = await fetchFrenchPokemonName(name);
+            console.log(`${name} en français : ${frenchName}`);
+        }
+    }
+
+    loadPokemonNames();
+
 // Fonction pour valider le panier
 async function validateCart(userId, cart, pseudo) {
     if (cart.length === 0) {
@@ -76,4 +87,26 @@ async function validateCart(userId, cart, pseudo) {
     }
 }
 
-export { generateUserId, saveCartToLocalStorage, getCartFromLocalStorage, saveCartToSupabase, validateCart, API_PRODUCTS, API_EXPANSIONS, API_TOKEN, supabaseClient };
+
+async function fetchFrenchPokemonName(pokemonName) {
+    try {
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonName.toLowerCase()}`);
+        if (!response.ok) throw new Error(`Erreur API PokeAPI: ${response.status}`);
+        const data = await response.json();
+
+        // Recherche du nom en français
+        const frenchName = data.names.find(name => name.language.name === 'fr');
+        if (frenchName) {
+            return frenchName.name; // Retourne le nom français
+        } else {
+            console.warn(`Aucun nom français trouvé pour ${pokemonName}. Utilisation du nom anglais.`);
+            return pokemonName; // Retourne le nom anglais par défaut
+        }
+    } catch (error) {
+        console.error("Erreur lors de la récupération du nom français :", error);
+        return pokemonName; // Retourne le nom anglais en cas d'erreur
+    }
+}
+
+// Exportez la fonction pour qu'elle soit utilisable dans d'autres fichiers
+export { fetchFrenchPokemonName, generateUserId, saveCartToLocalStorage, getCartFromLocalStorage, saveCartToSupabase, validateCart, API_PRODUCTS, API_EXPANSIONS, API_TOKEN, supabaseClient };
