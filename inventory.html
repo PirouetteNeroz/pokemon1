@@ -284,31 +284,33 @@
                 }
 
                 // Fonction pour ajouter une carte au panier
-                function addToCart(card, event) {
-                    const existingItem = cart.value.find(item => item.blueprintId === card.blueprint_id);
-                    if (existingItem) {
-                        if (existingItem.quantity >= card.quantity) {
-                            showNotification("Quantité maximale atteinte pour cette carte.", 'error');
-                            return;
-                        }
-                        existingItem.quantity += 1;
-                    } else {
-                        cart.value.push({
-                            blueprintId: card.blueprint_id,
-                            name: `${card.name_fr || card.name_en} (${expansions.value[card.expansion.id]} ${card.properties_hash.collector_number || 'N/A'})`,
-                            price: (card.price_cents / 100),
-                            quantity: 1
-                        });
-                    }
+function addToCart(card, event) {
+    const existingItem = cart.value.find(item => item.blueprintId === card.blueprint_id);
+    if (existingItem) {
+        if (existingItem.quantity >= card.quantity) {
+            showNotification("Quantité maximale atteinte pour cette carte.", 'error');
+            return;
+        }
+        existingItem.quantity += 1;
+    } else {
+        cart.value.push({
+            blueprintId: card.blueprint_id,
+            name: card.name_fr || card.name_en,
+            extension: expansions.value[card.expansion.id], // Ajout de l'extension
+            price: (card.price_cents / 100),
+            quantity: 1,
+            maxQuantity: card.quantity, // Quantité maximale disponible
+        });
+    }
 
-                    // Afficher une notification
-                    showNotification(`${card.name_fr || card.name_en} ajoutée au panier.`, 'success');
+    // Afficher une notification
+    showNotification(`${card.name_fr || card.name_en} ajoutée au panier.`, 'success');
 
-                    // Déclencher l'animation
-                    triggerCartAnimation(event);
+    // Déclencher l'animation
+    triggerCartAnimation(event);
 
-                    saveCartToLocalStorage(cart.value); // Sauvegarder le panier dans le localStorage
-                }
+    saveCartToLocalStorage(cart.value); // Sauvegarder le panier dans le localStorage
+}
 
                 // Fonction pour déclencher l'animation
                 function triggerCartAnimation(event) {
@@ -351,6 +353,7 @@
                 });
                 const expansionOptions = computed(() => Object.entries(expansions.value).map(([id, code]) => ({ title: code, value: id })));
                 const languageOptions = [
+                    { title: 'Français', value: 'fr' },
                     { title: 'Anglais', value: 'en' },
                     { title: 'Japonais', value: 'jp' }
                 ];
@@ -360,7 +363,7 @@
                     { title: 'Rare', value: 'Rare' }
                 ];
                 const reverseOptions = [
-                    { title: 'Cartes Inversées', value: 'true' },
+                    { title: 'Cartes Reverse', value: 'true' },
                     { title: 'Cartes Normales', value: 'false' }
                 ];
                 const sortOptions = [
