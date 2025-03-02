@@ -11,13 +11,14 @@
         /* Style général */
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
+            background-color: #121212; /* Fond sombre */
+            color: #ffffff; /* Texte blanc */
         }
         .cart-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #fff;
+            background-color: #1E1E1E; /* Fond de contenu sombre */
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
@@ -29,21 +30,19 @@
         .cart-table th, .cart-table td {
             padding: 12px;
             text-align: left;
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid #333; /* Bordures plus sombres */
         }
         .cart-table th {
-            background-color: #f8f9fa;
+            background-color: #1E1E1E; /* Fond sombre pour l'en-tête */
             font-weight: bold;
-            color: #333;
-        }
-        .cart-table tr:hover {
-            background-color: #f8f9fa;
+            color: #FFD700; /* Couleur dorée pour le texte */
         }
         .cart-table select {
             padding: 5px;
             border-radius: 4px;
-            border: 1px solid #ccc;
-            background-color: #fff;
+            border: 1px solid #555; /* Bordure plus sombre */
+            background-color: #333; /* Fond sombre pour le select */
+            color: #ffffff; /* Texte blanc */
         }
         .cart-table .actions {
             text-align: center;
@@ -51,18 +50,18 @@
         .cart-summary {
             margin-top: 20px;
             padding: 20px;
-            background-color: #f8f9fa;
+            background-color: #1E1E1E; /* Fond sombre */
             border-radius: 8px;
         }
         .cart-summary h3 {
             margin-bottom: 15px;
             font-size: 1.2em;
-            color: #333;
+            color: #FFD700; /* Couleur dorée */
         }
         .cart-summary .total {
             font-size: 1.2em;
             font-weight: bold;
-            color: #333;
+            color: #FFD700; /* Couleur dorée */
         }
         .cart-actions {
             margin-top: 20px;
@@ -76,7 +75,10 @@
         .empty-cart-message {
             text-align: center;
             padding: 40px;
-            color: #666;
+            color: #666; /* Texte gris */
+        }
+        .empty-cart-message .v-icon {
+            color: #666; /* Icône grise */
         }
     </style>
 </head>
@@ -163,6 +165,16 @@
                             <h3>Récapitulatif</h3>
                             <div class="total">Total : <span class="font-weight-bold">{{ cartTotal.toFixed(2) }}</span> €</div>
                         </div>
+
+                        <!-- Champ pour le pseudo -->
+                        <v-text-field
+                            v-model="pseudo"
+                            label="Votre pseudo"
+                            outlined
+                            dense
+                            class="mt-3"
+                            v-if="cart.length > 0"
+                        ></v-text-field>
 
                         <!-- Actions du panier -->
                         <div class="cart-actions" v-if="cart.length > 0">
