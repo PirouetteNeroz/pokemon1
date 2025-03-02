@@ -18,13 +18,6 @@
         .cart-item:hover {
             background-color: #f5f5f5;
         }
-        .cart-item-image {
-            width: 80px;
-            height: 80px;
-            border-radius: 8px;
-            margin-right: 15px;
-            object-fit: cover;
-        }
         .cart-item-details {
             flex-grow: 1;
             display: flex;
@@ -114,13 +107,6 @@
                                     <h2 class="text-warning mb-3">Panier</h2>
                                     <v-list v-if="cart.length > 0">
                                         <v-list-item v-for="item in cart" :key="item.blueprintId" class="cart-item">
-                                            <!-- Photo du Pokémon -->
-                                            <img :src="item.hovered ? item.hoverImage : item.originalImage" 
-                                                 :alt="item.name" 
-                                                 class="cart-item-image"
-                                                 @mouseover="item.hovered = true"
-                                                 @mouseout="item.hovered = false">
-
                                             <!-- Détails (Nom, extension, quantité) -->
                                             <div class="cart-item-details">
                                                 <div class="cart-item-name">{{ item.name }}</div>
@@ -193,6 +179,11 @@
             },
         });
 
+        // Configuration Supabase
+        const supabaseUrl = 'https://aibrhuoxwqwqbkhjhote.supabase.co'; // Remplacez par votre URL Supabase
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpYnJodW94d3F3cWJraGpob3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA1MTUxNzIsImV4cCI6MjA1NjA5MTE3Mn0.Lz_P5ZIUwL5mqIuMjJn3pxWnYV8SwprKUuDEnSOHii0'; // Remplacez par votre clé Supabase
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+        
         const app = createApp({
             setup() {
                 const cart = ref(getCartFromLocalStorage().map(item => ({
