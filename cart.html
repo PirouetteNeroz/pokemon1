@@ -156,7 +156,7 @@
     <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js"></script>
     <!-- Shared JS -->
     <script type="module">
-        import { generateUserId, saveCartToLocalStorage, getCartFromLocalStorage, saveCartToSupabase, validateCart } from './shared.js';
+        import { fetchFrenchPokemonName, generateUserId, saveCartToLocalStorage, getCartFromLocalStorage, saveCartToSupabase, validateCart } from './shared.js';
 
         const { createApp, ref, reactive, computed } = Vue;
         const vuetify = Vuetify.createVuetify({
