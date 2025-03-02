@@ -193,11 +193,6 @@
             },
         });
 
-     // Initialiser Supabase
-        const supabaseUrl = 'VOTRE_URL_SUPABASE'; // Remplacez par votre URL Supabase
-        const supabaseKey = 'VOTRE_CLE_SUPABASE'; // Remplacez par votre clé publique Supabase
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
         const app = createApp({
             setup() {
                 const cart = ref(getCartFromLocalStorage().map(item => ({
