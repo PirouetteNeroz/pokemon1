@@ -10,8 +10,7 @@
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Vue Lazy Load -->
-    <script src="https://unpkg.com/vue-lazyload@1.3.3/dist/vue-lazyload.js"></script>
+
     <style>
                .card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -243,7 +242,8 @@
     <!-- Shared JS -->
     <script type="module">
         import { fetchFrenchPokemonName, generateUserId, saveCartToLocalStorage, getCartFromLocalStorage, saveCartToSupabase, validateCart, API_PRODUCTS, API_EXPANSIONS, API_TOKEN, supabaseClient } from './shared.js';
-
+       import VueLazyload from 'vue-lazyload';
+        
         const { createApp, ref, reactive, computed, watch } = Vue;
         const vuetify = Vuetify.createVuetify({
             theme: {
