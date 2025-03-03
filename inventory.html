@@ -10,7 +10,6 @@
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <style>
                .card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -70,19 +69,6 @@
             opacity: 0;
         }
 
-        /* Style pour l'indicateur de chargement */
-.v-lazy-loading {
-    background: #f0f0f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 200px; /* Hauteur de l'image */
-}
-
-.v-lazy-loaded {
-    opacity: 1;
-    transition: opacity 0.3s ease;
-}
     </style>
 </head>
 <body>
@@ -170,58 +156,51 @@
                                             <h2>Inventaire</h2>
                                             <!-- Affichage des cartes en grille -->
                                             <v-row>
-    <v-col v-for="card in paginatedCards" :key="card.blueprint_id" cols="12" sm="6" md="4" lg="3">
-        <transition name="fade">
-            <v-card class="card">
-                <!-- Conteneur pour l'image et les détails -->
-                <v-row no-gutters>
-                    <!-- Image de la carte avec lazy loading -->
-                    <v-col cols="6">
-                        <div class="ribbon-container">
-                            <v-lazy>
-                                <template v-slot:loading>
-                                    <!-- Spinner de chargement -->
-                                    <v-progress-circular indeterminate color="primary"></v-progress-circular>
-                                </template>
-                                <v-img
-                                    :src="`${imageBaseUrl}${card.blueprint_id}.jpg`"
-                                    :alt="card.name_fr || card.name_en"
-                                    height="200"
-                                    contain
-                                    class="card-image"
-                                    :class="{ 'reverse-glow': card.properties_hash.pokemon_reverse }"
-                                    loading="lazy"
-                                ></v-img>
-                            </v-lazy>
-                            <!-- Ribbon "Reverse Foil" -->
-                            <div v-if="card.properties_hash.pokemon_reverse" class="ribbon">Reverse</div>
-                        </div>
-                    </v-col>
-                    <!-- Détails de la carte -->
-                    <v-col cols="6" class="card-details">
-                        <h3 class="text-h6">
-                            {{ card.name_fr || card.name_en }}
-                            <v-icon v-if="card.properties_hash.pokemon_reverse" color="blue lighten-2" class="ml-2">
-                                mdi-star-four-points
-                            </v-icon>
-                        </h3>
-                        <p><strong>Extension :</strong> {{ expansions[card.expansion.id] }}</p>
-                        <p><strong>Rareté :</strong> {{ card.properties_hash.pokemon_rarity }}, #{{ card.properties_hash.collector_number || 'N/A' }}</p>
-                        <p><strong>Prix :</strong> {{ (card.price_cents / 100).toFixed(2) }} €</p>
-                        <p><strong>Quantité disponible :</strong> {{ card.quantity || 0 }}</p>
-                    </v-col>
-                </v-row>
-                <!-- Bouton "Ajouter au panier" -->
-                <v-card-actions>
-                    <v-btn color="warning" block @click="addToCart(card, $event)">
-                        <v-icon left>mdi-cart</v-icon>
-                        Ajouter au panier
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-        </transition>
-    </v-col>
-</v-row>
+                                                <v-col v-for="card in paginatedCards" :key="card.blueprint_id" cols="12" sm="6" md="4" lg="3">
+                                                    <transition name="fade">
+                                                        <v-card class="card">
+                                                            <!-- Conteneur pour l'image et les détails -->
+                                                            <v-row no-gutters>
+                                                                <!-- Image de la carte -->
+                                                                <v-col cols="6">
+                                                                    <div class="ribbon-container">
+                                                                        <v-img
+                                                                            :src="`${imageBaseUrl}${card.blueprint_id}.jpg`"
+                                                                            :alt="card.name_fr || card.name_en"
+                                                                            height="200"
+                                                                            contain
+                                                                            class="card-image"
+                                                                            :class="{ 'reverse-glow': card.properties_hash.pokemon_reverse }"
+                                                                        ></v-img>
+                                                                        <!-- Ribbon "Reverse Foil" -->
+                                                                        <div v-if="card.properties_hash.pokemon_reverse" class="ribbon">Reverse</div>
+                                                                    </div>
+                                                                </v-col>
+                                                                <!-- Détails de la carte -->
+                                                                <v-col cols="6" class="card-details">
+                                                                    <h3 class="text-h6">
+                                                                        {{ card.name_fr || card.name_en }}
+                                                                        <v-icon v-if="card.properties_hash.pokemon_reverse" color="blue lighten-2" class="ml-2">
+                                                                            mdi-star-four-points
+                                                                        </v-icon>
+                                                                    </h3>
+                                                                    <p><strong>Extension :</strong> {{ expansions[card.expansion.id] }}</p>
+                                                                    <p><strong>Rareté :</strong> {{ card.properties_hash.pokemon_rarity }}, #{{ card.properties_hash.collector_number || 'N/A' }}</p>
+                                                                    <p><strong>Prix :</strong> {{ (card.price_cents / 100).toFixed(2) }} €</p>
+                                                                    <p><strong>Quantité disponible :</strong> {{ card.quantity || 0 }}</p>
+                                                                </v-col>
+                                                            </v-row>
+                                                            <!-- Bouton "Ajouter au panier" (toujours visible) -->
+                                                            <v-card-actions>
+                                                                <v-btn color="warning" block @click="addToCart(card, $event)">
+                                                                    <v-icon left>mdi-cart</v-icon>
+                                                                    Ajouter au panier
+                                                                </v-btn>
+                                                            </v-card-actions>
+                                                        </v-card>
+                                                    </transition>
+                                                </v-col>
+                                            </v-row>
                                             <!-- Pagination -->
                                             <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>
                                         </v-card>
@@ -242,8 +221,7 @@
     <!-- Shared JS -->
     <script type="module">
         import { fetchFrenchPokemonName, generateUserId, saveCartToLocalStorage, getCartFromLocalStorage, saveCartToSupabase, validateCart, API_PRODUCTS, API_EXPANSIONS, API_TOKEN, supabaseClient } from './shared.js';
-       import VueLazyload from 'vue-lazyload';
-        
+
         const { createApp, ref, reactive, computed, watch } = Vue;
         const vuetify = Vuetify.createVuetify({
             theme: {
@@ -479,14 +457,6 @@ function addToCart(card, event) {
             }
         });
 
-        // Configuration de vue-lazyload
-app.use(VueLazyload, {
-    preLoad: 1.3, // Pré-charge les images légèrement avant qu'elles ne soient visibles
-    error: 'path/to/error-image.png', // Image de remplacement en cas d'erreur
-    loading: 'path/to/loading-spinner.gif', // Image de chargement
-    attempt: 3, // Nombre de tentatives de chargement
-});
-        
         app.use(vuetify);
         app.mount('#app');
     </script>
