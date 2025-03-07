@@ -11,7 +11,7 @@
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-               .card {
+        .card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .card:hover {
@@ -68,7 +68,6 @@
         .fade-enter-from, .fade-leave-to {
             opacity: 0;
         }
-
     </style>
 </head>
 <body>
@@ -84,7 +83,6 @@
                     mdi-cart
                 </v-icon>
             </transition>
-
             <!-- Notifications visuelles (toasts) -->
             <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
                 {{ snackbar.message }}
@@ -92,7 +90,6 @@
                     <v-btn text v-bind="attrs" @click="snackbar.show = false">Fermer</v-btn>
                 </template>
             </v-snackbar>
-
             <!-- Header avec barre de recherche et accès rapide -->
 <v-app-bar app color="primary" dark>
     <!-- Titre cliquable pour revenir à l'inventaire -->
@@ -123,7 +120,6 @@
         </v-btn>
     </a>
 </v-app-bar>
-
             <!-- Barre de navigation avec onglets -->
             <v-tabs v-model="tab" grow>
                 <v-tab value="inventory">Inventaire</v-tab>
@@ -188,6 +184,7 @@
                                                                     <p><strong>Rareté :</strong> {{ card.properties_hash.pokemon_rarity }}, #{{ card.properties_hash.collector_number || 'N/A' }}</p>
                                                                     <p><strong>Prix :</strong> {{ (card.price_cents / 100).toFixed(2) }} €</p>
                                                                     <p><strong>Quantité disponible :</strong> {{ card.quantity || 0 }}</p>
+                                                                    <p><strong>Condition :</strong> {{ card.condition }}</p>
                                                                 </v-col>
                                                             </v-row>
                                                             <!-- Bouton "Ajouter au panier" (toujours visible) -->
@@ -213,7 +210,6 @@
             </v-main>
         </v-app>
     </div>
-
     <!-- Vue.js -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <!-- Vuetify JS -->
@@ -221,7 +217,6 @@
     <!-- Shared JS -->
     <script type="module">
         import { fetchFrenchPokemonName, generateUserId, saveCartToLocalStorage, getCartFromLocalStorage, saveCartToSupabase, validateCart, API_PRODUCTS, API_EXPANSIONS, API_TOKEN, supabaseClient } from './shared.js';
-
         const { createApp, ref, reactive, computed, watch } = Vue;
         const vuetify = Vuetify.createVuetify({
             theme: {
@@ -242,7 +237,6 @@
                 },
             },
         });
-
         const app = createApp({
             setup() {
                 const inventory = ref([]);
@@ -259,30 +253,25 @@
                 const imageBaseUrl = ref('https://www.cardtrader.com/images/blueprint/');
                 const currentPage = ref(1);
                 const itemsPerPage = 20;
-
                 // Animation pour l'ajout au panier
                 const showCartAnimation = ref(false);
                 const cartAnimationStyle = ref({});
-
                 // Notifications visuelles (toasts)
                 const snackbar = reactive({
                     show: false,
                     message: '',
                     color: 'success',
                 });
-
                 // Fonction pour afficher des notifications
                 function showNotification(message, color = 'success') {
                     snackbar.message = message;
                     snackbar.color = color;
                     snackbar.show = true;
-
                     // Masquer la notification après 3 secondes
                     setTimeout(() => {
                         snackbar.show = false;
                     }, 3000);
                 }
-
                 // Fonction pour ajouter une carte au panier
 function addToCart(card, event) {
     const existingItem = cart.value.find(item => item.blueprintId === card.blueprint_id);
@@ -302,38 +291,30 @@ function addToCart(card, event) {
             maxQuantity: card.quantity, // Quantité maximale disponible
         });
     }
-
     // Afficher une notification
     showNotification(`${card.name_fr || card.name_en} ajoutée au panier.`, 'success');
-
     // Déclencher l'animation
     triggerCartAnimation(event);
-
     saveCartToLocalStorage(cart.value); // Sauvegarder le panier dans le localStorage
 }
-
                 // Fonction pour déclencher l'animation
                 function triggerCartAnimation(event) {
                     // Récupérer la position du bouton cliqué
                     const buttonRect = event.target.getBoundingClientRect();
                     const buttonX = buttonRect.left + buttonRect.width / 2;
                     const buttonY = buttonRect.top + buttonRect.height / 2;
-
                     // Position de départ de l'icône animée
                     cartAnimationStyle.value = {
                         left: `${buttonX}px`,
                         top: `${buttonY}px`,
                     };
-
                     // Afficher l'icône animée
                     showCartAnimation.value = true;
-
                     // Masquer l'icône après l'animation
                     setTimeout(() => {
                         showCartAnimation.value = false;
                     }, 800); // Durée de l'animation
                 }
-
                 // Fonction pour réinitialiser les filtres
                 function resetFilters() {
                     searchQuery.value = '';
@@ -343,7 +324,6 @@ function addToCart(card, event) {
                     selectedReverse.value = '';
                     sortOrder.value = '';
                 }
-
                 // Calcul des propriétés calculées
                 const totalPages = computed(() => Math.ceil(filteredCards.value.length / itemsPerPage));
                 const paginatedCards = computed(() => {
@@ -371,7 +351,6 @@ function addToCart(card, event) {
                     { title: 'Tri Descendant', value: 'desc' }
                 ];
                 const totalItemsInCart = computed(() => cart.value.reduce((total, item) => total + item.quantity, 0));
-
                 // Fonction pour filtrer les cartes
                 const filteredCards = computed(() => {
                     let cards = inventory.value.filter(card => {
@@ -389,7 +368,6 @@ function addToCart(card, event) {
                     }
                     return cards;
                 });
-
                 // Charger les extensions et l'inventaire
                 async function fetchExpansions() {
                     try {
@@ -404,7 +382,6 @@ function addToCart(card, event) {
                         console.error("Erreur lors du chargement des extensions :", error);
                     }
                 }
-
                 async function fetchInventory() {
                     try {
                         const response = await fetch(API_PRODUCTS, {
@@ -415,16 +392,14 @@ function addToCart(card, event) {
                         const data = await response.json();
                         inventory.value = await Promise.all(data.map(async (card) => {
                             const frenchName = await fetchFrenchPokemonName(card.name_en.toLowerCase());
-                            return { ...card, name_fr: frenchName };
+                            return { ...card, name_fr: frenchName, condition: 'Mint' }; // Ajouter la condition
                         }));
                     } catch (error) {
                         console.error("Erreur API :", error);
                     }
                 }
-
                 // Initialisation
                 fetchExpansions().then(fetchInventory);
-
                 return {
                     inventory,
                     expansions,
@@ -456,7 +431,6 @@ function addToCart(card, event) {
                 };
             }
         });
-
         app.use(vuetify);
         app.mount('#app');
     </script>
