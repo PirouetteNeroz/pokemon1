@@ -303,6 +303,7 @@ function addToCart(card, event) {
             quantity: 1,
             maxQuantity: card.quantity, // Quantité maximale disponible
             condition: card.condition || 'Non spécifiée'
+            collectorNumber: card.properties_hash.collector_number || 'N/A'
         });
     }
     // Afficher une notification
