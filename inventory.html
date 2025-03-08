@@ -408,7 +408,7 @@ function addToCart(card, event) {
                         const data = await response.json();
                         inventory.value = await Promise.all(data.map(async (card) => {
                             const frenchName = await fetchFrenchPokemonName(card.name_en.toLowerCase());
-                            return { ...card, name_fr: frenchName, condition: card.condition || 'Non spécifiée' }; // Ajouter la condition
+                            return { ...card, name_fr: frenchName, condition: card.properties_hash.condition || 'Non spécifiée' }; // Ajouter la condition
                         }));
                     } catch (error) {
                         console.error("Erreur API :", error);
