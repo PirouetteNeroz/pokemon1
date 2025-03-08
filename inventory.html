@@ -302,7 +302,7 @@ function addToCart(card, event) {
             price: (card.price_cents / 100),
             quantity: 1,
             maxQuantity: card.quantity, // Quantité maximale disponible
-            condition: card.condition || 'Non spécifiée'
+            condition: card.condition || 'Non spécifiée',
             collectorNumber: card.properties_hash.collector_number || 'N/A'
         });
     }
