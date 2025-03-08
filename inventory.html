@@ -141,6 +141,7 @@
                                             <v-select v-model="selectedLanguage" :items="languageOptions" label="Langue" outlined dense class="mb-3"></v-select>
                                             <v-select v-model="selectedRarity" :items="rarityOptions" label="Rareté" outlined dense class="mb-3"></v-select>
                                             <v-select v-model="selectedReverse" :items="reverseOptions" label="Type de carte" outlined dense class="mb-3"></v-select>
+                                            <v-select v-model="selectedCondition" :items="conditionOptions" label="Condition" outlined dense class="mb-3"></v-select>
                                             <v-select v-model="sortOrder" :items="sortOptions" label="Trier par" outlined dense class="mb-3"></v-select>
                                             <v-btn color="warning" block class="mb-3" @click="updateDisplay">Rechercher</v-btn>
                                             <v-btn color="error" block class="mb-3" @click="resetFilters">Réinitialiser les filtres</v-btn>
@@ -184,7 +185,7 @@
                                                                     <p><strong>Rareté :</strong> {{ card.properties_hash.pokemon_rarity }}, #{{ card.properties_hash.collector_number || 'N/A' }}</p>
                                                                     <p><strong>Prix :</strong> {{ (card.price_cents / 100).toFixed(2) }} €</p>
                                                                     <p><strong>Quantité disponible :</strong> {{ card.quantity || 0 }}</p>
-                                                                    <p><strong>Condition :</strong> {{ card.condition }}</p>
+                                                                    <p><strong>Condition :</strong> {{ card.condition || 'Non spécifiée' }}</p>
                                                                 </v-col>
                                                             </v-row>
                                                             <!-- Bouton "Ajouter au panier" (toujours visible) -->
@@ -262,6 +263,17 @@
                     message: '',
                     color: 'success',
                 });
+
+                                // Options de condition
+                const conditionOptions = [
+                    { title: 'Mint', value: 'Mint' },
+                    { title: 'Near Mint', value: 'Near Mint' },
+                    { title: 'Slightly Played', value: 'Slightly Played' },
+                    { title: 'Moderately Played', value: 'Moderately Played' },
+                    { title: 'Played', value: 'Played' },
+                    { title: 'Heavily Played', value: 'Heavily Played' },
+                    { title: 'Poor', value: 'Poor' }
+                ];
                 // Fonction pour afficher des notifications
                 function showNotification(message, color = 'success') {
                     snackbar.message = message;
@@ -289,6 +301,7 @@ function addToCart(card, event) {
             price: (card.price_cents / 100),
             quantity: 1,
             maxQuantity: card.quantity, // Quantité maximale disponible
+            condition: card.condition || 'Non spécifiée'
         });
     }
     // Afficher une notification
@@ -322,6 +335,7 @@ function addToCart(card, event) {
                     selectedLanguage.value = '';
                     selectedRarity.value = '';
                     selectedReverse.value = '';
+                    selectedCondition.value = '';
                     sortOrder.value = '';
                 }
                 // Calcul des propriétés calculées
@@ -359,6 +373,7 @@ function addToCart(card, event) {
                         if (selectedLanguage.value && card.properties_hash.pokemon_language != selectedLanguage.value) return false;
                         if (selectedRarity.value && card.properties_hash.pokemon_rarity != selectedRarity.value) return false;
                         if (selectedReverse.value !== "" && card.properties_hash.pokemon_reverse.toString() !== selectedReverse.value) return false;
+                        if (selectedCondition.value && card.condition !== selectedCondition.value) return false;
                         return true;
                     });
                     if (sortOrder.value === 'asc') {
@@ -392,7 +407,7 @@ function addToCart(card, event) {
                         const data = await response.json();
                         inventory.value = await Promise.all(data.map(async (card) => {
                             const frenchName = await fetchFrenchPokemonName(card.name_en.toLowerCase());
-                            return { ...card, name_fr: frenchName, condition: 'Mint' }; // Ajouter la condition
+                            return { ...card, name_fr: frenchName, condition: card.condition || 'Non spécifiée' }; // Ajouter la condition
                         }));
                     } catch (error) {
                         console.error("Erreur API :", error);
@@ -410,6 +425,7 @@ function addToCart(card, event) {
                     selectedLanguage,
                     selectedRarity,
                     selectedReverse,
+                    selectedCondition,
                     sortOrder,
                     imageBaseUrl,
                     currentPage,
@@ -420,6 +436,7 @@ function addToCart(card, event) {
                     languageOptions,
                     rarityOptions,
                     reverseOptions,
+                    conditionOptions,
                     sortOptions,
                     totalItemsInCart,
                     snackbar,
