@@ -10,8 +10,6 @@
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .admin {
             background-color: #1E1E1E;
@@ -35,6 +33,13 @@
         .v-img {
             border-radius: 8px;
         }
+        .highlight {
+            color: #FFD700; /* Couleur dorée pour mettre en avant */
+            font-weight: bold;
+        }
+        .full-width {
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -51,14 +56,7 @@
 
             <!-- Contenu principal -->
             <v-main>
-                <v-container fluid>
-                    <!-- Tableau de bord -->
-                    <v-card class="admin pa-3 mb-4">
-                        <h3 class="text-warning mb-3">Tableau de bord</h3>
-                        <v-divider class="mb-4"></v-divider>
-                        <canvas id="ordersChart"></canvas>
-                    </v-card>
-
+                <v-container fluid class="full-width">
                     <!-- Liste des commandes -->
                     <v-card class="admin pa-3">
                         <h2 class="text-warning mb-3">Commandes validées</h2>
@@ -122,12 +120,14 @@
                                                 <v-list-item-content>
                                                     <v-list-item-title>{{ item.name }}</v-list-item-title>
                                                     <v-list-item-subtitle>
-                                                        <span>Quantité: {{ item.quantity }}</span> |
+                                                        <span class="highlight">Quantité: {{ item.quantity }}</span> |
+                                                        <span class="highlight">Numéro de collection: {{ item.collectorNumber }}</span>
+                                                    </v-list-item-subtitle>
+                                                    <v-list-item-subtitle>
                                                         <span>Prix unitaire: {{ item.price.toFixed(2) }} €</span> |
                                                         <span>Total: {{ (item.price * item.quantity).toFixed(2) }} €</span>
                                                     </v-list-item-subtitle>
                                                     <v-list-item-subtitle>
-                                                        <span>Numéro de collection: {{ item.collectorNumber }}</span> |
                                                         <span>Extension: {{ item.extension }}</span>
                                                     </v-list-item-subtitle>
                                                 </v-list-item-content>
@@ -340,34 +340,6 @@
 
                 // Charger les commandes au démarrage
                 fetchOrders();
-
-                // Configurer le graphique après le chargement des données
-                function setupChart() {
-                    const ctx = document.getElementById('ordersChart').getContext('2d');
-                    const ordersChart = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
-                            datasets: [{
-                                label: 'Commandes par jour',
-                                data: [12, 19, 3, 5, 2, 3, 7], // Remplacez par vos données réelles
-                                backgroundColor: 'rgba(255, 215, 0, 0.2)',
-                                borderColor: 'rgba(255, 215, 0, 1)',
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            scales: {
-                                y: {
-                                    beginAtZero: true
-                                }
-                            }
-                        }
-                    });
-                }
-
-                // Appeler setupChart après le chargement des données
-                fetchOrders().then(() => setupChart());
 
                 return {
                     orders,
