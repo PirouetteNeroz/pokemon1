@@ -77,7 +77,13 @@
                                                 <template v-slot:prepend>
                                                     <v-img :src="getCardImageUrl(item.blueprintId)" width="50" height="70" class="mr-3"></v-img>
                                                 </template>
-                                                <v-list-item-title>{{ item.name }} - {{ item.price }} € x {{ item.quantity }}</v-list-item-title>
+                                                <v-list-item-title>
+                                                    {{ item.name }} - {{ item.price }} € x {{ item.quantity }}
+                                                    <br>
+                                                    <small>Numéro de collection: {{ item.collectorNumber }}</small>
+                                                    <br>
+                                                    <small>Extension: {{ item.extension }}</small>
+                                                </v-list-item-title>
                                             </v-list-item>
                                         </v-list>
                                         <v-card-text class="mt-3">Total: <span class="font-weight-bold">{{ calculateOrderTotal(order.cart_data).toFixed(2) }}</span> €</v-card-text>
@@ -153,7 +159,7 @@
                     const collections = new Set();
                     orders.forEach(order => {
                         order.cart_data.forEach(item => {
-                            const collection = item.name.split('(')[1]?.split(')')[0] || 'Inconnue';
+                            const collection = item.extension || 'Inconnue'; // Utiliser l'extension comme collection
                             collections.add(collection);
                         });
                     });
@@ -167,21 +173,18 @@
                     // Filtrer par collection
                     if (selectedCollection.value) {
                         filtered = filtered.filter(order =>
-                            order.cart_data.some(item => {
-                                const collection = item.name.split('(')[1]?.split(')')[0] || 'Inconnue';
-                                return collection === selectedCollection.value;
-                            })
+                            order.cart_data.some(item => item.extension === selectedCollection.value)
                         );
                     }
 
                     // Trier par numéro de collection
                     if (sortOrder.value === 'asc') {
                         filtered.sort((a, b) =>
-                            a.cart_data[0].name.localeCompare(b.cart_data[0].name)
+                            a.cart_data[0].collectorNumber.localeCompare(b.cart_data[0].collectorNumber)
                         );
                     } else if (sortOrder.value === 'desc') {
                         filtered.sort((a, b) =>
-                            b.cart_data[0].name.localeCompare(a.cart_data[0].name)
+                            b.cart_data[0].collectorNumber.localeCompare(a.cart_data[0].collectorNumber)
                         );
                     }
 
