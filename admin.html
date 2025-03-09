@@ -37,9 +37,11 @@
                 <v-container fluid>
                     <v-card class="admin pa-3">
                         <h2 class="text-warning mb-3">Commandes validées</h2>
+                        <v-divider class="mb-4"></v-divider>
 
                         <!-- Filtres et tri -->
                         <v-row>
+                            <!-- Filtre par collection -->
                             <v-col cols="12" md="4">
                                 <v-select
                                     v-model="selectedCollection"
@@ -50,11 +52,26 @@
                                     clearable
                                 ></v-select>
                             </v-col>
+                            <!-- Filtre par statut -->
                             <v-col cols="12" md="4">
-                                <v-radio-group v-model="sortOrder" row>
-                                    <v-radio label="Ascendant" value="asc"></v-radio>
-                                    <v-radio label="Descendant" value="desc"></v-radio>
-                                </v-radio-group>
+                                <v-select
+                                    v-model="selectedStatus"
+                                    :items="statusOptions"
+                                    label="Filtrer par statut"
+                                    outlined
+                                    dense
+                                    clearable
+                                ></v-select>
+                            </v-col>
+                            <!-- Filtre par montant minimum -->
+                            <v-col cols="12" md="4">
+                                <v-text-field
+                                    v-model="minAmount"
+                                    label="Montant minimum"
+                                    type="number"
+                                    outlined
+                                    dense
+                                ></v-text-field>
                             </v-col>
                         </v-row>
 
@@ -87,6 +104,15 @@
                                             </v-list-item>
                                         </v-list>
                                         <v-card-text class="mt-3">Total: <span class="font-weight-bold">{{ calculateOrderTotal(order.cart_data).toFixed(2) }}</span> €</v-card-text>
+                                        <!-- Actions sur la commande -->
+                                        <v-card-actions>
+                                            <v-btn icon @click="validateOrder(order.id)" color="success">
+                                                <v-icon>mdi-check</v-icon>
+                                            </v-btn>
+                                            <v-btn icon @click="cancelOrder(order.id)" color="error">
+                                                <v-icon>mdi-close</v-icon>
+                                            </v-btn>
+                                        </v-card-actions>
                                     </v-expansion-panel-text>
                                 </v-expansion-panel>
                             </v-expansion-panels>
@@ -136,8 +162,17 @@
             setup() {
                 const orders = ref([]);
                 const selectedCollection = ref('');
-                const sortOrder = ref('asc');
+                const selectedStatus = ref('');
+                const minAmount = ref(null);
+                const sortKey = ref('pseudo');
+                const sortDirection = ref('asc');
                 const collectionOptions = ref([]);
+                const statusOptions = ref([
+                    { title: 'En attente', value: 'pending' },
+                    { title: 'En préparation', value: 'preparing' },
+                    { title: 'Expédié', value: 'shipped' },
+                    { title: 'Annulé', value: 'cancelled' }
+                ]);
 
                 // Récupérer les commandes validées
                 async function fetchOrders() {
@@ -159,11 +194,21 @@
                     const collections = new Set();
                     orders.forEach(order => {
                         order.cart_data.forEach(item => {
-                            const collection = item.extension || 'Inconnue'; // Utiliser l'extension comme collection
+                            const collection = item.extension || 'Inconnue';
                             collections.add(collection);
                         });
                     });
                     return Array.from(collections).map(collection => ({ title: collection, value: collection }));
+                }
+
+                // Trier les commandes
+                function sortBy(key) {
+                    if (sortKey.value === key) {
+                        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        sortKey.value = key;
+                        sortDirection.value = 'asc';
+                    }
                 }
 
                 // Filtrer et trier les commandes
@@ -177,14 +222,42 @@
                         );
                     }
 
-                    // Trier par numéro de collection
-                    if (sortOrder.value === 'asc') {
-                        filtered.sort((a, b) =>
-                            a.cart_data[0].collectorNumber.localeCompare(b.cart_data[0].collectorNumber)
+                    // Filtrer par statut
+                    if (selectedStatus.value) {
+                        filtered = filtered.filter(order => order.status === selectedStatus.value);
+                    }
+
+                    // Filtrer par montant minimum
+                    if (minAmount.value) {
+                        filtered = filtered.filter(order =>
+                            calculateOrderTotal(order.cart_data) >= parseFloat(minAmount.value)
                         );
-                    } else if (sortOrder.value === 'desc') {
+                    }
+
+                    // Appliquer le tri
+                    if (sortKey.value === 'pseudo') {
                         filtered.sort((a, b) =>
-                            b.cart_data[0].collectorNumber.localeCompare(a.cart_data[0].collectorNumber)
+                            sortDirection.value === 'asc'
+                                ? a.pseudo.localeCompare(b.pseudo)
+                                : b.pseudo.localeCompare(a.pseudo)
+                        );
+                    } else if (sortKey.value === 'status') {
+                        filtered.sort((a, b) =>
+                            sortDirection.value === 'asc'
+                                ? a.status.localeCompare(b.status)
+                                : b.status.localeCompare(a.status)
+                        );
+                    } else if (sortKey.value === 'total') {
+                        filtered.sort((a, b) =>
+                            sortDirection.value === 'asc'
+                                ? calculateOrderTotal(a.cart_data) - calculateOrderTotal(b.cart_data)
+                                : calculateOrderTotal(b.cart_data) - calculateOrderTotal(a.cart_data)
+                        );
+                    } else if (sortKey.value === 'date') {
+                        filtered.sort((a, b) =>
+                            sortDirection.value === 'asc'
+                                ? new Date(a.created_at) - new Date(b.created_at)
+                                : new Date(b.created_at) - new Date(a.created_at)
                         );
                     }
 
@@ -201,6 +274,34 @@
                     return `https://www.cardtrader.com/images/blueprint/${blueprintId}.jpg`;
                 }
 
+                // Valider une commande
+                async function validateOrder(orderId) {
+                    const { error } = await supabaseClient
+                        .from('orders')
+                        .update({ status: 'shipped' })
+                        .eq('id', orderId);
+
+                    if (error) {
+                        console.error('Erreur lors de la validation de la commande:', error);
+                    } else {
+                        fetchOrders(); // Recharger les commandes
+                    }
+                }
+
+                // Annuler une commande
+                async function cancelOrder(orderId) {
+                    const { error } = await supabaseClient
+                        .from('orders')
+                        .update({ status: 'cancelled' })
+                        .eq('id', orderId);
+
+                    if (error) {
+                        console.error('Erreur lors de l\'annulation de la commande:', error);
+                    } else {
+                        fetchOrders(); // Recharger les commandes
+                    }
+                }
+
                 // Déconnexion de l'admin
                 function logout() {
                     localStorage.removeItem('admin-token'); // Supprimer le token d'authentification
@@ -213,12 +314,19 @@
                 return {
                     orders,
                     selectedCollection,
-                    sortOrder,
+                    selectedStatus,
+                    minAmount,
+                    sortKey,
+                    sortDirection,
                     collectionOptions,
+                    statusOptions,
                     filteredOrders,
                     calculateOrderTotal,
                     getCardImageUrl,
+                    validateOrder,
+                    cancelOrder,
                     logout,
+                    sortBy,
                 };
             }
         });
