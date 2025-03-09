@@ -61,6 +61,43 @@
 .card-image {
     border-bottom: 1px solid #ddd;
 }
+        /* Style pour la condition de la carte */
+.card-condition {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-align: center;
+    margin: 4px 0;
+    background-color: #e0e0e0; /* Couleur par défaut */
+    color: #333;
+}
+
+/* Couleurs spécifiques pour chaque condition */
+.card-condition.mint { background-color: #4CAF50; color: white; } /* Mint */
+.card-condition.near-mint { background-color: #8BC34A; color: white; } /* Near Mint */
+.card-condition.slightly-played { background-color: #FFC107; color: black; } /* Slightly Played */
+.card-condition.moderately-played { background-color: #FF9800; color: white; } /* Moderately Played */
+.card-condition.played { background-color: #F44336; color: white; } /* Played */
+.card-condition.heavily-played { background-color: #D32F2F; color: white; } /* Heavily Played */
+.card-condition.poor { background-color: #757575; color: white; } /* Poor */
+
+/* Style pour la rareté */
+.card-rarity {
+    font-size: 0.875rem;
+    font-weight: bold;
+    color: #FFC107; /* Couleur dorée pour la rareté */
+    margin: 4px 0;
+}
+
+/* Style pour le numéro de collection */
+.card-collector-number {
+    font-size: 0.75rem;
+    color: #666;
+    text-align: right;
+    margin-top: 8px;
+}
         /* Conteneur pour la ribbon */
         .ribbon-container {
             position: relative;
@@ -214,6 +251,8 @@
                                                                         ></v-img>
                                                                         <!-- Ribbon "Reverse Foil" -->
                                                                         <div v-if="card.properties_hash.pokemon_reverse" class="ribbon">Reverse</div>
+                                                                        <!-- Numéro de collection -->
+                                                                        <div class="card-collector-number">#{{ card.properties_hash.collector_number || 'N/A' }}</div>
                                                                     </div>
                                                                 </v-col>
                                                                 <!-- Détails de la carte -->
@@ -225,10 +264,13 @@
                                                                         </v-icon>
                                                                     </h3>
                                                                     <p><strong>Extension :</strong> {{ expansions[card.expansion.id] }}</p>
+                                                                    <p class="card-rarity">{{ card.properties_hash.pokemon_rarity }}</p>
                                                                     <p><strong>Rareté :</strong> {{ card.properties_hash.pokemon_rarity }}, #{{ card.properties_hash.collector_number || 'N/A' }}</p>
                                                                     <p class="card-price">{{ (card.price_cents / 100).toFixed(2) }} €</p>
                                                                     <div class="card-quantity">{{ card.quantity || 0 }} disponible(s)</div>
-                                                                    <p><strong>Condition :</strong> {{ card.condition || 'Non spécifiée' }}</p>
+                                                                    <div :class="`card-condition ${card.condition.toLowerCase().replace(' ', '-')}`">
+                {{ card.condition || 'Non spécifiée' }}
+            </div>
                                                                 </v-col>
                                                             </v-row>
                                                             <!-- Bouton "Ajouter au panier" (toujours visible) -->
