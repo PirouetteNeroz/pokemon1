@@ -138,11 +138,11 @@
                                             <h2 class="text-warning mb-4">Filtres</h2>
                                             <v-text-field v-model="searchQuery" label="Rechercher..." prepend-icon="mdi-magnify" outlined dense class="mb-3"></v-text-field>
                                             <v-select v-model="selectedExpansion" :items="expansionOptions" label="Extension" outlined dense clearable class="mb-3"></v-select>
-                                            <v-select v-model="selectedLanguage" :items="languageOptions" label="Langue" outlined dense class="mb-3"></v-select>
-                                            <v-select v-model="selectedRarity" :items="rarityOptions" label="Rareté" outlined dense class="mb-3"></v-select>
-                                            <v-select v-model="selectedReverse" :items="reverseOptions" label="Type de carte" outlined dense class="mb-3"></v-select>
-                                            <v-select v-model="selectedCondition" :items="conditionOptions" label="Condition" outlined dense class="mb-3"></v-select>
-                                            <v-select v-model="sortOrder" :items="sortOptions" label="Trier par" outlined dense class="mb-3"></v-select>
+                                            <v-select v-model="selectedLanguage" :items="languageOptions" label="Langue" outlined dense clearable class="mb-3"></v-select>
+                                            <v-select v-model="selectedRarity" :items="rarityOptions" label="Rareté" outlined dense clearable class="mb-3"></v-select>
+                                            <v-select v-model="selectedReverse" :items="reverseOptions" label="Type de carte" outlined dense clearable class="mb-3"></v-select>
+                                            <v-select v-model="selectedCondition" :items="conditionOptions" label="Condition" outlined dense clearable class="mb-3"></v-select>
+                                            <v-select v-model="sortOrder" :items="sortOptions" label="Trier par" outlined dense clearable class="mb-3"></v-select>
                                             <v-btn color="warning" block class="mb-3" @click="updateDisplay">Rechercher</v-btn>
                                             <v-btn color="error" block class="mb-3" @click="resetFilters">Réinitialiser les filtres</v-btn>
                                         </v-card>
