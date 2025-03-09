@@ -30,38 +30,18 @@
     height: 100%;
 }
 
-.card-name {
-    font-size: 1.25rem;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 8px;
-    color: #333;
-}
-
-.card-price {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #4CAF50; /* Couleur verte pour le prix */
-    text-align: center;
-    margin-bottom: 8px;
-}
-
+/* Couleur du texte en blanc */
+.card-name,
+.card-expansion,
+.card-price,
+.card-rarity,
+.card-condition,
+.card-collector-number,
 .card-quantity {
-    display: inline-block;
-    padding: 4px 8px;
-    background-color: #2196F3; /* Couleur bleue pour la quantité */
     color: white;
-    border-radius: 12px;
-    font-size: 0.875rem;
-    font-weight: bold;
-    text-align: center;
-    margin: 0 auto;
 }
 
-.card-image {
-    border-bottom: 1px solid #ddd;
-}
-        /* Style pour la condition de la carte */
+/* Style pour la condition de la carte */
 .card-condition {
     display: inline-block;
     padding: 4px 8px;
@@ -70,41 +50,48 @@
     font-weight: bold;
     text-align: center;
     margin: 4px 0;
-    background-color: #e0e0e0; /* Couleur par défaut */
-    color: #333;
+    background-color: rgba(255, 255, 255, 0.1); /* Fond légèrement visible */
 }
-
-/* Couleurs spécifiques pour chaque condition */
-.card-condition.mint { background-color: #4CAF50; color: white; } /* Mint */
-.card-condition.near-mint { background-color: #8BC34A; color: white; } /* Near Mint */
-.card-condition.slightly-played { background-color: #FFC107; color: black; } /* Slightly Played */
-.card-condition.moderately-played { background-color: #FF9800; color: white; } /* Moderately Played */
-.card-condition.played { background-color: #F44336; color: white; } /* Played */
-.card-condition.heavily-played { background-color: #D32F2F; color: white; } /* Heavily Played */
-.card-condition.poor { background-color: #757575; color: white; } /* Poor */
 
 /* Style pour la rareté */
 .card-rarity {
     font-size: 0.875rem;
     font-weight: bold;
-    color: #FFC107; /* Couleur dorée pour la rareté */
     margin: 4px 0;
 }
 
 /* Style pour le numéro de collection */
 .card-collector-number {
     font-size: 0.875rem;
-    color: #666;
     font-weight: bold;
     margin-left: 8px; /* Espacement par rapport au nom */
+    opacity: 0.8; /* Légère transparence pour le numéro */
 }
 
 /* Style pour l'extension */
 .card-expansion {
     font-size: 0.875rem;
-    color: #666;
     margin-top: 4px;
-    font-style: italic;
+    opacity: 0.8; /* Légère transparence pour l'extension */
+}
+
+/* Style pour le prix */
+.card-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 8px 0;
+}
+
+/* Style pour la quantité disponible */
+.card-quantity {
+    display: inline-block;
+    padding: 4px 8px;
+    background-color: rgba(255, 255, 255, 0.1); /* Fond légèrement visible */
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: bold;
+    text-align: center;
+    margin: 0 auto;
 }
         /* Conteneur pour la ribbon */
         .ribbon-container {
@@ -243,7 +230,7 @@
                                             <v-row>
                                                 <v-col v-for="card in paginatedCards" :key="card.blueprint_id" cols="12" sm="6" md="4" lg="3">
                                                     <transition name="fade">
-                              <v-card class="card">
+<v-card class="card">
     <v-row no-gutters>
         <!-- Image de la carte -->
         <v-col cols="6">
@@ -270,14 +257,14 @@
             </div>
             <!-- Extension -->
             <p class="card-expansion">{{ expansions[card.expansion.id] }}</p>
-            <!-- Prix -->
-            <p class="card-price">{{ (card.price_cents / 100).toFixed(2) }} €</p>
+            <!-- Rareté -->
+            <p class="card-rarity">{{ card.properties_hash.pokemon_rarity }}</p>
             <!-- Condition de la carte -->
             <div :class="`card-condition ${card.condition.toLowerCase().replace(' ', '-')}`">
                 {{ card.condition || 'Non spécifiée' }}
             </div>
-            <!-- Rareté -->
-            <p class="card-rarity">{{ card.properties_hash.pokemon_rarity }}</p>
+            <!-- Prix -->
+            <p class="card-price">{{ (card.price_cents / 100).toFixed(2) }} €</p>
             <!-- Quantité disponible -->
             <div class="card-quantity">{{ card.quantity || 0 }} disponible(s)</div>
         </v-col>
