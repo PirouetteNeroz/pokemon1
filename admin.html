@@ -84,7 +84,10 @@
                                             <template v-slot:prepend>
                                                 <v-icon>mdi-cart</v-icon>
                                             </template>
-                                            <v-list-item-title>{{ order.pseudo }} - {{ order.status }}</v-list-item-title>
+                                            <v-list-item-title>
+                                                {{ order.pseudo }} - 
+                                                <span :class="{'text-success': order.status === 'shipped'}">{{ order.status }}</span>
+                                            </v-list-item-title>
                                         </v-list-item>
                                     </v-expansion-panel-title>
                                     <v-expansion-panel-text>
@@ -179,7 +182,7 @@
                     const { data, error } = await supabaseClient
                         .from('orders')
                         .select('*')
-                        .eq('status', 'pending'); // ou 'completed' selon votre logique
+                        .neq('status', 'cancelled'); // Exclure les commandes annulées
 
                     if (error) {
                         console.error('Erreur lors de la récupération des commandes:', error);
@@ -278,13 +281,13 @@
                 async function validateOrder(orderId) {
                     const { error } = await supabaseClient
                         .from('orders')
-                        .update({ status: 'shipped' })
+                        .update({ status: 'shipped' }) // Mettre à jour le statut à "shipped"
                         .eq('id', orderId);
 
                     if (error) {
                         console.error('Erreur lors de la validation de la commande:', error);
                     } else {
-                        fetchOrders(); // Recharger les commandes
+                        fetchOrders(); // Recharger les commandes pour refléter le changement
                     }
                 }
 
@@ -292,13 +295,13 @@
                 async function cancelOrder(orderId) {
                     const { error } = await supabaseClient
                         .from('orders')
-                        .update({ status: 'cancelled' })
+                        .update({ status: 'cancelled' }) // Mettre à jour le statut à "cancelled"
                         .eq('id', orderId);
 
                     if (error) {
                         console.error('Erreur lors de l\'annulation de la commande:', error);
                     } else {
-                        fetchOrders(); // Recharger les commandes
+                        fetchOrders(); // Recharger les commandes pour refléter le changement
                     }
                 }
 
