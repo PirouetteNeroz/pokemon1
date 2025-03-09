@@ -43,14 +43,11 @@
 
 /* Style pour la condition de la carte */
 .card-condition {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     font-weight: bold;
-    text-align: center;
+    text-align: left; /* Alignement à gauche */
     margin: 4px 0;
-    background-color: rgba(255, 255, 255, 0.1); /* Fond légèrement visible */
+    opacity: 0.8; /* Légère transparence */
 }
 
 /* Style pour la rareté */
@@ -62,10 +59,10 @@
 
 /* Style pour le numéro de collection */
 .card-collector-number {
-    font-size: 0.875rem;
+    font-size: 1rem; /* Taille augmentée */
     font-weight: bold;
     margin-left: 8px; /* Espacement par rapport au nom */
-    opacity: 0.8; /* Légère transparence pour le numéro */
+    opacity: 0.8; /* Légère transparence */
 }
 
 /* Style pour l'extension */
@@ -79,6 +76,7 @@
 .card-price {
     font-size: 1.5rem;
     font-weight: bold;
+    text-align: center; /* Centrage du prix */
     margin: 8px 0;
 }
 
@@ -259,11 +257,9 @@
             <p class="card-expansion">{{ expansions[card.expansion.id] }}</p>
             <!-- Rareté -->
             <p class="card-rarity">{{ card.properties_hash.pokemon_rarity }}</p>
-            <!-- Condition de la carte -->
-            <div :class="`card-condition ${card.condition.toLowerCase().replace(' ', '-')}`">
-                {{ card.condition || 'Non spécifiée' }}
-            </div>
-            <!-- Prix -->
+            <!-- Condition de la carte (alignée à gauche) -->
+            <p class="card-condition">{{ card.condition || 'Non spécifiée' }}</p>
+            <!-- Prix (centré) -->
             <p class="card-price">{{ (card.price_cents / 100).toFixed(2) }} €</p>
             <!-- Quantité disponible -->
             <div class="card-quantity">{{ card.quantity || 0 }} disponible(s)</div>
