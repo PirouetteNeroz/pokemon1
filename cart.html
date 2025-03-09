@@ -297,6 +297,13 @@
                         return;
                     }
 
+                    // Ajouter collectorNumber et extension à chaque article du panier
+                    const cartDataWithDetails = cart.value.map(item => ({
+                        ...item,
+                        collectorNumber: item.collectorNumber || 'Inconnu', // Assurez-vous que cette propriété existe
+                        extension: item.extension || 'Inconnue' // Assurez-vous que cette propriété existe
+                    }));
+
                     // Envoyer le panier à Supabase
                     const { data, error } = await supabaseClient
                         .from('orders')
@@ -304,7 +311,7 @@
                             {
                                 user_id: userId.value,
                                 pseudo: pseudo.value,
-                                cart_data: cart.value,
+                                cart_data: cartDataWithDetails, // Utiliser les données mises à jour
                                 status: 'pending'
                             }
                         ]);
