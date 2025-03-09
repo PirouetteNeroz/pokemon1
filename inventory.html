@@ -93,10 +93,18 @@
 
 /* Style pour le numéro de collection */
 .card-collector-number {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     color: #666;
-    text-align: right;
-    margin-top: 8px;
+    font-weight: bold;
+    margin-left: 8px; /* Espacement par rapport au nom */
+}
+
+/* Style pour l'extension */
+.card-expansion {
+    font-size: 0.875rem;
+    color: #666;
+    margin-top: 4px;
+    font-style: italic;
 }
         /* Conteneur pour la ribbon */
         .ribbon-container {
@@ -235,52 +243,53 @@
                                             <v-row>
                                                 <v-col v-for="card in paginatedCards" :key="card.blueprint_id" cols="12" sm="6" md="4" lg="3">
                                                     <transition name="fade">
-                                                        <v-card class="card">
-                                                            <!-- Conteneur pour l'image et les détails -->
-                                                            <v-row no-gutters>
-                                                                <!-- Image de la carte -->
-                                                                <v-col cols="6">
-                                                                    <div class="ribbon-container">
-                                                                        <v-img
-                                                                            :src="`${imageBaseUrl}${card.blueprint_id}.jpg`"
-                                                                            :alt="card.name_fr || card.name_en"
-                                                                            height="200"
-                                                                            contain
-                                                                            class="card-image"
-                                                                            :class="{ 'reverse-glow': card.properties_hash.pokemon_reverse }"
-                                                                        ></v-img>
-                                                                        <!-- Ribbon "Reverse Foil" -->
-                                                                        <div v-if="card.properties_hash.pokemon_reverse" class="ribbon">Reverse</div>
-                                                                        <!-- Numéro de collection -->
-                                                                        <div class="card-collector-number">#{{ card.properties_hash.collector_number || 'N/A' }}</div>
-                                                                    </div>
-                                                                </v-col>
-                                                                <!-- Détails de la carte -->
-                                                                <v-col cols="6" class="card-details">
-                                                                    <h3 class="text-h6">
-                                                                        {{ card.name_fr || card.name_en }}
-                                                                        <v-icon v-if="card.properties_hash.pokemon_reverse" color="blue lighten-2" class="ml-2">
-                                                                            mdi-star-four-points
-                                                                        </v-icon>
-                                                                    </h3>
-                                                                    <p><strong>Extension :</strong> {{ expansions[card.expansion.id] }}</p>
-                                                                    <p class="card-rarity">{{ card.properties_hash.pokemon_rarity }}</p>
-                                                                    <p><strong>Rareté :</strong> {{ card.properties_hash.pokemon_rarity }}, #{{ card.properties_hash.collector_number || 'N/A' }}</p>
-                                                                    <p class="card-price">{{ (card.price_cents / 100).toFixed(2) }} €</p>
-                                                                    <div class="card-quantity">{{ card.quantity || 0 }} disponible(s)</div>
-                                                                    <div :class="`card-condition ${card.condition.toLowerCase().replace(' ', '-')}`">
+                              <v-card class="card">
+    <v-row no-gutters>
+        <!-- Image de la carte -->
+        <v-col cols="6">
+            <div class="ribbon-container">
+                <v-img
+                    :src="`${imageBaseUrl}${card.blueprint_id}.jpg`"
+                    :alt="card.name_fr || card.name_en"
+                    height="200"
+                    contain
+                    class="card-image"
+                    :class="{ 'reverse-glow': card.properties_hash.pokemon_reverse }"
+                    loading="lazy"
+                ></v-img>
+                <!-- Ribbon "Reverse Foil" -->
+                <div v-if="card.properties_hash.pokemon_reverse" class="ribbon">Reverse</div>
+            </div>
+        </v-col>
+        <!-- Détails de la carte -->
+        <v-col cols="6" class="card-details">
+            <!-- Nom de la carte et numéro de collection -->
+            <div style="display: flex; align-items: center;">
+                <h3 class="card-name">{{ card.name_fr || card.name_en }}</h3>
+                <span class="card-collector-number">#{{ card.properties_hash.collector_number || 'N/A' }}</span>
+            </div>
+            <!-- Extension -->
+            <p class="card-expansion">{{ expansions[card.expansion.id] }}</p>
+            <!-- Prix -->
+            <p class="card-price">{{ (card.price_cents / 100).toFixed(2) }} €</p>
+            <!-- Condition de la carte -->
+            <div :class="`card-condition ${card.condition.toLowerCase().replace(' ', '-')}`">
                 {{ card.condition || 'Non spécifiée' }}
             </div>
-                                                                </v-col>
-                                                            </v-row>
-                                                            <!-- Bouton "Ajouter au panier" (toujours visible) -->
-                                                            <v-card-actions>
-                                                                <v-btn color="warning" block @click="addToCart(card, $event)">
-                                                                    <v-icon left>mdi-cart</v-icon>
-                                                                    Ajouter au panier
-                                                                </v-btn>
-                                                            </v-card-actions>
-                                                        </v-card>
+            <!-- Rareté -->
+            <p class="card-rarity">{{ card.properties_hash.pokemon_rarity }}</p>
+            <!-- Quantité disponible -->
+            <div class="card-quantity">{{ card.quantity || 0 }} disponible(s)</div>
+        </v-col>
+    </v-row>
+    <!-- Bouton "Ajouter au panier" -->
+    <v-card-actions>
+        <v-btn color="warning" block @click="addToCart(card, $event)">
+            <v-icon left>mdi-cart</v-icon>
+            Ajouter au panier
+        </v-btn>
+    </v-card-actions>
+</v-card>
                                                     </transition>
                                                 </v-col>
                                             </v-row>
