@@ -446,7 +446,11 @@ function addToCart(card, event) {
                 const totalItemsInCart = computed(() => cart.value.reduce((total, item) => total + item.quantity, 0));
                 // Fonction pour filtrer les cartes
 const normalizeString = (str) => {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    return str
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
 };
 
 const filteredCards = computed(() => {
