@@ -445,23 +445,50 @@ function addToCart(card, event) {
                 ];
                 const totalItemsInCart = computed(() => cart.value.reduce((total, item) => total + item.quantity, 0));
                 // Fonction pour filtrer les cartes
-                const filteredCards = computed(() => {
-                    let cards = inventory.value.filter(card => {
-                        if (searchQuery.value && !card.name_en.toLowerCase().includes(searchQuery.value.toLowerCase())) return false;
-                        if (selectedExpansion.value && card.expansion.id != selectedExpansion.value) return false;
-                        if (selectedLanguage.value && card.properties_hash.pokemon_language != selectedLanguage.value) return false;
-                        if (selectedRarity.value && card.properties_hash.pokemon_rarity != selectedRarity.value) return false;
-                        if (selectedReverse.value !== "" && card.properties_hash.pokemon_reverse.toString() !== selectedReverse.value) return false;
-                        if (selectedCondition.value && card.condition !== selectedCondition.value) return false;
-                        return true;
-                    });
-                    if (sortOrder.value === 'asc') {
-                        cards.sort((a, b) => a.properties_hash.collector_number - b.properties_hash.collector_number);
-                    } else if (sortOrder.value === 'desc') {
-                        cards.sort((a, b) => b.properties_hash.collector_number - a.properties_hash.collector_number);
-                    }
-                    return cards;
-                });
+const normalizeString = (str) => {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+};
+
+const filteredCards = computed(() => {
+    let cards = inventory.value.filter(card => {
+        if (searchQuery.value) {
+            const searchTerm = normalizeString(searchQuery.value);
+            const nameEn = normalizeString(card.name_en);
+            const nameFr = normalizeString(card.name_fr);
+            if (!nameEn.includes(searchTerm) && !nameFr.includes(searchTerm)) return false;
+        }
+        if (selectedExpansion.value && card.expansion.id != selectedExpansion.value) return false;
+        if (selectedLanguage.value && card.properties_hash.pokemon_language != selectedLanguage.value) return false;
+        if (selectedRarity.value && card.properties_hash.pokemon_rarity != selectedRarity.value) return false;
+        if (selectedReverse.value !== "" && card.properties_hash.pokemon_reverse.toString() !== selectedReverse.value) return false;
+        if (selectedCondition.value && card.condition !== selectedCondition.value) return false;
+        return true;
+    });
+    if (sortOrder.value === 'asc') {
+        cards.sort((a, b) => a.properties_hash.collector_number - b.properties_hash.collector_number);
+    } else if (sortOrder.value === 'desc') {
+        cards.sort((a, b) => b.properties_hash.collector_number - a.properties_hash.collector_number);
+    }
+    return cards;
+});
+
+const suggestions = ref([]);
+
+function updateSuggestions() {
+    if (searchQuery.value.length > 1) {
+        suggestions.value = inventory.value
+            .filter(card => {
+                const searchTerm = normalizeString(searchQuery.value);
+                const nameEn = normalizeString(card.name_en);
+                const nameFr = normalizeString(card.name_fr);
+                return nameEn.includes(searchTerm) || nameFr.includes(searchTerm);
+            })
+            .map(card => card.name_fr || card.name_en)
+            .slice(0, 5); // Limite à 5 suggestions
+    } else {
+        suggestions.value = [];
+    }
+}
                 // Charger les extensions et l'inventaire
                 async function fetchExpansions() {
                     try {
