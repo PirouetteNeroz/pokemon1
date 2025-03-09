@@ -472,6 +472,11 @@ const filteredCards = computed(() => {
     return cards;
 });
 
+                // Watch pour réinitialiser la pagination et forcer la mise à jour
+watch(searchQuery, () => {
+    currentPage.value = 1; // Réinitialiser la pagination à la première page
+});
+
 const suggestions = ref([]);
 
 function updateSuggestions() {
