@@ -12,12 +12,55 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-details {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.card-name {
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.card-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #4CAF50; /* Couleur verte pour le prix */
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.card-quantity {
+    display: inline-block;
+    padding: 4px 8px;
+    background-color: #2196F3; /* Couleur bleue pour la quantité */
+    color: white;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: bold;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.card-image {
+    border-bottom: 1px solid #ddd;
+}
         /* Conteneur pour la ribbon */
         .ribbon-container {
             position: relative;
@@ -183,8 +226,8 @@
                                                                     </h3>
                                                                     <p><strong>Extension :</strong> {{ expansions[card.expansion.id] }}</p>
                                                                     <p><strong>Rareté :</strong> {{ card.properties_hash.pokemon_rarity }}, #{{ card.properties_hash.collector_number || 'N/A' }}</p>
-                                                                    <p><strong>Prix :</strong> {{ (card.price_cents / 100).toFixed(2) }} €</p>
-                                                                    <p><strong>Quantité disponible :</strong> {{ card.quantity || 0 }}</p>
+                                                                    <p class="card-price">{{ (card.price_cents / 100).toFixed(2) }} €</p>
+                                                                    <div class="card-quantity">{{ card.quantity || 0 }} disponible(s)</div>
                                                                     <p><strong>Condition :</strong> {{ card.condition || 'Non spécifiée' }}</p>
                                                                 </v-col>
                                                             </v-row>
