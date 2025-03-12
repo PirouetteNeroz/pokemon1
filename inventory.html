@@ -17,6 +17,17 @@
     overflow: hidden;
 }
 
+        /* Style pour l'image avec effet de zoom */
+.card-image {
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Animation fluide */
+    cursor: pointer; /* Curseur en forme de main */
+}
+
+/* Effet de zoom au survol */
+.card-image:hover {
+    transform: scale(1.2); /* Agrandir l'image de 20% */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Ombre pour un effet de profondeur */
+}
 .card:hover {
     transform: scale(1.05);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
@@ -340,7 +351,7 @@
                         :alt="item.name_fr || item.name_en"
                         height="50"
                         contain
-                        class="card-image"
+                        class="card-image" <!-- Appliquer la classe pour l'effet de zoom -->
                         loading="lazy"
                     ></v-img>
                 </template>
