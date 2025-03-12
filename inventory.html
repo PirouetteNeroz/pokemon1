@@ -183,6 +183,12 @@
                                                                     Ajouter
                                                                 </v-btn>
                                                             </template>
+                                                            <template v-slot:item.properties_hash.pokemon_reverse="{ item }">
+                                                                {{ item.properties_hash.pokemon_reverse ? 'Reverse' : 'Normal' }}
+                                                            </template>
+                                                            <template v-slot:item.price_cents="{ item }">
+                                                                {{ (item.price_cents / 100).toFixed(2) }} €
+                                                            </template>
                                                         </v-data-table>
                                                         <!-- Pagination pour le tableau -->
                                                         <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>
