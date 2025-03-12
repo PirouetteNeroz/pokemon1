@@ -297,16 +297,20 @@
     hide-default-footer
     class="elevation-1"
 >
-    <!-- Colonne pour l'image de la carte -->
-    <template v-slot:item.image="{ item }">
-        <v-img
-            :src="`${imageBaseUrl}${item.blueprint_id}.jpg`"
-            :alt="item.name_fr || item.name_en"
-            height="50"
-            contain
-            class="card-image"
-            loading="lazy"
-        ></v-img>
+    <!-- Colonne combinée pour l'image et le nom du Pokémon -->
+    <template v-slot:item.card="{ item }">
+        <div style="display: flex; align-items: center;">
+            <v-img
+                :src="`${imageBaseUrl}${item.blueprint_id}.jpg`"
+                :alt="item.name_fr || item.name_en"
+                height="50"
+                contain
+                class="card-image"
+                loading="lazy"
+                style="margin-right: 10px;"
+            ></v-img>
+            <span>{{ item.name_fr || item.name_en }}</span> <!-- Nom du Pokémon -->
+        </div>
     </template>
 
     <!-- Colonne pour l'extension -->
@@ -414,8 +418,8 @@
                 ];
 const tableHeaders = ref([
     { text: 'Numéro de Collection', value: 'properties_hash.collector_number', align: 'start' },
-    { text: 'Image', value: 'image', sortable: false, align: 'center' },
-    { text: 'Extension', value: 'expansion', align: 'center' }, // Nouvelle colonne pour l'extension
+    { text: 'Carte', value: 'card', sortable: false, align: 'center' }, // Colonne combinée pour l'image et le nom
+    { text: 'Extension', value: 'expansion', align: 'center' }, // Colonne pour l'extension
     { text: 'Quantité', value: 'quantity', align: 'center' },
     { text: 'Langue', value: 'properties_hash.pokemon_language', align: 'center' },
     { text: 'Condition', value: 'condition', align: 'center' },
@@ -491,11 +495,13 @@ const tableHeaders = ref([
                 }
                 // Calcul des propriétés calculées
                 const totalPages = computed(() => Math.ceil(filteredCards.value.length / itemsPerPage));
-                const paginatedCards = computed(() => {
-                    const start = (currentPage.value - 1) * itemsPerPage;
-                    const end = start + itemsPerPage;
-                    return filteredCards.value.slice(start, end);
-                });
+const paginatedCards = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const cards = filteredCards.value.slice(start, end);
+    console.log("Paginated Cards:", cards); // Vérifiez les données dans la console
+    return cards;
+});
                 const expansionOptions = computed(() => Object.entries(expansions.value).map(([id, code]) => ({ title: code, value: id })));
                 const languageOptions = [
                     { title: 'Français', value: 'fr' },
