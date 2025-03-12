@@ -432,18 +432,7 @@
             },
         });
 
-        const tableHeaders = ref([
-    { text: 'Numéro de Collection', value: 'properties_hash.collector_number', align: 'start' },
-    { text: 'Image', value: 'image', sortable: false, align: 'center' }, // Colonne pour l'image
-    { text: 'Nom du Pokémon', value: 'name', align: 'center' }, // Nouvelle colonne pour le nom
-    { text: 'Extension', value: 'expansion', align: 'center' }, // Colonne pour l'extension
-    { text: 'Quantité', value: 'quantity', align: 'center' },
-    { text: 'Langue', value: 'properties_hash.pokemon_language', align: 'center' },
-    { text: 'Condition', value: 'condition', align: 'center' },
-    { text: 'Prix', value: 'price_cents', align: 'center' },
-    { text: 'Version', value: 'properties_hash.pokemon_reverse', align: 'center' },
-    { text: 'Actions', value: 'actions', sortable: false, align: 'center' }
-]);
+
         
         const app = createApp({
             setup() {
@@ -471,7 +460,18 @@
                     message: '',
                     color: 'success',
                 });
-
+                const tableHeaders = ref([
+    { text: 'Numéro de Collection', value: 'properties_hash.collector_number', align: 'start' },
+    { text: 'Image', value: 'image', sortable: false, align: 'center' }, // Colonne pour l'image
+    { text: 'Nom du Pokémon', value: 'name', align: 'center' }, // Nouvelle colonne pour le nom
+    { text: 'Extension', value: 'expansion', align: 'center' }, // Colonne pour l'extension
+    { text: 'Quantité', value: 'quantity', align: 'center' },
+    { text: 'Langue', value: 'properties_hash.pokemon_language', align: 'center' },
+    { text: 'Condition', value: 'condition', align: 'center' },
+    { text: 'Prix', value: 'price_cents', align: 'center' },
+    { text: 'Version', value: 'properties_hash.pokemon_reverse', align: 'center' },
+    { text: 'Actions', value: 'actions', sortable: false, align: 'center' }
+]);
                 // Options de condition
                 const conditionOptions = [
                     { title: 'Mint', value: 'Mint' },
@@ -690,6 +690,7 @@ const paginatedCards = computed(() => {
                     itemsPerPage,
                     totalPages,
                     paginatedCards,
+                    tableHeaders,
                     expansionOptions,
                     languageOptions,
                     rarityOptions,
@@ -703,7 +704,6 @@ const paginatedCards = computed(() => {
                     addToCart,
                     resetFilters,
                     showNotification,
-                    tableHeaders,
                     viewMode,
                     toggleViewMode() {
                         viewMode.value = viewMode.value === 'grid' ? 'table' : 'grid';
