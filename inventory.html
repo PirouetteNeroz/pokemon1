@@ -666,8 +666,31 @@
                         console.error("Erreur API :", error);
                     }
                 }
+
+                async function fetchTranslations() {
+                    try {
+                        const response = await fetch('/translations.json');
+                        if (!response.ok) throw new Error(`Erreur lors du chargement des traductions: ${response.status}`);
+                        const translations = await response.json();
+                        console.log("Traductions chargées:", translations);
+                        return translations;
+                    } catch (error) {
+                        console.error("Erreur lors du chargement des traductions:", error);
+                        return {};
+                    }
+                }
+
                 // Initialisation
-                fetchExpansions().then(fetchInventory);
+                fetchExpansions().then(async () => {
+                    const translations = await fetchTranslations();
+                    Object.keys(expansions.value).forEach(key => {
+                        if (translations[expansions.value[key]]) {
+                            expansions.value[key] = translations[expansions.value[key]];
+                        }
+                    });
+                    fetchInventory();
+                });
+
                 return {
                     inventory,
                     expansions,
