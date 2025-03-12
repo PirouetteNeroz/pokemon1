@@ -11,8 +11,138 @@
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Vos styles CSS ici */
+        .card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-details {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+/* Couleur du texte en blanc */
+.card-name,
+.card-expansion,
+.card-price,
+.card-rarity,
+.card-condition,
+.card-collector-number,
+.card-quantity {
+    color: white;
+}
+
+/* Style pour la condition de la carte */
+.card-condition {
+    font-size: 0.875rem;
+    font-weight: bold;
+    text-align: left; /* Alignement à gauche */
+    margin: 4px 0;
+    opacity: 0.8; /* Légère transparence */
+}
+
+/* Style pour la rareté */
+.card-rarity {
+    font-size: 0.875rem;
+    font-weight: bold;
+    margin: 4px 0;
+}
+
+/* Style pour le numéro de collection */
+.card-collector-number {
+    font-size: 1rem; /* Taille augmentée */
+    font-weight: bold;
+    margin-left: 8px; /* Espacement par rapport au nom */
+    opacity: 0.8; /* Légère transparence */
+}
+
+/* Style pour l'extension */
+.card-expansion {
+    font-size: 0.875rem;
+    margin-top: 4px;
+    opacity: 0.8; /* Légère transparence pour l'extension */
+}
+
+/* Style pour le prix */
+.card-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center; /* Centrage du prix */
+    margin: 8px 0;
+}
+
+/* Style pour la quantité disponible */
+.card-quantity {
+    display: inline-block;
+    padding: 4px 8px;
+    background-color: rgba(255, 255, 255, 0.1); /* Fond légèrement visible */
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: bold;
+    text-align: center;
+    margin: 0 auto;
+}
+        /* Conteneur pour la ribbon */
+        .ribbon-container {
+            position: relative;
+        }
+        /* Ribbon en haut à gauche */
+        .ribbon {
+            position: absolute;
+            top: 10px;
+            left: -10px;
+            background: blue;
+            color: white;
+            padding: 5px 15px;
+            font-size: 12px;
+            font-weight: bold;
+            transform: rotate(-20deg);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        /* Effet lumineux sur les Reverse Foil */
+        .reverse-glow {
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.8);
+            border: 2px solid rgba(0, 123, 255, 0.5);
+            border-radius: 10px;
+        }
+        /* Animation pour l'icône du panier */
+        .cart-animation-icon {
+            position: fixed;
+            font-size: 24px;
+            color: #FFC107; /* Couleur de l'icône */
+            z-index: 1000;
+            transition: all 0.8s ease-in-out; /* Durée et effet de l'animation */
+        }
+        /* Animation d'entrée et de sortie */
+        .slide-fade-enter-active {
+            transition: all 0.8s ease;
+        }
+        .slide-fade-leave-active {
+            transition: all 0.5s ease;
+        }
+        .slide-fade-enter-from,
+        .slide-fade-leave-to {
+            opacity: 0;
+            transform: translateY(20px); /* Déplacement vers le bas */
+        }
+        /* Animation fade */
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.5s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
     </style>
+
 </head>
 <body>
     <div id="app">
@@ -159,37 +289,48 @@
                                                 <v-col cols="12">
                                                     <v-card class="pa-3">
                                                         <h2>Inventaire (Liste)</h2>
-                                                        <v-data-table
-                                                            :headers="tableHeaders"
-                                                            :items="paginatedCards"
-                                                            :items-per-page="itemsPerPage"
-                                                            :page.sync="currentPage"
-                                                            hide-default-footer
-                                                            class="elevation-1"
-                                                        >
-                                                            <!-- Colonnes personnalisées -->
-                                                            <template v-slot:item.image="{ item }">
-                                                                <v-img
-                                                                    :src="`${imageBaseUrl}${item.blueprint_id}.jpg`"
-                                                                    :alt="item.name_fr || item.name_en"
-                                                                    height="50"
-                                                                    width="50"
-                                                                    contain
-                                                                ></v-img>
-                                                            </template>
-                                                            <template v-slot:item.actions="{ item }">
-                                                                <v-btn color="warning" @click="addToCart(item, $event)">
-                                                                    <v-icon left>mdi-cart</v-icon>
-                                                                    Ajouter
-                                                                </v-btn>
-                                                            </template>
-                                                            <template v-slot:item.properties_hash.pokemon_reverse="{ item }">
-                                                                {{ item.properties_hash.pokemon_reverse ? 'Reverse' : 'Normal' }}
-                                                            </template>
-                                                            <template v-slot:item.price_cents="{ item }">
-                                                                {{ (item.price_cents / 100).toFixed(2) }} €
-                                                            </template>
-                                                        </v-data-table>
+<v-data-table
+    :headers="tableHeaders"
+    :items="paginatedCards"
+    :items-per-page="itemsPerPage"
+    :page.sync="currentPage"
+    hide-default-footer
+    class="elevation-1"
+>
+    <!-- Colonne pour l'image de la carte -->
+    <template v-slot:item.image="{ item }">
+        <v-img
+            :src="`${imageBaseUrl}${item.blueprint_id}.jpg`"
+            :alt="item.name_fr || item.name_en"
+            height="50"
+            contain
+            class="card-image"
+            loading="lazy"
+        ></v-img>
+    </template>
+
+    <!-- Colonne pour l'extension -->
+    <template v-slot:item.expansion="{ item }">
+        {{ expansions[item.expansion.id] }} <!-- Afficher le nom de l'extension -->
+    </template>
+
+    <!-- Colonne pour le prix formaté -->
+    <template v-slot:item.price_cents="{ item }">
+        {{ (item.price_cents / 100).toFixed(2) }} €
+    </template>
+
+    <!-- Colonne pour la version (Reverse ou Normale) -->
+    <template v-slot:item.properties_hash.pokemon_reverse="{ item }">
+        {{ item.properties_hash.pokemon_reverse ? 'Reverse' : 'Normale' }}
+    </template>
+
+    <!-- Colonne pour les actions (ajout au panier) -->
+    <template v-slot:item.actions="{ item }">
+        <v-btn icon @click="addToCart(item)">
+            <v-icon>mdi-cart</v-icon>
+        </v-btn>
+    </template>
+</v-data-table>
                                                         <!-- Pagination pour le tableau -->
                                                         <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>
                                                     </v-card>
@@ -271,16 +412,17 @@
                     { title: 'Heavily Played', value: 'Heavily Played' },
                     { title: 'Poor', value: 'Poor' }
                 ];
-                const tableHeaders = ref([
-                    { text: 'Numéro de Collection', value: 'properties_hash.collector_number', align: 'start' },
-                    { text: 'Image', value: 'image', sortable: false, align: 'center' },
-                    { text: 'Quantité', value: 'quantity', align: 'center' },
-                    { text: 'Langue', value: 'properties_hash.pokemon_language', align: 'center' },
-                    { text: 'Condition', value: 'condition', align: 'center' },
-                    { text: 'Prix', value: 'price_cents', align: 'center' },
-                    { text: 'Version', value: 'properties_hash.pokemon_reverse', align: 'center' },
-                    { text: 'Actions', value: 'actions', sortable: false, align: 'center' }
-                ]);
+const tableHeaders = ref([
+    { text: 'Numéro de Collection', value: 'properties_hash.collector_number', align: 'start' },
+    { text: 'Image', value: 'image', sortable: false, align: 'center' },
+    { text: 'Extension', value: 'expansion', align: 'center' }, // Nouvelle colonne pour l'extension
+    { text: 'Quantité', value: 'quantity', align: 'center' },
+    { text: 'Langue', value: 'properties_hash.pokemon_language', align: 'center' },
+    { text: 'Condition', value: 'condition', align: 'center' },
+    { text: 'Prix', value: 'price_cents', align: 'center' },
+    { text: 'Version', value: 'properties_hash.pokemon_reverse', align: 'center' },
+    { text: 'Actions', value: 'actions', sortable: false, align: 'center' }
+]);
                 const viewMode = ref('grid'); // 'grid' ou 'table'
                 // Fonction pour afficher des notifications
                 function showNotification(message, color = 'success') {
@@ -490,6 +632,7 @@
                     addToCart,
                     resetFilters,
                     showNotification,
+                    tableHeaders,
                     viewMode,
                     toggleViewMode() {
                         viewMode.value = viewMode.value === 'grid' ? 'table' : 'grid';
