@@ -321,9 +321,6 @@
                                                 </v-col>
                                             </v-row>
 
-                                            <!-- Pagination -->
-                                            <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>
-                                        </v-card>
 
 
                                             
@@ -380,10 +377,13 @@
     </template>
 </v-data-table>
                                                         <!-- Pagination pour le tableau -->
-                                                        <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>
+                                                     <!--   <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>-->
                                                     </v-card>
                                                 </v-col>
                                             </v-row>
+                                            <!-- Pagination -->
+                                            <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>
+                                        </v-card>
 
                                     </v-col>
                                 </v-row>
