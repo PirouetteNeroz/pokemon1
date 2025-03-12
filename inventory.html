@@ -320,69 +320,68 @@
                                                     </transition>
                                                 </v-col>
                                             </v-row>
-                                                                                        <!-- Pagination -->
+                                            <!-- Section Tableau -->
+                                            <v-row v-if="viewMode === 'table'" :key="viewMode">
+                                                <v-col cols="12">
+                                                    <v-card class="pa-3">
+                                                        <h2>Inventaire (Liste)</h2>
+<v-data-table
+    :headers="tableHeaders"
+    :items="paginatedCards"
+    :items-per-page="itemsPerPage"
+    :page.sync="currentPage"
+    hide-default-footer
+    class="elevation-1"
+>
+    <!-- Colonne pour l'image de la carte -->
+    <template v-slot:item.image="{ item }">
+        <v-img
+            :src="`${imageBaseUrl}${item.blueprint_id}.jpg`"
+            :alt="item.name_fr || item.name_en"
+            height="50"
+            contain
+            class="card-image"
+            loading="lazy"
+        ></v-img>
+    </template>
+
+    <!-- Colonne pour le nom du Pokémon -->
+    <template v-slot:item.name="{ item }">
+        {{ item.name_fr || item.name_en }} <!-- Nom du Pokémon -->
+    </template>
+
+    <!-- Colonne pour l'extension -->
+    <template v-slot:item.expansion="{ item }">
+        {{ expansions[item.expansion.id] }} <!-- Afficher le nom de l'extension -->
+    </template>
+
+    <!-- Colonne pour le prix formaté -->
+    <template v-slot:item.price_cents="{ item }">
+        {{ (item.price_cents / 100).toFixed(2) }} €
+    </template>
+
+    <!-- Colonne pour la version (Reverse ou Normale) -->
+    <template v-slot:item.properties_hash.pokemon_reverse="{ item }">
+        {{ item.properties_hash.pokemon_reverse ? 'Reverse' : 'Normale' }}
+    </template>
+
+    <!-- Colonne pour les actions (ajout au panier) -->
+    <template v-slot:item.actions="{ item }">
+        <v-btn icon @click="addToCart(item)">
+            <v-icon>mdi-cart</v-icon>
+        </v-btn>
+    </template>
+</v-data-table>
+                                                        <!-- Pagination pour le tableau -->
+                                                        <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>
+                                                    </v-card>
+                                                </v-col>
+                                            </v-row>
+                                            <!-- Pagination -->
                                             <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>
                                         </v-card>
                                     </v-col>
                                 </v-row>
-                                            <!-- Section Tableau -->
-<v-row v-if="viewMode === 'table'">
-    <v-col cols="12">
-        <v-card class="pa-3">
-            <h2>Inventaire (Liste)</h2>
-            <v-data-table
-                :headers="tableHeaders"
-                :items="paginatedCards"
-                :items-per-page="itemsPerPage"
-                :page.sync="currentPage"
-                hide-default-footer
-                class="elevation-1"
-            >
-                <!-- Colonne pour l'image de la carte -->
-                <template v-slot:item.image="{ item }">
-                    <v-img
-                        :src="`${imageBaseUrl}${item.blueprint_id}.jpg`"
-                        :alt="item.name_fr || item.name_en"
-                        height="50"
-                        contain
-                        class="card-image"
-                        loading="lazy"
-                    ></v-img>
-                </template>
-
-                <!-- Colonne pour le nom du Pokémon -->
-                <template v-slot:item.name="{ item }">
-                    {{ item.name_fr || item.name_en }} <!-- Nom du Pokémon -->
-                </template>
-
-                <!-- Colonne pour l'extension -->
-                <template v-slot:item.expansion="{ item }">
-                    {{ expansions[item.expansion.id] }} <!-- Afficher le nom de l'extension -->
-                </template>
-
-                <!-- Colonne pour le prix formaté -->
-                <template v-slot:item.price_cents="{ item }">
-                    {{ (item.price_cents / 100).toFixed(2) }} €
-                </template>
-
-                <!-- Colonne pour la version (Reverse ou Normale) -->
-                <template v-slot:item.properties_hash.pokemon_reverse="{ item }">
-                    {{ item.properties_hash.pokemon_reverse ? 'Reverse' : 'Normale' }}
-                </template>
-
-                <!-- Colonne pour les actions (ajout au panier) -->
-                <template v-slot:item.actions="{ item }">
-                    <v-btn icon @click="addToCart(item, $event)">
-                        <v-icon>mdi-cart</v-icon>
-                    </v-btn>
-                </template>
-            </v-data-table>
-            <!-- Pagination pour le tableau -->
-            <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>
-        </v-card>
-    </v-col>
-</v-row>
-
                             </v-window-item>
                         </transition>
                     </v-window>
