@@ -320,6 +320,13 @@
                                                     </transition>
                                                 </v-col>
                                             </v-row>
+
+                                            <!-- Pagination -->
+                                            <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>
+                                        </v-card>
+
+
+                                            
                                             <!-- Section Tableau -->
                                             <v-row v-if="viewMode === 'table'" :key="viewMode">
                                                 <v-col cols="12">
@@ -377,9 +384,7 @@
                                                     </v-card>
                                                 </v-col>
                                             </v-row>
-                                            <!-- Pagination -->
-                                            <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>
-                                        </v-card>
+
                                     </v-col>
                                 </v-row>
                             </v-window-item>
