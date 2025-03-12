@@ -24,7 +24,7 @@
 
 /* Effet de zoom au survol */
 .card-image:hover {
-    transform: scale(3); /* Agrandir l'image de 20% */
+    transform: scale(5); /* Agrandir l'image de 20% */
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Ombre pour un effet de profondeur */
 }
         
@@ -565,7 +565,8 @@ const paginatedCards = computed(() => {
                 const rarityOptions = [
                     { title: 'Commun', value: 'Common' },
                     { title: 'Peu Commun', value: 'Uncommon' },
-                    { title: 'Rare', value: 'Rare' }
+                    { title: 'Rare', value: 'Rare' },
+                    { title: 'Holo', value: 'Holo Rare' }
                 ];
                 const reverseOptions = [
                     { title: 'Cartes Reverse', value: 'true' },
