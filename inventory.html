@@ -334,15 +334,11 @@
                                                     </transition>
                                                 </v-col>
                                             </v-row>
-
-
-
-                                            
+                                     
                                             <!-- Section Tableau -->
                                             <v-row v-if="viewMode === 'table'" :key="viewMode">
                                                 <v-col cols="12">
                                                     <v-card class="pa-3">
-                                                        <h2>Inventaire (Liste)</h2>
 <v-data-table
     :headers="tableHeaders"
     :items="paginatedCards"
@@ -435,6 +431,20 @@
                 },
             },
         });
+
+        const tableHeaders = ref([
+    { text: 'Numéro de Collection', value: 'properties_hash.collector_number', align: 'start' },
+    { text: 'Image', value: 'image', sortable: false, align: 'center' }, // Colonne pour l'image
+    { text: 'Nom du Pokémon', value: 'name', align: 'center' }, // Nouvelle colonne pour le nom
+    { text: 'Extension', value: 'expansion', align: 'center' }, // Colonne pour l'extension
+    { text: 'Quantité', value: 'quantity', align: 'center' },
+    { text: 'Langue', value: 'properties_hash.pokemon_language', align: 'center' },
+    { text: 'Condition', value: 'condition', align: 'center' },
+    { text: 'Prix', value: 'price_cents', align: 'center' },
+    { text: 'Version', value: 'properties_hash.pokemon_reverse', align: 'center' },
+    { text: 'Actions', value: 'actions', sortable: false, align: 'center' }
+]);
+        
         const app = createApp({
             setup() {
                 const inventory = ref([]);
@@ -472,18 +482,7 @@
                     { title: 'Heavily Played', value: 'Heavily Played' },
                     { title: 'Poor', value: 'Poor' }
                 ];
-const tableHeaders = ref([
-    { text: 'Numéro de Collection', value: 'properties_hash.collector_number', align: 'start' },
-    { text: 'Image', value: 'image', sortable: false, align: 'center' }, // Colonne pour l'image
-    { text: 'Nom du Pokémon', value: 'name', align: 'center' }, // Nouvelle colonne pour le nom
-    { text: 'Extension', value: 'expansion', align: 'center' }, // Colonne pour l'extension
-    { text: 'Quantité', value: 'quantity', align: 'center' },
-    { text: 'Langue', value: 'properties_hash.pokemon_language', align: 'center' },
-    { text: 'Condition', value: 'condition', align: 'center' },
-    { text: 'Prix', value: 'price_cents', align: 'center' },
-    { text: 'Version', value: 'properties_hash.pokemon_reverse', align: 'center' },
-    { text: 'Actions', value: 'actions', sortable: false, align: 'center' }
-]);
+
                 const viewMode = ref('grid'); // 'grid' ou 'table'
                 // Fonction pour afficher des notifications
                 function showNotification(message, color = 'success') {
