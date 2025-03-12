@@ -25,6 +25,8 @@
 /* Effet de zoom au survol */
 .card-image:hover {
     transform: scale(5); /* Agrandir l'image de 20% */
+        z-index: 1000; /* Passer au premier plan */
+    position: relative; /* Nécessaire pour z-index */
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Ombre pour un effet de profondeur */
 }
         
@@ -105,6 +107,7 @@
         /* Conteneur pour la ribbon */
         .ribbon-container {
             position: relative;
+            overflow: visible; /* Permet à l'image de déborder */
         }
         /* Ribbon en haut à gauche */
         .ribbon {
