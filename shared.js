@@ -12,18 +12,23 @@ const API_EXPANSIONS = 'https://api.cardtrader.com/api/v2/expansions/export';
 const API_TOKEN = 'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJjYXJkdHJhZGVyLXByb2R1Y3Rpb24iLCJzdWIiOiJhcHA6MTM5MzgiLCJhdWQiOiJhcHA6MTM5MzgiLCJleHAiOjQ4OTU2MzQ3MTcsImp0aSI6IjQxMjA3NmNjLTcyZTEtNDljOC1iODA2LTE3OTJiNmU3N2JhMyIsImlhdCI6MTczOTk2MTExNywibmFtZSI6Ik5lcm96YnJpY2tzIEFwcCAyMDI1MDIwODE3NDkxOSJ9.PkkEXit3MvxmVij_e5Eyz55k_3EYgQF-2ln9goSfMbQD3mIpDVrSkQa010BfnF9IR1L8fvswAyxk56qiUr2LKm2KXX0iKAvVRR373A3XEDwgNtGGBBAR-rxh8raL1hW8e4AH_bps1tVFTrdZ_W-Odg5egSxLFIxnLgi0a9It5KVeVkjdgLmxYuaCXspgml9TXfgJcJ2GH62izvB5eUsAj4NhobpH5q_Pyfbyw2cJu4HmilQjBSOm4NsmRW7Nd692tNT2semj1Oh1UqV1xel2WewtLaWlUAVHYt2LSMWrEw_kx9Yjk9Kz-rM67tk0nXosKklnIigJpcrmRUXf-O7qJA'; // Remplacez par votre token API
 
 // Fonction pour récupérer le nom français d'un Pokémon
-async function fetchFrenchPokemonName(cardId) {
+async function fetchFrenchPokemonName(pokemonName) {
     try {
-        // Appel à l'API TCGdex pour récupérer les informations de la carte
-        const response = await fetch(`https://api.tcgdex.net/v2/fr/cards/${cardId}`);
-        if (!response.ok) throw new Error(`Erreur API TCGdex: ${response.status}`);
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonName.toLowerCase()}`);
+        if (!response.ok) throw new Error(`Erreur API PokeAPI: ${response.status}`);
         const data = await response.json();
 
-        // Retourne le nom de la carte en français
-        return data.name || null;
+        // Recherche du nom en français
+        const frenchName = data.names.find(name => name.language.name === 'fr');
+        if (frenchName) {
+            return frenchName.name; // Retourne le nom français
+        } else {
+            console.warn(`Aucun nom français trouvé pour ${pokemonName}. Utilisation du nom anglais.`);
+            return pokemonName; // Retourne le nom anglais par défaut
+        }
     } catch (error) {
-        console.error("Erreur lors de la récupération du nom de la carte :", error);
-        return null; // Retourne null en cas d'erreur
+        console.error("Erreur lors de la récupération du nom français :", error);
+        return pokemonName; // Retourne le nom anglais en cas d'erreur
     }
 }
 
