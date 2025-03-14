@@ -402,11 +402,11 @@
         </v-app>
     </div>
     <!-- Vue.js -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js" defer></script>
     <!-- Vuetify JS -->
-    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js" defer></script>
     <!-- Shared JS -->
-    <script type="module">
+    <script type="module" defer>
         import { fetchFrenchPokemonName, generateUserId, saveCartToLocalStorage, getCartFromLocalStorage, saveCartToSupabase, validateCart, API_PRODUCTS, API_EXPANSIONS, API_TOKEN, supabaseClient } from './shared.js';
         const { createApp, ref, reactive, computed, watch } = Vue;
         const vuetify = Vuetify.createVuetify({
