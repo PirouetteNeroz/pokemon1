@@ -402,32 +402,35 @@
         </v-app>
     </div>
     <!-- Vue.js -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js" defer></script>
+   <!-- Vue.js -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js" async></script>
     <!-- Vuetify JS -->
-    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js" async></script>
     <!-- Shared JS -->
-    <script type="module" defer>
-        import { fetchFrenchPokemonName, generateUserId, saveCartToLocalStorage, getCartFromLocalStorage, saveCartToSupabase, validateCart, API_PRODUCTS, API_EXPANSIONS, API_TOKEN, supabaseClient } from './shared.js';
-        const { createApp, ref, reactive, computed, watch } = Vue;
-        const vuetify = Vuetify.createVuetify({
-            theme: {
-                defaultTheme: 'dark',
-                themes: {
-                    dark: {
-                        colors: {
-                            primary: '#FFD700',
-                            secondary: '#1E1E1E',
-                            background: '#121212',
-                            surface: '#1E1E1E',
-                            error: '#FF5252',
-                            info: '#2196F3',
-                            success: '#4CAF50',
-                            warning: '#FFC107',
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+            import('./shared.js').then((module) => {
+                const { fetchFrenchPokemonName, generateUserId, saveCartToLocalStorage, getCartFromLocalStorage, saveCartToSupabase, validateCart, API_PRODUCTS, API_EXPANSIONS, API_TOKEN, supabaseClient } = module;
+                const { createApp, ref, reactive, computed, watch } = Vue;
+                const vuetify = Vuetify.createVuetify({
+                    theme: {
+                        defaultTheme: 'dark',
+                        themes: {
+                            dark: {
+                                colors: {
+                                    primary: '#FFD700',
+                                    secondary: '#1E1E1E',
+                                    background: '#121212',
+                                    surface: '#1E1E1E',
+                                    error: '#FF5252',
+                                    info: '#2196F3',
+                                    success: '#4CAF50',
+                                    warning: '#FFC107',
+                                },
+                            },
                         },
                     },
-                },
-            },
-        });
+                });
 
         const app = createApp({
             setup() {
