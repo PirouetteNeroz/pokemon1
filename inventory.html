@@ -8,104 +8,102 @@
     <link href="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.css" rel="stylesheet">
     <!-- Material Design Icons -->
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
-    <!-- Vue.js -->
-<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        /* Style pour l'image avec effet de zoom */
-       /* .card-image {
-            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Animation fluide */
-       /*     cursor: pointer; /* Curseur en forme de main */
-       /* }
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 10px;
+    overflow: hidden;
+}
+/* Style pour l'image avec effet de zoom */
+.card-image {
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Animation fluide */
+    cursor: pointer; /* Curseur en forme de main */
+}
 
-        /* Effet de zoom au survol */
-       /* .card-image:hover {
-            transform: scale(5); /* Agrandir l'image de 20% */
-        /*    z-index: 1000; /* Passer au premier plan */
-       /*     position: relative; /* Nécessaire pour z-index */
-        /*    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Ombre pour un effet de profondeur */
-       /* }*/
+/* Effet de zoom au survol */
+.card-image:hover {
+    transform: scale(5); /* Agrandir l'image de 20% */
+        z-index: 1000; /* Passer au premier plan */
+    position: relative; /* Nécessaire pour z-index */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Ombre pour un effet de profondeur */
+}
+        
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
 
-        .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
+.card-details {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
 
-        .card-details {
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 100%;
-        }
+/* Couleur du texte en blanc */
+.card-name,
+.card-expansion,
+.card-price,
+.card-rarity,
+.card-condition,
+.card-collector-number,
+.card-quantity {
+    color: white;
+}
 
-        /* Couleur du texte en blanc */
-        .card-name,
-        .card-expansion,
-        .card-price,
-        .card-rarity,
-        .card-condition,
-        .card-collector-number,
-        .card-quantity {
-            color: white;
-        }
+/* Style pour la condition de la carte */
+.card-condition {
+    font-size: 0.875rem;
+    font-weight: bold;
+    text-align: left; /* Alignement à gauche */
+    margin: 4px 0;
+    opacity: 0.8; /* Légère transparence */
+}
 
-        /* Style pour la condition de la carte */
-        .card-condition {
-            font-size: 0.875rem;
-            font-weight: bold;
-            text-align: left; /* Alignement à gauche */
-            margin: 4px 0;
-            opacity: 0.8; /* Légère transparence */
-        }
+/* Style pour la rareté */
+.card-rarity {
+    font-size: 0.875rem;
+    font-weight: bold;
+    margin: 4px 0;
+}
 
-        /* Style pour la rareté */
-        .card-rarity {
-            font-size: 0.875rem;
-            font-weight: bold;
-            margin: 4px 0;
-        }
+/* Style pour le numéro de collection */
+.card-collector-number {
+    font-size: 1rem; /* Taille augmentée */
+    font-weight: bold;
+    margin-left: 8px; /* Espacement par rapport au nom */
+    opacity: 0.8; /* Légère transparence */
+}
 
-        /* Style pour le numéro de collection */
-        .card-collector-number {
-            font-size: 1rem; /* Taille augmentée */
-            font-weight: bold;
-            margin-left: 8px; /* Espacement par rapport au nom */
-            opacity: 0.8; /* Légère transparence */
-        }
+/* Style pour l'extension */
+.card-expansion {
+    font-size: 0.875rem;
+    margin-top: 4px;
+    opacity: 0.8; /* Légère transparence pour l'extension */
+}
 
-        /* Style pour l'extension */
-        .card-expansion {
-            font-size: 0.875rem;
-            margin-top: 4px;
-            opacity: 0.8; /* Légère transparence pour l'extension */
-        }
+/* Style pour le prix */
+.card-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center; /* Centrage du prix */
+    margin: 8px 0;
+}
 
-        /* Style pour le prix */
-        .card-price {
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-align: center; /* Centrage du prix */
-            margin: 8px 0;
-        }
-
-        /* Style pour la quantité disponible */
-        .card-quantity {
-            display: inline-block;
-            padding: 4px 8px;
-            background-color: rgba(255, 255, 255, 0.1); /* Fond légèrement visible */
-            border-radius: 12px;
-            font-size: 0.875rem;
-            font-weight: bold;
-            text-align: center;
-            margin: 0 auto;
-        }
+/* Style pour la quantité disponible */
+.card-quantity {
+    display: inline-block;
+    padding: 4px 8px;
+    background-color: rgba(255, 255, 255, 0.1); /* Fond légèrement visible */
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: bold;
+    text-align: center;
+    margin: 0 auto;
+}
         /* Conteneur pour la ribbon */
         .ribbon-container {
             position: relative;
@@ -159,40 +157,42 @@
         }
 
         /* Style pour le tableau */
-        .v-data-table {
-            margin-top: 20px;
-            background-color: #1E1E1E; /* Fond sombre pour le thème dark */
-            color: white; /* Texte en blanc */
-        }
+.v-data-table {
+    margin-top: 20px;
+    background-color: #1E1E1E; /* Fond sombre pour le thème dark */
+    color: white; /* Texte en blanc */
+}
 
-        /* Style pour les en-têtes du tableau */
-        .v-data-table-header {
-            background-color: #121212; /* Fond sombre pour les en-têtes */
-            color: white; /* Texte en blanc */
-            font-weight: bold; /* Texte en gras */
-        }
+/* Style pour les en-têtes du tableau */
+.v-data-table-header {
+    background-color: #121212; /* Fond sombre pour les en-têtes */
+    color: white; /* Texte en blanc */
+    font-weight: bold; /* Texte en gras */
+}
 
-        /* Style pour les lignes du tableau */
-        .v-data-table__tr {
-            background-color: #1E1E1E; /* Fond sombre pour les lignes */
-            color: white; /* Texte en blanc */
-        }
+/* Style pour les lignes du tableau */
+.v-data-table__tr {
+    background-color: #1E1E1E; /* Fond sombre pour les lignes */
+    color: white; /* Texte en blanc */
+}
 
-        /* Style pour les lignes au survol */
-        .v-data-table__tr:hover {
-            background-color: #2E2E2E; /* Fond légèrement plus clair au survol */
-        }
+/* Style pour les lignes au survol */
+.v-data-table__tr:hover {
+    background-color: #2E2E2E; /* Fond légèrement plus clair au survol */
+}
 
-        /* Style pour les cellules du tableau */
-        .v-data-table__td {
-            padding: 12px; /* Espacement interne */
-        }
+/* Style pour les cellules du tableau */
+.v-data-table__td {
+    padding: 12px; /* Espacement interne */
+}
 
-        /* Style pour l'image dans le tableau */
-        .card-image {
-            border-radius: 5px; /* Coins arrondis */
-        }
+/* Style pour l'image dans le tableau */
+.card-image {
+    border-radius: 5px; /* Coins arrondis */
+}
+        
     </style>
+
 </head>
 <body>
     <div id="app">
@@ -334,66 +334,67 @@
                                                     </transition>
                                                 </v-col>
                                             </v-row>
-
+                                     
                                             <!-- Section Tableau -->
                                             <v-row v-if="viewMode === 'table'" :key="viewMode">
                                                 <v-col cols="12">
                                                     <v-card class="pa-3">
-                                                        <v-data-table
-                                                            :headers="tableHeaders"
-                                                            :items="paginatedCards"
-                                                            :items-per-page="itemsPerPage"
-                                                            :page.sync="currentPage"
-                                                            hide-default-footer
-                                                            class="elevation-1"
-                                                        >
-                                                            <!-- Colonne pour l'image de la carte -->
-                                                            <template v-slot:item.image="{ item }">
-                                                                <v-img
-                                                                    :src="`${imageBaseUrl}${item.blueprint_id}.jpg`"
-                                                                    :alt="item.name_fr || item.name_en"
-                                                                    height="50"
-                                                                    contain
-                                                                    class="card-image"
-                                                                    loading="lazy"
-                                                                ></v-img>
-                                                            </template>
+<v-data-table
+    :headers="tableHeaders"
+    :items="paginatedCards"
+    :items-per-page="itemsPerPage"
+    :page.sync="currentPage"
+    hide-default-footer
+    class="elevation-1"
+>
+    <!-- Colonne pour l'image de la carte -->
+    <template v-slot:item.image="{ item }">
+        <v-img
+            :src="`${imageBaseUrl}${item.blueprint_id}.jpg`"
+            :alt="item.name_fr || item.name_en"
+            height="50"
+            contain
+            class="card-image"
+            loading="lazy"
+        ></v-img>
+    </template>
 
-                                                            <!-- Colonne pour le nom du Pokémon -->
-                                                            <template v-slot:item.name="{ item }">
-                                                                {{ item.name_fr || item.name_en }}
-                                                            </template>
+    <!-- Colonne pour le nom du Pokémon -->
+    <template v-slot:item.name="{ item }">
+        {{ item.name_fr || item.name_en }}
+    </template>
 
-                                                            <!-- Colonne pour l'extension -->
-                                                            <template v-slot:item.expansion="{ item }">
-                                                                {{ expansions[item.expansion?.id] || 'N/A' }}
-                                                            </template>
+    <!-- Colonne pour l'extension -->
+    <template v-slot:item.expansion="{ item }">
+        {{ expansions[item.expansion?.id] || 'N/A' }}
+    </template>
 
-                                                            <!-- Colonne pour le prix formaté -->
-                                                            <template v-slot:item.price_cents="{ item }">
-                                                                {{ (item.price_cents / 100).toFixed(2) }} €
-                                                            </template>
+    <!-- Colonne pour le prix formaté -->
+    <template v-slot:item.price_cents="{ item }">
+        {{ (item.price_cents / 100).toFixed(2) }} €
+    </template>
 
-                                                            <!-- Colonne pour la version (Reverse ou Normale) -->
-                                                            <template v-slot:item.properties_hash.pokemon_reverse="{ item }">
-                                                                {{ item.properties_hash?.pokemon_reverse ? 'Reverse' : 'Normale' }}
-                                                            </template>
+    <!-- Colonne pour la version (Reverse ou Normale) -->
+    <template v-slot:item.properties_hash.pokemon_reverse="{ item }">
+        {{ item.properties_hash?.pokemon_reverse ? 'Reverse' : 'Normale' }}
+    </template>
 
-                                                            <!-- Colonne pour les actions (ajout au panier) -->
-                                                            <template v-slot:item.actions="{ item }">
-                                                                <v-btn icon @click="addToCart(item, $event)">
-                                                                    <v-icon>mdi-cart</v-icon>
-                                                                </v-btn>
-                                                            </template>
-                                                        </v-data-table>
+    <!-- Colonne pour les actions (ajout au panier) -->
+    <template v-slot:item.actions="{ item }">
+        <v-btn icon @click="addToCart(item, $event)">
+            <v-icon>mdi-cart</v-icon>
+        </v-btn>
+    </template>
+</v-data-table>
                                                         <!-- Pagination pour le tableau -->
-                                                        <!--   <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>-->
+                                                     <!--   <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>-->
                                                     </v-card>
                                                 </v-col>
                                             </v-row>
                                             <!-- Pagination -->
                                             <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>
                                         </v-card>
+
                                     </v-col>
                                 </v-row>
                             </v-window-item>
@@ -431,6 +432,8 @@
             },
         });
 
+
+        
         const app = createApp({
             setup() {
                 const inventory = ref([]);
@@ -458,17 +461,17 @@
                     color: 'success',
                 });
                 const tableHeaders = ref([
-                    { text: 'Numéro de Collection', value: 'properties_hash.collector_number', align: 'start' },
-                    { text: 'Image', value: 'image', sortable: false, align: 'center' }, // Colonne pour l'image
-                    { text: 'Nom du Pokémon', value: 'name', align: 'center' }, // Nouvelle colonne pour le nom
-                    { text: 'Extension', value: 'expansion', align: 'center' }, // Colonne pour l'extension
-                    { text: 'Quantité', value: 'quantity', align: 'center' },
-                    { text: 'Langue', value: 'properties_hash.pokemon_language', align: 'center' },
-                    { text: 'Condition', value: 'condition', align: 'center' },
-                    { text: 'Prix', value: 'price_cents', align: 'center' },
-                    { text: 'Version', value: 'properties_hash.pokemon_reverse', align: 'center' },
-                    { text: 'Actions', value: 'actions', sortable: false, align: 'center' }
-                ]);
+    { text: 'Numéro de Collection', value: 'properties_hash.collector_number', align: 'start' },
+    { text: 'Image', value: 'image', sortable: false, align: 'center' }, // Colonne pour l'image
+    { text: 'Nom du Pokémon', value: 'name', align: 'center' }, // Nouvelle colonne pour le nom
+    { text: 'Extension', value: 'expansion', align: 'center' }, // Colonne pour l'extension
+    { text: 'Quantité', value: 'quantity', align: 'center' },
+    { text: 'Langue', value: 'properties_hash.pokemon_language', align: 'center' },
+    { text: 'Condition', value: 'condition', align: 'center' },
+    { text: 'Prix', value: 'price_cents', align: 'center' },
+    { text: 'Version', value: 'properties_hash.pokemon_reverse', align: 'center' },
+    { text: 'Actions', value: 'actions', sortable: false, align: 'center' }
+]);
                 // Options de condition
                 const conditionOptions = [
                     { title: 'Mint', value: 'Mint' },
@@ -548,13 +551,13 @@
                 }
                 // Calcul des propriétés calculées
                 const totalPages = computed(() => Math.ceil(filteredCards.value.length / itemsPerPage));
-                const paginatedCards = computed(() => {
-                    const start = (currentPage.value - 1) * itemsPerPage;
-                    const end = start + itemsPerPage;
-                    const cards = filteredCards.value.slice(start, end);
-                    console.log("Paginated Cards:", cards); // Vérifiez les données dans la console
-                    return cards;
-                });
+const paginatedCards = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const cards = filteredCards.value.slice(start, end);
+    console.log("Paginated Cards:", cards); // Vérifiez les données dans la console
+    return cards;
+});
                 const expansionOptions = computed(() => Object.entries(expansions.value).map(([id, code]) => ({ title: code, value: id })));
                 const languageOptions = [
                     { title: 'Français', value: 'fr' },
@@ -668,31 +671,8 @@
                         console.error("Erreur API :", error);
                     }
                 }
-
-                async function fetchTranslations() {
-                    try {
-                        const response = await fetch('/translations.json');
-                        if (!response.ok) throw new Error(`Erreur lors du chargement des traductions: ${response.status}`);
-                        const translations = await response.json();
-                        console.log("Traductions chargées:", translations);
-                        return translations;
-                    } catch (error) {
-                        console.error("Erreur lors du chargement des traductions:", error);
-                        return {};
-                    }
-                }
-
                 // Initialisation
-                fetchExpansions().then(async () => {
-                    const translations = await fetchTranslations();
-                    Object.keys(expansions.value).forEach(key => {
-                        if (translations[expansions.value[key]]) {
-                            expansions.value[key] = translations[expansions.value[key]];
-                        }
-                    });
-                    fetchInventory();
-                });
-
+                fetchExpansions().then(fetchInventory);
                 return {
                     inventory,
                     expansions,
