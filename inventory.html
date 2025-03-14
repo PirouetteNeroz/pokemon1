@@ -234,6 +234,13 @@
             import('./shared.js').then((module) => {
                 const { fetchFrenchPokemonName, generateUserId, saveCartToLocalStorage, getCartFromLocalStorage, saveCartToSupabase, validateCart, API_PRODUCTS, API_EXPANSIONS, API_TOKEN, supabaseClient } = module;
                 const { createApp, ref, reactive, computed, watch } = Vue;
+
+                // Vérifiez que Vuetify est correctement importé
+                if (typeof Vuetify === 'undefined') {
+                    console.error('Vuetify is not defined');
+                    return;
+                }
+
                 const vuetify = Vuetify.createVuetify({
                     theme: {
                         defaultTheme: 'dark',
