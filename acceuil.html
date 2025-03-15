@@ -52,33 +52,46 @@
                         @input="filterSeries"
                     ></v-text-field>
 
-                    <!-- Grille des séries -->
-                    <v-row>
-                        <v-col
-                            v-for="serie in filteredSeries"
-                            :key="serie.id"
-                            cols="12"
-                            sm="6"
-                            md="4"
-                            lg="3"
+                    <!-- Panneaux dépliables par bloc -->
+                    <v-expansion-panels>
+                        <v-expansion-panel
+                            v-for="(block, index) in groupedSeries"
+                            :key="index"
                         >
-                            <v-card class="serie-card" @click="goToInventory(serie)">
-                                <v-img
-                                    :src="serie.logo + '.png'"
-                                    :alt="serie.name"
-                                    height="200"
-                                    cover
-                                    class="align-end"
-                                    gradient="to bottom, rgba(0,0,0,0), rgba(0,0,0,0.7)"
-                                >
-                                    <v-card-title class="text-white">{{ serie.name }}</v-card-title>
-                                </v-img>
-                                <v-card-text>
-                                    <p>Cartes : {{ serie.cardCount.total }} (Officielles : {{ serie.cardCount.official }})</p>
-                                </v-card-text>
-                            </v-card>
-                        </v-col>
-                    </v-row>
+                            <v-expansion-panel-title>
+                                {{ block.name }}
+                            </v-expansion-panel-title>
+                            <v-expansion-panel-text>
+                                <!-- Grille des séries dans ce bloc -->
+                                <v-row>
+                                    <v-col
+                                        v-for="serie in block.series"
+                                        :key="serie.id"
+                                        cols="12"
+                                        sm="6"
+                                        md="4"
+                                        lg="3"
+                                    >
+                                        <v-card class="serie-card" @click="goToInventory(serie)">
+                                            <v-img
+                                                :src="serie.logo + '.png'"
+                                                :alt="serie.name"
+                                                height="200"
+                                                cover
+                                                class="align-end"
+                                                gradient="to bottom, rgba(0,0,0,0), rgba(0,0,0,0.7)"
+                                            >
+                                                <v-card-title class="text-white">{{ serie.name }}</v-card-title>
+                                            </v-img>
+                                            <v-card-text>
+                                                <p>Cartes : {{ serie.cardCount.total }} (Officielles : {{ serie.cardCount.official }})</p>
+                                            </v-card-text>
+                                        </v-card>
+                                    </v-col>
+                                </v-row>
+                            </v-expansion-panel-text>
+                        </v-expansion-panel>
+                    </v-expansion-panels>
 
                     <!-- Message si aucune série n'est trouvée -->
                     <v-alert
@@ -148,12 +161,31 @@
                     }
                 }
 
-                // Filtrer les séries en fonction de la recherche
-                const filteredSeries = computed(() => {
-                    if (!searchQuery.value) return series.value;
-                    return series.value.filter(serie =>
-                        serie.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-                    );
+                // Grouper les séries par blocs
+                const groupedSeries = computed(() => {
+                    const blocks = [
+                        { name: 'Scarlet & Violet', series: [] },
+                        { name: 'Sword & Shield', series: [] },
+                        { name: 'Sun & Moon', series: [] },
+                        { name: 'XY', series: [] },
+                        { name: 'Black & White', series: [] },
+                    ];
+
+                    series.value.forEach(serie => {
+                        if (serie.name.includes('Scarlet & Violet')) {
+                            blocks[0].series.push(serie);
+                        } else if (serie.name.includes('Sword & Shield')) {
+                            blocks[1].series.push(serie);
+                        } else if (serie.name.includes('Sun & Moon')) {
+                            blocks[2].series.push(serie);
+                        } else if (serie.name.includes('XY')) {
+                            blocks[3].series.push(serie);
+                        } else if (serie.name.includes('Black & White')) {
+                            blocks[4].series.push(serie);
+                        }
+                    });
+
+                    return blocks.filter(block => block.series.length > 0);
                 });
 
                 // Rediriger vers l'inventaire avec le filtre de l'extension
@@ -174,7 +206,7 @@
                 return {
                     series,
                     searchQuery,
-                    filteredSeries,
+                    groupedSeries,
                     goToInventory,
                     toggleTheme,
                 };
