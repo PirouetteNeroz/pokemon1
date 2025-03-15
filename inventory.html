@@ -480,6 +480,11 @@
                 ];
 
                 const viewMode = ref('grid'); // 'grid' ou 'table'
+
+const urlParams = new URLSearchParams(window.location.search);
+const selectedExtension = urlParams.get('extension');
+
+                
                 // Fonction pour afficher des notifications
                 function showNotification(message, color = 'success') {
                     snackbar.message = message;
@@ -683,11 +688,25 @@ const expansionOptions = computed(() => {
                             const frenchName = await fetchFrenchPokemonName(card.name_en.toLowerCase());
                             return { ...card, name_fr: frenchName, condition: card.properties_hash.condition || 'Non spécifiée' }; // Ajouter la condition
                         }));
+                               if (selectedExtension) {
+            selectedExpansion.value = selectedExtension;
+            updateDisplay();
+        }
                     } catch (error) {
                         console.error("Erreur API :", error);
                     }
                 }
+function updateDisplay() {
+    // Appliquer les filtres et mettre à jour l'affichage
+    filteredCards.value = inventory.value.filter(card => {
+        if (selectedExpansion.value && card.expansion.id != selectedExpansion.value) return false;
+        // Ajoutez ici les autres filtres (langue, rareté, etc.)
+        return true;
+    });
 
+    // Réinitialiser la pagination
+    currentPage.value = 1;
+}
                 async function fetchTranslations() {
                     try {
                         const response = await fetch('/translations.json');
