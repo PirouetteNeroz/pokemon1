@@ -1,4 +1,5 @@
 // shared.js
+import tcgdex from 'https://cdn.jsdelivr.net/npm/@tcgdex/sdk@2/dist/tcgdex.browser.js';
 
 const { createClient } = supabase;
 
