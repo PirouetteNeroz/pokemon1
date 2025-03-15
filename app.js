@@ -1,258 +1,204 @@
 const { useState, useEffect } = React;
 
+// Configuration Supabase
+const supabaseUrl = 'https://aibrhuoxwqwqbkhjhote.supabase.co'; // Remplacez par votre URL Supabase
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpYnJodW94d3F3cWJraGpob3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA1MTUxNzIsImV4cCI6MjA1NjA5MTE3Mn0.Lz_P5ZIUwL5mqIuMjJn3pxWnYV8SwprKUuDEnSOHii0'; // Remplacez par votre clé Supabase
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
 const App = () => {
-    const [inventory, setInventory] = useState([]);
-    const [expansions, setExpansions] = useState({});
-    const [cart, setCart] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedExpansion, setSelectedExpansion] = useState('');
-    const [selectedLanguage, setSelectedLanguage] = useState('');
-    const [selectedRarity, setSelectedRarity] = useState('');
-    const [selectedReverse, setSelectedReverse] = useState('');
-    const [selectedCondition, setSelectedCondition] = useState('');
-    const [sortOrder, setSortOrder] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 100;
-    const [showCartAnimation, setShowCartAnimation] = useState(false);
-    const [cartAnimationStyle, setCartAnimationStyle] = useState({});
-    const [snackbar, setSnackbar] = useState({ show: false, message: '', color: 'success' });
+    const [orders, setOrders] = useState([]);
+    const [selectedCollection, setSelectedCollection] = useState('');
+    const [selectedStatus, setSelectedStatus] = useState('');
+    const [minAmount, setMinAmount] = useState(null);
+    const [sortKey, setSortKey] = useState('pseudo');
+    const [sortDirection, setSortDirection] = useState('asc');
+    const [collectionOptions, setCollectionOptions] = useState([]);
+    const statusOptions = [
+        { title: 'En attente', value: 'pending' },
+        { title: 'En préparation', value: 'preparing' },
+        { title: 'Expédié', value: 'shipped' },
+        { title: 'Annulé', value: 'cancelled' }
+    ];
 
-    const imageBaseUrl = 'https://www.cardtrader.com/images/blueprint/';
+    // Récupérer les commandes validées
+    const fetchOrders = async () => {
+        const { data, error } = await supabaseClient
+            .from('orders')
+            .select('*')
+            .neq('status', 'cancelled'); // Exclure les commandes annulées
 
-    // Fonction pour ajouter une carte au panier
-    const addToCart = (card, event) => {
-        const existingItem = cart.find(item => item.blueprintId === card.blueprint_id);
-        if (existingItem) {
-            if (existingItem.quantity >= card.quantity) {
-                showNotification("Quantité maximale atteinte pour cette carte.", 'error');
-                return;
-            }
-            existingItem.quantity += 1;
+        if (error) {
+            console.error('Erreur lors de la récupération des commandes:', error);
         } else {
-            setCart([...cart, {
-                blueprintId: card.blueprint_id,
-                name: card.name_fr || card.name_en,
-                extension: expansions[card.expansion.id],
-                price: (card.price_cents / 100),
-                quantity: 1,
-                maxQuantity: card.quantity,
-                condition: card.condition || 'Non spécifiée',
-                collectorNumber: card.properties_hash.collector_number || 'N/A'
-            }]);
+            setOrders(data);
+            setCollectionOptions(extractCollections(data)); // Extraire les collections
         }
-        showNotification(`${card.name_fr || card.name_en} ajoutée au panier.`, 'success');
-        triggerCartAnimation(event);
-        saveCartToLocalStorage(cart);
     };
 
-    // Fonction pour déclencher l'animation du panier
-    const triggerCartAnimation = (event) => {
-        const buttonRect = event.target.getBoundingClientRect();
-        const buttonX = buttonRect.left + buttonRect.width / 2;
-        const buttonY = buttonRect.top + buttonRect.height / 2;
-        setCartAnimationStyle({
-            left: `${buttonX}px`,
-            top: `${buttonY}px`,
+    // Extraire les collections disponibles
+    const extractCollections = (orders) => {
+        const collections = new Set();
+        orders.forEach(order => {
+            order.cart_data.forEach(item => {
+                const collection = item.extension || 'Inconnue';
+                collections.add(collection);
+            });
         });
-        setShowCartAnimation(true);
-        setTimeout(() => {
-            setShowCartAnimation(false);
-        }, 800);
+        return Array.from(collections).map(collection => ({ title: collection, value: collection }));
     };
 
-    // Fonction pour afficher une notification
-    const showNotification = (message, color = 'success') => {
-        setSnackbar({ show: true, message, color });
-        setTimeout(() => {
-            setSnackbar({ ...snackbar, show: false });
-        }, 3000);
-    };
-
-    // Fonction pour réinitialiser les filtres
-    const resetFilters = () => {
-        setSearchQuery('');
-        setSelectedExpansion('');
-        setSelectedLanguage('');
-        setSelectedRarity('');
-        setSelectedReverse('');
-        setSelectedCondition('');
-        setSortOrder('');
-    };
-
-    // Fonction pour normaliser les chaînes de caractères
-    const normalizeString = (str) => {
-        return str
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .toLowerCase()
-            .trim();
-    };
-
-    // Fonction pour filtrer les cartes
-    const filteredCards = inventory.filter(card => {
-        if (searchQuery) {
-            const searchTerm = normalizeString(searchQuery);
-            const nameEn = normalizeString(card.name_en);
-            const nameFr = normalizeString(card.name_fr);
-            if (!nameEn.includes(searchTerm) && !nameFr.includes(searchTerm)) return false;
+    // Trier les commandes
+    const sortBy = (key) => {
+        if (sortKey === key) {
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortKey(key);
+            setSortDirection('asc');
         }
-        if (selectedExpansion && card.expansion.id != selectedExpansion) return false;
-        if (selectedLanguage && card.properties_hash.pokemon_language != selectedLanguage) return false;
-        if (selectedRarity && card.properties_hash.pokemon_rarity != selectedRarity) return false;
-        if (selectedReverse !== "" && card.properties_hash.pokemon_reverse.toString() !== selectedReverse) return false;
-        if (selectedCondition && card.condition !== selectedCondition) return false;
-        return true;
-    });
+    };
 
-    // Pagination
-    const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
-    const paginatedCards = filteredCards.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+    // Filtrer et trier les commandes
+    const filteredOrders = orders
+        .filter(order => {
+            if (selectedCollection && !order.cart_data.some(item => item.extension === selectedCollection)) {
+                return false;
+            }
+            if (selectedStatus && order.status !== selectedStatus) {
+                return false;
+            }
+            if (minAmount && calculateOrderTotal(order.cart_data) < parseFloat(minAmount)) {
+                return false;
+            }
+            return true;
+        })
+        .sort((a, b) => {
+            if (sortKey === 'pseudo') {
+                return sortDirection === 'asc' ? a.pseudo.localeCompare(b.pseudo) : b.pseudo.localeCompare(a.pseudo);
+            } else if (sortKey === 'status') {
+                return sortDirection === 'asc' ? a.status.localeCompare(b.status) : b.status.localeCompare(a.status);
+            } else if (sortKey === 'total') {
+                return sortDirection === 'asc'
+                    ? calculateOrderTotal(a.cart_data) - calculateOrderTotal(b.cart_data)
+                    : calculateOrderTotal(b.cart_data) - calculateOrderTotal(a.cart_data);
+            } else if (sortKey === 'date') {
+                return sortDirection === 'asc'
+                    ? new Date(a.created_at) - new Date(b.created_at)
+                    : new Date(b.created_at) - new Date(a.created_at);
+            }
+            return 0;
+        });
 
-    // Charger les extensions et l'inventaire
+    // Calculer le total d'une commande
+    const calculateOrderTotal = (cartData) => {
+        return cartData.reduce((total, item) => total + item.price * item.quantity, 0);
+    };
+
+    // Générer l'URL de l'image de la carte
+    const getCardImageUrl = (blueprintId) => {
+        return `https://www.cardtrader.com/images/blueprint/${blueprintId}.jpg`;
+    };
+
+    // Valider une commande
+    const validateOrder = async (orderId) => {
+        const { error } = await supabaseClient
+            .from('orders')
+            .update({ status: 'shipped' }) // Mettre à jour le statut à "shipped"
+            .eq('id', orderId);
+
+        if (error) {
+            console.error('Erreur lors de la validation de la commande:', error);
+        } else {
+            fetchOrders(); // Recharger les commandes pour refléter le changement
+        }
+    };
+
+    // Annuler une commande
+    const cancelOrder = async (orderId) => {
+        const { error } = await supabaseClient
+            .from('orders')
+            .update({ status: 'cancelled' }) // Mettre à jour le statut à "cancelled"
+            .eq('id', orderId);
+
+        if (error) {
+            console.error('Erreur lors de l\'annulation de la commande:', error);
+        } else {
+            fetchOrders(); // Recharger les commandes pour refléter le changement
+        }
+    };
+
+    // Déconnexion de l'admin
+    const logout = () => {
+        localStorage.removeItem('admin-token'); // Supprimer le token d'authentification
+        window.location.href = 'index.html'; // Rediriger vers la page d'accueil
+    };
+
+    // Charger les commandes au démarrage
     useEffect(() => {
-        const fetchExpansions = async () => {
-            try {
-                const response = await fetch(API_EXPANSIONS, {
-                    method: "GET",
-                    headers: { "Authorization": `Bearer ${API_TOKEN}` }
-                });
-                if (!response.ok) throw new Error(`Erreur API Expansions: ${response.status}`);
-                const data = await response.json();
-                const expansionsMap = {};
-                data.forEach(exp => expansionsMap[exp.id] = exp.name);
-                setExpansions(expansionsMap);
-            } catch (error) {
-                console.error("Erreur lors du chargement des extensions :", error);
-            }
-        };
-
-        const fetchInventory = async () => {
-            try {
-                const response = await fetch(API_PRODUCTS, {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${API_TOKEN}` }
-                });
-                if (!response.ok) throw new Error(`Erreur API Produits: ${response.status}`);
-                const data = await response.json();
-                const inventoryWithFrenchNames = await Promise.all(data.map(async (card) => {
-                    const frenchName = await fetchFrenchPokemonName(card.name_en.toLowerCase());
-                    return { ...card, name_fr: frenchName, condition: card.properties_hash.condition || 'Non spécifiée' };
-                }));
-                setInventory(inventoryWithFrenchNames);
-            } catch (error) {
-                console.error("Erreur API :", error);
-            }
-        };
-
-        fetchExpansions().then(fetchInventory);
+        fetchOrders();
     }, []);
 
     return (
         <div>
             <header>
-                <h1><a href="/inventory.html">Carameche</a></h1>
-                <div className="search-bar">
-                    <input
-                        type="text"
-                        placeholder="Rechercher..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    <button>Rechercher</button>
-                </div>
-                <div>
-                    <a href="/inventory.html">Accueil</a>
-                    <a href="/cart.html">Panier ({cart.reduce((total, item) => total + item.quantity, 0)})</a>
-                </div>
+                <h1>Admin - CardTrader</h1>
+                <button onClick={logout}>Déconnexion</button>
             </header>
 
-            <div className="filters">
-                <h2>Filtres</h2>
-                <select value={selectedExpansion} onChange={(e) => setSelectedExpansion(e.target.value)}>
-                    <option value="">Extension</option>
-                    {Object.entries(expansions).map(([id, name]) => (
-                        <option key={id} value={id}>{name}</option>
-                    ))}
-                </select>
-                <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)}>
-                    <option value="">Langue</option>
-                    <option value="fr">Français</option>
-                    <option value="en">Anglais</option>
-                    <option value="jp">Japonais</option>
-                </select>
-                <select value={selectedRarity} onChange={(e) => setSelectedRarity(e.target.value)}>
-                    <option value="">Rareté</option>
-                    <option value="Common">Commun</option>
-                    <option value="Uncommon">Peu Commun</option>
-                    <option value="Rare">Rare</option>
-                    <option value="Holo Rare">Holo</option>
-                    <option value="Promo">Promo</option>
-                    <option value="Ultra Rare">Ultra Rare</option>
-                    <option value="Secret Rare">Secret Rare</option>
-                    <option value="Rare Holo EX">Rare Holo EX</option>
-                    <option value="Double Rare">Double Rare</option>
-                    <option value="Triple Rare">Triple Rare</option>
-                    <option value="Illustration Rare">Illustration Rare</option>
-                </select>
-                <select value={selectedReverse} onChange={(e) => setSelectedReverse(e.target.value)}>
-                    <option value="">Type de carte</option>
-                    <option value="true">Cartes Reverse</option>
-                    <option value="false">Cartes Normales</option>
-                </select>
-                <select value={selectedCondition} onChange={(e) => setSelectedCondition(e.target.value)}>
-                    <option value="">Condition</option>
-                    <option value="Mint">Mint</option>
-                    <option value="Near Mint">Near Mint</option>
-                    <option value="Slightly Played">Slightly Played</option>
-                    <option value="Moderately Played">Moderately Played</option>
-                    <option value="Played">Played</option>
-                    <option value="Heavily Played">Heavily Played</option>
-                    <option value="Poor">Poor</option>
-                </select>
-                <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
-                    <option value="">Trier par</option>
-                    <option value="asc">Tri Ascendant</option>
-                    <option value="desc">Tri Descendant</option>
-                </select>
-                <button onClick={resetFilters}>Réinitialiser les filtres</button>
-            </div>
-
-            <div className="inventory-grid">
-                {paginatedCards.map(card => (
-                    <div key={card.blueprint_id} className="card">
-                        <div className="ribbon-container">
-                            <img
-                                src={`${imageBaseUrl}${card.blueprint_id}.jpg`}
-                                alt={card.name_fr || card.name_en}
-                                className={`card-image ${card.properties_hash.pokemon_reverse ? 'reverse-glow' : ''}`}
-                            />
-                            {card.properties_hash.pokemon_reverse && <div className="ribbon">Reverse</div>}
-                        </div>
-                        <div className="card-details">
-                            <h3 className="card-name">{card.name_fr || card.name_en}</h3>
-                            <p className="card-expansion">{expansions[card.expansion.id]}</p>
-                            <p className="card-rarity">{card.properties_hash.pokemon_rarity}</p>
-                            <p className="card-condition">{card.condition || 'Non spécifiée'}</p>
-                            <p className="card-price">{(card.price_cents / 100).toFixed(2)} €</p>
-                            <div className="card-quantity">{card.quantity || 0} disponible(s)</div>
-                            <button onClick={(e) => addToCart(card, e)}>Ajouter au panier</button>
-                        </div>
+            <main>
+                <div className="admin">
+                    <h2>Commandes validées</h2>
+                    <div>
+                        <select value={selectedCollection} onChange={(e) => setSelectedCollection(e.target.value)}>
+                            <option value="">Filtrer par collection</option>
+                            {collectionOptions.map(option => (
+                                <option key={option.value} value={option.value}>{option.title}</option>
+                            ))}
+                        </select>
+                        <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)}>
+                            <option value="">Filtrer par statut</option>
+                            {statusOptions.map(option => (
+                                <option key={option.value} value={option.value}>{option.title}</option>
+                            ))}
+                        </select>
+                        <input
+                            type="number"
+                            placeholder="Montant minimum"
+                            value={minAmount || ''}
+                            onChange={(e) => setMinAmount(e.target.value)}
+                        />
                     </div>
-                ))}
-            </div>
 
-            {snackbar.show && (
-                <div className="snackbar" style={{ backgroundColor: snackbar.color }}>
-                    {snackbar.message}
-                    <button onClick={() => setSnackbar({ ...snackbar, show: false })}>Fermer</button>
+                    {filteredOrders.length > 0 ? (
+                        <div>
+                            {filteredOrders.map(order => (
+                                <div key={order.id}>
+                                    <h3>{order.pseudo} - <span>{order.status}</span></h3>
+                                    <div>
+                                        {order.cart_data.map((item, index) => (
+                                            <div key={index}>
+                                                <img src={getCardImageUrl(item.blueprintId)} alt={item.name} />
+                                                <div>
+                                                    <p>{item.name}</p>
+                                                    <p>Quantité: {item.quantity}</p>
+                                                    <p>Numéro de collection: {item.collectorNumber}</p>
+                                                    <p>Prix unitaire: {item.price.toFixed(2)} €</p>
+                                                    <p>Total: {(item.price * item.quantity).toFixed(2)} €</p>
+                                                    <p>Extension: {item.extension}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <p>Total de la commande: {calculateOrderTotal(order.cart_data).toFixed(2)} €</p>
+                                    <button onClick={() => validateOrder(order.id)}>Valider</button>
+                                    <button onClick={() => cancelOrder(order.id)}>Annuler</button>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p>Aucune commande correspondante.</p>
+                    )}
                 </div>
-            )}
-
-            {showCartAnimation && (
-                <div className="cart-animation-icon" style={cartAnimationStyle}>
-                    <i className="mdi mdi-cart"></i>
-                </div>
-            )}
+            </main>
         </div>
     );
 };
