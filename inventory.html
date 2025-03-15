@@ -554,7 +554,27 @@
                     console.log("Paginated Cards:", cards); // Vérifiez les données dans la console
                     return cards;
                 });
-                const expansionOptions = computed(() => Object.entries(expansions.value).map(([id, code]) => ({ title: code, value: id })));
+                const cardsPerExtension = computed(() => {
+    const counts = {};
+    filteredCards.value.forEach(card => {
+        const expansionId = card.expansion.id;
+        if (!counts[expansionId]) {
+            counts[expansionId] = 0;
+        }
+        counts[expansionId] += card.quantity || 0;
+    });
+    return counts;
+});
+                //const expansionOptions = computed(() => Object.entries(expansions.value).map(([id, code]) => ({ title: code, value: id })));
+                const expansionOptions = computed(() => {
+    return Object.entries(expansions.value).map(([id, code]) => {
+        const count = cardsPerExtension.value[id] || 0;
+        return {
+            title: `${code} (${count})`, // Ajoutez le nombre de cartes à côté du nom de l'extension
+            value: id
+        };
+    });
+});
                 const languageOptions = [
                     { title: 'Français', value: 'fr' },
                     { title: 'Anglais', value: 'en' },
