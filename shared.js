@@ -13,17 +13,13 @@ const API_TOKEN = 'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJjYXJkdHJhZGVyLXByb2R1Y3Rpb24i
 
 // Fonction pour récupérer le nom français d'un Pokémon
 // Fonction pour récupérer le nom français d'une carte Pokémon avec TCGdex
+// Fonction pour récupérer le nom français d'une carte Pokémon avec TCGdex SDK
 async function fetchFrenchPokemonName(cardName) {
     try {
-        // Récupérer les informations de la carte en français
-        const response = await fetch(`https://api.tcgdex.net/v2/fr/cards?name=${encodeURIComponent(cardName)}`);
-        if (!response.ok) throw new Error(`Erreur API TCGdex: ${response.status}`);
-        const data = await response.json();
-
-        // Vérifier si des résultats ont été trouvés
-        if (data.length > 0) {
-            // Retourner le nom français de la première carte trouvée
-            return data[0].name;
+        // Utiliser TCGdex SDK pour récupérer les informations de la carte
+        const cards = await tcgdex.fetch('cards', { name: cardName, lang: 'fr' });
+        if (cards.length > 0) {
+            return cards[0].name; // Retourne le nom français de la première carte trouvée
         } else {
             console.warn(`Aucune carte trouvée pour "${cardName}". Utilisation du nom anglais.`);
             return cardName; // Retourne le nom anglais par défaut
