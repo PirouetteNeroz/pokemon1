@@ -18,8 +18,7 @@
     <div id="app">
         <v-app>
             <!-- Votre contenu Vue ici -->
-            <!-- Icône animée pour l'ajout au panier -->
-            <transition name="slide-fade">
+                      <transition name="slide-fade">
                 <v-icon
                     v-if="showCartAnimation"
                     class="cart-animation-icon"
@@ -224,6 +223,7 @@
             </v-main>
         </v-app>
     </div>
+
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js"></script>
     <script>
@@ -250,301 +250,297 @@
             },
         });
 
-                const app = createApp({
-                    setup() {
-                        const inventory = ref([]);
-                        const expansions = ref({});
-                        const cart = ref(getCartFromLocalStorage());
-                        const userId = ref(generateUserId());
-                        const tab = ref('inventory');
-                        const searchQuery = ref('');
-                        const selectedExpansion = ref('');
-                        const selectedLanguage = ref('');
-                        const selectedRarity = ref('');
-                        const selectedReverse = ref('');
-                        const selectedCondition = ref('');
-                        const sortOrder = ref('');
-                        const imageBaseUrl = ref('https://www.cardtrader.com/images/blueprint/');
-                        const currentPage = ref(1);
-                        const itemsPerPage = 100;
-                        const showCartAnimation = ref(false);
-                        const cartAnimationStyle = ref({});
-                        const snackbar = reactive({
-                            show: false,
-                            message: '',
-                            color: 'success',
-                        });
-                        const tableHeaders = ref([
-                            { text: 'Numéro de Collection', value: 'properties_hash.collector_number', align: 'start' },
-                            { text: 'Image', value: 'image', sortable: false, align: 'center' },
-                            { text: 'Nom du Pokémon', value: 'name', align: 'center' },
-                            { text: 'Extension', value: 'expansion', align: 'center' },
-                            { text: 'Quantité', value: 'quantity', align: 'center' },
-                            { text: 'Langue', value: 'properties_hash.pokemon_language', align: 'center' },
-                            { text: 'Condition', value: 'condition', align: 'center' },
-                            { text: 'Prix', value: 'price_cents', align: 'center' },
-                            { text: 'Version', value: 'properties_hash.pokemon_reverse', align: 'center' },
-                            { text: 'Actions', value: 'actions', sortable: false, align: 'center' }
-                        ]);
-                        const conditionOptions = [
-                            { title: 'Mint', value: 'Mint' },
-                            { title: 'Near Mint', value: 'Near Mint' },
-                            { title: 'Slightly Played', value: 'Slightly Played' },
-                            { title: 'Moderately Played', value: 'Moderately Played' },
-                            { title: 'Played', value: 'Played' },
-                            { title: 'Heavily Played', value: 'Heavily Played' },
-                            { title: 'Poor', value: 'Poor' }
-                        ];
-                        const viewMode = ref('grid');
-
-                        function showNotification(message, color = 'success') {
-                            snackbar.message = message;
-                            snackbar.color = color;
-                            snackbar.show = true;
-                            setTimeout(() => {
-                                snackbar.show = false;
-                            }, 3000);
-                        }
-
-                        function addToCart(card, event) {
-                            const existingItem = cart.value.find(item => item.blueprintId === card.blueprint_id);
-                            if (existingItem) {
-                                if (existingItem.quantity >= card.quantity) {
-                                    showNotification("Quantité maximale atteinte pour cette carte.", 'error');
-                                    return;
-                                }
-                                existingItem.quantity += 1;
-                            } else {
-                                cart.value.push({
-                                    blueprintId: card.blueprint_id,
-                                    name: card.name_fr || card.name_en,
-                                    extension: expansions.value[card.expansion.id],
-                                    price: (card.price_cents / 100),
-                                    quantity: 1,
-                                    maxQuantity: card.quantity,
-                                    condition: card.condition || 'Non spécifiée',
-                                    collectorNumber: card.properties_hash.collector_number || 'N/A'
-                                });
-                            }
-                            showNotification(`${card.name_fr || card.name_en} ajoutée au panier.`, 'success');
-                            triggerCartAnimation(event);
-                            saveCartToLocalStorage(cart.value);
-                        }
-
-                        function triggerCartAnimation(event) {
-                            const buttonRect = event.target.getBoundingClientRect();
-                            const buttonX = buttonRect.left + buttonRect.width / 2;
-                            const buttonY = buttonRect.top + buttonRect.height / 2;
-                            cartAnimationStyle.value = {
-                                left: `${buttonX}px`,
-                                top: `${buttonY}px`,
-                            };
-                            showCartAnimation.value = true;
-                            setTimeout(() => {
-                                showCartAnimation.value = false;
-                            }, 800);
-                        }
-
-                        function resetFilters() {
-                            searchQuery.value = '';
-                            selectedExpansion.value = '';
-                            selectedLanguage.value = '';
-                            selectedRarity.value = '';
-                            selectedReverse.value = '';
-                            selectedCondition.value = '';
-                            sortOrder.value = '';
-                        }
-
-                        const totalPages = computed(() => Math.ceil(filteredCards.value.length / itemsPerPage));
-                        const paginatedCards = computed(() => {
-                            const start = (currentPage.value - 1) * itemsPerPage;
-                            const end = start + itemsPerPage;
-                            const cards = filteredCards.value.slice(start, end);
-                            console.log("Paginated Cards:", cards);
-                            return cards;
-                        });
-                        const expansionOptions = computed(() => Object.entries(expansions.value).map(([id, code]) => ({ title: code, value: id })));
-                        const languageOptions = [
-                            { title: 'Français', value: 'fr' },
-                            { title: 'Anglais', value: 'en' },
-                            { title: 'Japonais', value: 'jp' }
-                        ];
-                        const rarityOptions = [
-                            { title: 'Commun', value: 'Common' },
-                            { title: 'Peu Commun', value: 'Uncommon' },
-                            { title: 'Rare', value: 'Rare' },
-                            { title: 'Holo', value: 'Holo Rare' },
-                            { title: 'Promo', value: 'Promo' },
-                            { title: 'Holo', value: 'Holo Rare' },
-                            { title: 'Ultra Rare', value: 'Ultra Rare' },
-                            { title: 'Secret Rare', value: 'Secret Rare' },
-                            { title: 'Rare Holo EX', value: 'Rare Holo EX' },
-                            { title: 'Double Rare', value: 'Double Rare' },
-                            { title: 'Triple Rare', value: 'Triple Rare' },
-                            { title: 'Illustration Rare', value: 'Illustration Rare' }
-                        ];
-                        const reverseOptions = [
-                            { title: 'Cartes Reverse', value: 'true' },
-                            { title: 'Cartes Normales', value: 'false' }
-                        ];
-                        const sortOptions = [
-                            { title: 'Tri Ascendant', value: 'asc' },
-                            { title: 'Tri Descendant', value: 'desc' }
-                        ];
-                        const totalItemsInCart = computed(() => cart.value.reduce((total, item) => total + item.quantity, 0));
-
-                        const normalizeString = (str) => {
-                            return str
-                                .normalize("NFD")
-                                .replace(/[\u0300-\u036f]/g, "")
-                                .toLowerCase()
-                                .trim();
-                        };
-
-                        const filteredCards = computed(() => {
-                            let cards = inventory.value.filter(card => {
-                                if (searchQuery.value) {
-                                    const searchTerm = normalizeString(searchQuery.value);
-                                    const nameEn = normalizeString(card.name_en);
-                                    const nameFr = normalizeString(card.name_fr);
-                                    if (!nameEn.includes(searchTerm) && !nameFr.includes(searchTerm)) return false;
-                                }
-                                if (selectedExpansion.value && card.expansion.id != selectedExpansion.value) return false;
-                                if (selectedLanguage.value && card.properties_hash.pokemon_language != selectedLanguage.value) return false;
-                                if (selectedRarity.value && card.properties_hash.pokemon_rarity != selectedRarity.value) return false;
-                                if (selectedReverse.value !== "" && card.properties_hash.pokemon_reverse.toString() !== selectedReverse.value) return false;
-                                if (selectedCondition.value && card.condition !== selectedCondition.value) return false;
-                                return true;
-                            });
-                            if (sortOrder.value === 'asc') {
-                                cards.sort((a, b) => a.properties_hash.collector_number - b.properties_hash.collector_number);
-                            } else if (sortOrder.value === 'desc') {
-                                cards.sort((a, b) => b.properties_hash.collector_number - a.properties_hash.collector_number);
-                            }
-                            return cards;
-                        });
-
-                        watch(searchQuery, () => {
-                            currentPage.value = 1;
-                        });
-
-                        const suggestions = ref([]);
-
-                        function updateSuggestions() {
-                            if (searchQuery.value.length > 1) {
-                                suggestions.value = inventory.value
-                                    .filter(card => {
-                                        const searchTerm = normalizeString(searchQuery.value);
-                                        const nameEn = normalizeString(card.name_en);
-                                        const nameFr = normalizeString(card.name_fr);
-                                        return nameEn.includes(searchTerm) || nameFr.includes(searchTerm);
-                                    })
-                                    .map(card => card.name_fr || card.name_en)
-                                    .slice(0, 5);
-                            } else {
-                                suggestions.value = [];
-                            }
-                        }
-
-                        async function fetchExpansions() {
-                            try {
-                                const response = await fetch(API_EXPANSIONS, {
-                                    method: "GET",
-                                    headers: { "Authorization": `Bearer ${API_TOKEN}` }
-                                });
-                                if (!response.ok) throw new Error(`Erreur API Expansions: ${response.status}`);
-                                const data = await response.json();
-                                data.forEach(exp => expansions.value[exp.id] = exp.name);
-                            } catch (error) {
-                                console.error("Erreur lors du chargement des extensions :", error);
-                            }
-                        }
-
-                        async function fetchInventory() {
-                            try {
-                                const response = await fetch(API_PRODUCTS, {
-                                    method: 'GET',
-                                    headers: { 'Authorization': `Bearer ${API_TOKEN}` }
-                                });
-                                if (!response.ok) throw new Error(`Erreur API Produits: ${response.status}`);
-                                const data = await response.json();
-                                inventory.value = await Promise.all(data.map(async (card) => {
-                                    const frenchName = await fetchFrenchPokemonName(card.name_en.toLowerCase());
-                                    return { ...card, name_fr: frenchName, condition: card.properties_hash.condition || 'Non spécifiée' };
-                                }));
-                            } catch (error) {
-                                console.error("Erreur API :", error);
-                            }
-                        }
-
-                        async function fetchTranslations() {
-                            try {
-                                const response = await fetch('/translations.json');
-                                if (!response.ok) throw new Error(`Erreur lors du chargement des traductions: ${response.status}`);
-                                const translations = await response.json();
-                                console.log("Traductions chargées:", translations);
-                                return translations;
-                            } catch (error) {
-                                console.error("Erreur lors du chargement des traductions:", error);
-                                return {};
-                            }
-                        }
-
-                        fetchExpansions().then(async () => {
-                            const translations = await fetchTranslations();
-                            Object.keys(expansions.value).forEach(key => {
-                                if (translations[expansions.value[key]]) {
-                                    expansions.value[key] = translations[expansions.value[key]];
-                                }
-                            });
-                            fetchInventory();
-                        });
-
-                        return {
-                            inventory,
-                            expansions,
-                            cart,
-                            tab,
-                            searchQuery,
-                            selectedExpansion,
-                            selectedLanguage,
-                            selectedRarity,
-                            selectedReverse,
-                            selectedCondition,
-                            sortOrder,
-                            imageBaseUrl,
-                            currentPage,
-                            itemsPerPage,
-                            totalPages,
-                            paginatedCards,
-                            tableHeaders,
-                            expansionOptions,
-                            languageOptions,
-                            rarityOptions,
-                            reverseOptions,
-                            conditionOptions,
-                            sortOptions,
-                            totalItemsInCart,
-                            snackbar,
-                            showCartAnimation,
-                            cartAnimationStyle,
-                            addToCart,
-                            resetFilters,
-                            showNotification,
-                            viewMode,
-                            toggleViewMode() {
-                                viewMode.value = viewMode.value === 'grid' ? 'table' : 'grid';
-                            },
-                        };
-                    }
+        const app = createApp({
+            setup() {
+                const inventory = ref([]);
+                const expansions = ref({});
+                const cart = ref(getCartFromLocalStorage());
+                const userId = ref(generateUserId());
+                const tab = ref('inventory');
+                const searchQuery = ref('');
+                const selectedExpansion = ref('');
+                const selectedLanguage = ref('');
+                const selectedRarity = ref('');
+                const selectedReverse = ref('');
+                const selectedCondition = ref('');
+                const sortOrder = ref('');
+                const imageBaseUrl = ref('https://www.cardtrader.com/images/blueprint/');
+                const currentPage = ref(1);
+                const itemsPerPage = 100;
+                const showCartAnimation = ref(false);
+                const cartAnimationStyle = ref({});
+                const snackbar = reactive({
+                    show: false,
+                    message: '',
+                    color: 'success',
                 });
-                app.use(vuetify);
-                app.mount('#app');
-            });
-                .catch((error) => {
-                console.error('Erreur lors du chargement du module shared.js:', error);
-            });
+                const tableHeaders = ref([
+                    { text: 'Numéro de Collection', value: 'properties_hash.collector_number', align: 'start' },
+                    { text: 'Image', value: 'image', sortable: false, align: 'center' },
+                    { text: 'Nom du Pokémon', value: 'name', align: 'center' },
+                    { text: 'Extension', value: 'expansion', align: 'center' },
+                    { text: 'Quantité', value: 'quantity', align: 'center' },
+                    { text: 'Langue', value: 'properties_hash.pokemon_language', align: 'center' },
+                    { text: 'Condition', value: 'condition', align: 'center' },
+                    { text: 'Prix', value: 'price_cents', align: 'center' },
+                    { text: 'Version', value: 'properties_hash.pokemon_reverse', align: 'center' },
+                    { text: 'Actions', value: 'actions', sortable: false, align: 'center' }
+                ]);
+                const conditionOptions = [
+                    { title: 'Mint', value: 'Mint' },
+                    { title: 'Near Mint', value: 'Near Mint' },
+                    { title: 'Slightly Played', value: 'Slightly Played' },
+                    { title: 'Moderately Played', value: 'Moderately Played' },
+                    { title: 'Played', value: 'Played' },
+                    { title: 'Heavily Played', value: 'Heavily Played' },
+                    { title: 'Poor', value: 'Poor' }
+                ];
+                const viewMode = ref('grid');
+
+                function showNotification(message, color = 'success') {
+                    snackbar.message = message;
+                    snackbar.color = color;
+                    snackbar.show = true;
+                    setTimeout(() => {
+                        snackbar.show = false;
+                    }, 3000);
+                }
+
+                function addToCart(card, event) {
+                    const existingItem = cart.value.find(item => item.blueprintId === card.blueprint_id);
+                    if (existingItem) {
+                        if (existingItem.quantity >= card.quantity) {
+                            showNotification("Quantité maximale atteinte pour cette carte.", 'error');
+                            return;
+                        }
+                        existingItem.quantity += 1;
+                    } else {
+                        cart.value.push({
+                            blueprintId: card.blueprint_id,
+                            name: card.name_fr || card.name_en,
+                            extension: expansions.value[card.expansion.id],
+                            price: (card.price_cents / 100),
+                            quantity: 1,
+                            maxQuantity: card.quantity,
+                            condition: card.condition || 'Non spécifiée',
+                            collectorNumber: card.properties_hash.collector_number || 'N/A'
+                        });
+                    }
+                    showNotification(`${card.name_fr || card.name_en} ajoutée au panier.`, 'success');
+                    triggerCartAnimation(event);
+                    saveCartToLocalStorage(cart.value);
+                }
+
+                function triggerCartAnimation(event) {
+                    const buttonRect = event.target.getBoundingClientRect();
+                    const buttonX = buttonRect.left + buttonRect.width / 2;
+                    const buttonY = buttonRect.top + buttonRect.height / 2;
+                    cartAnimationStyle.value = {
+                        left: `${buttonX}px`,
+                        top: `${buttonY}px`,
+                    };
+                    showCartAnimation.value = true;
+                    setTimeout(() => {
+                        showCartAnimation.value = false;
+                    }, 800);
+                }
+
+                function resetFilters() {
+                    searchQuery.value = '';
+                    selectedExpansion.value = '';
+                    selectedLanguage.value = '';
+                    selectedRarity.value = '';
+                    selectedReverse.value = '';
+                    selectedCondition.value = '';
+                    sortOrder.value = '';
+                }
+
+                const totalPages = computed(() => Math.ceil(filteredCards.value.length / itemsPerPage));
+                const paginatedCards = computed(() => {
+                    const start = (currentPage.value - 1) * itemsPerPage;
+                    const end = start + itemsPerPage;
+                    const cards = filteredCards.value.slice(start, end);
+                    console.log("Paginated Cards:", cards);
+                    return cards;
+                });
+                const expansionOptions = computed(() => Object.entries(expansions.value).map(([id, code]) => ({ title: code, value: id })));
+                const languageOptions = [
+                    { title: 'Français', value: 'fr' },
+                    { title: 'Anglais', value: 'en' },
+                    { title: 'Japonais', value: 'jp' }
+                ];
+                const rarityOptions = [
+                    { title: 'Commun', value: 'Common' },
+                    { title: 'Peu Commun', value: 'Uncommon' },
+                    { title: 'Rare', value: 'Rare' },
+                    { title: 'Holo', value: 'Holo Rare' },
+                    { title: 'Promo', value: 'Promo' },
+                    { title: 'Holo', value: 'Holo Rare' },
+                    { title: 'Ultra Rare', value: 'Ultra Rare' },
+                    { title: 'Secret Rare', value: 'Secret Rare' },
+                    { title: 'Rare Holo EX', value: 'Rare Holo EX' },
+                    { title: 'Double Rare', value: 'Double Rare' },
+                    { title: 'Triple Rare', value: 'Triple Rare' },
+                    { title: 'Illustration Rare', value: 'Illustration Rare' }
+                ];
+                const reverseOptions = [
+                    { title: 'Cartes Reverse', value: 'true' },
+                    { title: 'Cartes Normales', value: 'false' }
+                ];
+                const sortOptions = [
+                    { title: 'Tri Ascendant', value: 'asc' },
+                    { title: 'Tri Descendant', value: 'desc' }
+                ];
+                const totalItemsInCart = computed(() => cart.value.reduce((total, item) => total + item.quantity, 0));
+
+                const normalizeString = (str) => {
+                    return str
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .toLowerCase()
+                        .trim();
+                };
+
+                const filteredCards = computed(() => {
+                    let cards = inventory.value.filter(card => {
+                        if (searchQuery.value) {
+                            const searchTerm = normalizeString(searchQuery.value);
+                            const nameEn = normalizeString(card.name_en);
+                            const nameFr = normalizeString(card.name_fr);
+                            if (!nameEn.includes(searchTerm) && !nameFr.includes(searchTerm)) return false;
+                        }
+                        if (selectedExpansion.value && card.expansion.id != selectedExpansion.value) return false;
+                        if (selectedLanguage.value && card.properties_hash.pokemon_language != selectedLanguage.value) return false;
+                        if (selectedRarity.value && card.properties_hash.pokemon_rarity != selectedRarity.value) return false;
+                        if (selectedReverse.value !== "" && card.properties_hash.pokemon_reverse.toString() !== selectedReverse.value) return false;
+                        if (selectedCondition.value && card.condition !== selectedCondition.value) return false;
+                        return true;
+                    });
+                    if (sortOrder.value === 'asc') {
+                        cards.sort((a, b) => a.properties_hash.collector_number - b.properties_hash.collector_number);
+                    } else if (sortOrder.value === 'desc') {
+                        cards.sort((a, b) => b.properties_hash.collector_number - a.properties_hash.collector_number);
+                    }
+                    return cards;
+                });
+
+                watch(searchQuery, () => {
+                    currentPage.value = 1;
+                });
+
+                const suggestions = ref([]);
+
+                function updateSuggestions() {
+                    if (searchQuery.value.length > 1) {
+                        suggestions.value = inventory.value
+                            .filter(card => {
+                                const searchTerm = normalizeString(searchQuery.value);
+                                const nameEn = normalizeString(card.name_en);
+                                const nameFr = normalizeString(card.name_fr);
+                                return nameEn.includes(searchTerm) || nameFr.includes(searchTerm);
+                            })
+                            .map(card => card.name_fr || card.name_en)
+                            .slice(0, 5);
+                    } else {
+                        suggestions.value = [];
+                    }
+                }
+
+                async function fetchExpansions() {
+                    try {
+                        const response = await fetch(API_EXPANSIONS, {
+                            method: "GET",
+                            headers: { "Authorization": `Bearer ${API_TOKEN}` }
+                        });
+                        if (!response.ok) throw new Error(`Erreur API Expansions: ${response.status}`);
+                        const data = await response.json();
+                        data.forEach(exp => expansions.value[exp.id] = exp.name);
+                    } catch (error) {
+                        console.error("Erreur lors du chargement des extensions :", error);
+                    }
+                }
+
+                async function fetchInventory() {
+                    try {
+                        const response = await fetch(API_PRODUCTS, {
+                            method: 'GET',
+                            headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+                        });
+                        if (!response.ok) throw new Error(`Erreur API Produits: ${response.status}`);
+                        const data = await response.json();
+                        inventory.value = await Promise.all(data.map(async (card) => {
+                            const frenchName = await fetchFrenchPokemonName(card.name_en.toLowerCase());
+                            return { ...card, name_fr: frenchName, condition: card.properties_hash.condition || 'Non spécifiée' };
+                        }));
+                    } catch (error) {
+                        console.error("Erreur API :", error);
+                    }
+                }
+
+                async function fetchTranslations() {
+                    try {
+                        const response = await fetch('/translations.json');
+                        if (!response.ok) throw new Error(`Erreur lors du chargement des traductions: ${response.status}`);
+                        const translations = await response.json();
+                        console.log("Traductions chargées:", translations);
+                        return translations;
+                    } catch (error) {
+                        console.error("Erreur lors du chargement des traductions:", error);
+                        return {};
+                    }
+                }
+
+                fetchExpansions().then(async () => {
+                    const translations = await fetchTranslations();
+                    Object.keys(expansions.value).forEach(key => {
+                        if (translations[expansions.value[key]]) {
+                            expansions.value[key] = translations[expansions.value[key]];
+                        }
+                    });
+                    fetchInventory();
+                });
+
+                return {
+                    inventory,
+                    expansions,
+                    cart,
+                    tab,
+                    searchQuery,
+                    selectedExpansion,
+                    selectedLanguage,
+                    selectedRarity,
+                    selectedReverse,
+                    selectedCondition,
+                    sortOrder,
+                    imageBaseUrl,
+                    currentPage,
+                    itemsPerPage,
+                    totalPages,
+                    paginatedCards,
+                    tableHeaders,
+                    expansionOptions,
+                    languageOptions,
+                    rarityOptions,
+                    reverseOptions,
+                    conditionOptions,
+                    sortOptions,
+                    totalItemsInCart,
+                    snackbar,
+                    showCartAnimation,
+                    cartAnimationStyle,
+                    addToCart,
+                    resetFilters,
+                    showNotification,
+                    viewMode,
+                    toggleViewMode() {
+                        viewMode.value = viewMode.value === 'grid' ? 'table' : 'grid';
+                    },
+                };
+            }
         });
+
+        app.use(vuetify);
+        app.mount('#app');
     </script>
 </body>
 </html>
