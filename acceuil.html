@@ -1,220 +1,110 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TCGdex - Toutes les séries</title>
-    <!-- Vuetify CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.css" rel="stylesheet">
-    <!-- Material Design Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
-    <style>
-        .serie-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-        }
-        .serie-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-        .serie-card img {
-            border-radius: 8px;
-        }
-        .search-field {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-    </style>
-</head>
-<body>
-    <div id="app">
-        <v-app>
-            <!-- Barre d'application -->
-            <v-app-bar app color="primary" dark>
-                <v-toolbar-title>TCGdex - Toutes les séries</v-toolbar-title>
-                <v-spacer></v-spacer>
-                <v-btn icon @click="toggleTheme">
-                    <v-icon>mdi-theme-light-dark</v-icon>
-                </v-btn>
-            </v-app-bar>
-
-            <!-- Contenu principal -->
-            <v-main>
-                <v-container>
-                    <!-- Barre de recherche -->
-                    <v-text-field
-                        v-model="searchQuery"
-                        label="Rechercher une série..."
-                        prepend-icon="mdi-magnify"
-                        outlined
-                        dense
-                        class="search-field mb-6"
-                        @input="filterSeries"
-                    ></v-text-field>
-
-                    <!-- Panneaux dépliables par bloc -->
-                    <v-expansion-panels>
-                        <v-expansion-panel
-                            v-for="(block, index) in groupedSeries"
-                            :key="index"
-                        >
-                            <v-expansion-panel-title>
-                                {{ block.name }}
-                            </v-expansion-panel-title>
-                            <v-expansion-panel-text>
-                                <!-- Grille des séries dans ce bloc -->
-                                <v-row>
-                                    <v-col
-                                        v-for="serie in block.series"
-                                        :key="serie.id"
-                                        cols="12"
-                                        sm="6"
-                                        md="4"
-                                        lg="3"
-                                    >
-                                        <v-card class="serie-card" @click="goToInventory(serie)">
-                                            <v-img
-                                                :src="serie.logo + '.png'"
-                                                :alt="serie.name"
-                                                height="200"
-                                                cover
-                                                class="align-end"
-                                                gradient="to bottom, rgba(0,0,0,0), rgba(0,0,0,0.7)"
-                                            >
-                                                <v-card-title class="text-white">{{ serie.name }}</v-card-title>
-                                            </v-img>
-                                            <v-card-text>
-                                                <p>Cartes : {{ serie.cardCount.total }} (Officielles : {{ serie.cardCount.official }})</p>
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-col>
-                                </v-row>
-                            </v-expansion-panel-text>
-                        </v-expansion-panel>
-                    </v-expansion-panels>
-
-                    <!-- Message si aucune série n'est trouvée -->
-                    <v-alert
-                        v-if="filteredSeries.length === 0"
-                        type="info"
-                        class="mt-6"
-                    >
-                        Aucune série trouvée.
-                    </v-alert>
-                </v-container>
-            </v-main>
-        </v-app>
-    </div>
-
-    <!-- Vue.js -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
-    <!-- Vuetify JS -->
-    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js"></script>
-    <script>
-        const { createApp, ref, computed } = Vue;
-        const vuetify = Vuetify.createVuetify({
-            theme: {
-                defaultTheme: 'dark',
-                themes: {
-                    dark: {
-                        colors: {
-                            primary: '#FFD700',
-                            secondary: '#1E1E1E',
-                            background: '#121212',
-                            surface: '#1E1E1E',
-                            error: '#FF5252',
-                            info: '#2196F3',
-                            success: '#4CAF50',
-                            warning: '#FFC107',
-                        },
-                    },
-                    light: {
-                        colors: {
-                            primary: '#1976D2',
-                            secondary: '#424242',
-                            background: '#FFFFFF',
-                            surface: '#FFFFFF',
-                            error: '#FF5252',
-                            info: '#2196F3',
-                            success: '#4CAF50',
-                            warning: '#FFC107',
-                        },
-                    },
+const { createApp, ref, computed } = Vue;
+const vuetify = Vuetify.createVuetify({
+    theme: {
+        defaultTheme: 'dark',
+        themes: {
+            dark: {
+                colors: {
+                    primary: '#FFD700',
+                    secondary: '#1E1E1E',
+                    background: '#121212',
+                    surface: '#1E1E1E',
+                    error: '#FF5252',
+                    info: '#2196F3',
+                    success: '#4CAF50',
+                    warning: '#FFC107',
                 },
             },
-        });
-
-        const app = createApp({
-            setup() {
-                const series = ref([]);
-                const searchQuery = ref('');
-                const isDarkTheme = ref(true);
-
-                // Charger toutes les séries
-                async function fetchAllSeries() {
-                    try {
-                        const response = await fetch('https://api.tcgdex.net/v2/fr/sets');
-                        if (!response.ok) throw new Error('Impossible de récupérer les séries');
-                        series.value = await response.json();
-                    } catch (error) {
-                        console.error('Erreur:', error.message);
-                    }
-                }
-
-                // Grouper les séries par blocs
-                const groupedSeries = computed(() => {
-                    const blocks = [
-                        { name: 'Scarlet & Violet', series: [] },
-                        { name: 'Sword & Shield', series: [] },
-                        { name: 'Sun & Moon', series: [] },
-                        { name: 'XY', series: [] },
-                        { name: 'Black & White', series: [] },
-                    ];
-
-                    series.value.forEach(serie => {
-                        if (serie.name.includes('Scarlet & Violet')) {
-                            blocks[0].series.push(serie);
-                        } else if (serie.name.includes('Sword & Shield')) {
-                            blocks[1].series.push(serie);
-                        } else if (serie.name.includes('Sun & Moon')) {
-                            blocks[2].series.push(serie);
-                        } else if (serie.name.includes('XY')) {
-                            blocks[3].series.push(serie);
-                        } else if (serie.name.includes('Black & White')) {
-                            blocks[4].series.push(serie);
-                        }
-                    });
-
-                    return blocks.filter(block => block.series.length > 0);
-                });
-
-                // Rediriger vers l'inventaire avec le filtre de l'extension
-                function goToInventory(serie) {
-                    const cardtraderName = serie.name; // Utilisez le mapping ou la correspondance approximative ici
-                    window.location.href = `/inventory.html?extension=${encodeURIComponent(cardtraderName)}`;
-                }
-
-                // Basculer entre le thème sombre et clair
-                function toggleTheme() {
-                    isDarkTheme.value = !isDarkTheme.value;
-                    vuetify.theme.global.name.value = isDarkTheme.value ? 'dark' : 'light';
-                }
-
-                // Charger les séries au démarrage
-                fetchAllSeries();
-
-                return {
-                    series,
-                    searchQuery,
-                    groupedSeries,
-                    goToInventory,
-                    toggleTheme,
-                };
+            light: {
+                colors: {
+                    primary: '#1976D2',
+                    secondary: '#424242',
+                    background: '#FFFFFF',
+                    surface: '#FFFFFF',
+                    error: '#FF5252',
+                    info: '#2196F3',
+                    success: '#4CAF50',
+                    warning: '#FFC107',
+                },
             },
+        },
+    },
+});
+
+const app = createApp({
+    setup() {
+        const series = ref([]);
+        const searchQuery = ref('');
+        const isDarkTheme = ref(true);
+        const isLoading = ref(true);
+
+        // Charger toutes les séries
+        async function fetchAllSeries() {
+            try {
+                const response = await fetch('https://api.tcgdex.net/v2/fr/sets');
+                if (!response.ok) throw new Error('Impossible de récupérer les séries');
+                series.value = await response.json();
+            } catch (error) {
+                console.error('Erreur:', error.message);
+            } finally {
+                isLoading.value = false; // Fin du chargement
+            }
+        }
+
+        // Grouper les séries par blocs
+        const groupedSeries = computed(() => {
+            if (!series.value || series.value.length === 0) return []; // Retourne un tableau vide si series.value est vide
+            const blocks = [
+                { name: 'Scarlet & Violet', series: [] },
+                { name: 'Sword & Shield', series: [] },
+                { name: 'Sun & Moon', series: [] },
+                { name: 'XY', series: [] },
+                { name: 'Black & White', series: [] },
+            ];
+
+            series.value.forEach(serie => {
+                if (!serie.name || !serie.logo) return; // Ignorer les séries sans nom ou logo
+                if (serie.name.includes('Scarlet & Violet')) {
+                    blocks[0].series.push(serie);
+                } else if (serie.name.includes('Sword & Shield')) {
+                    blocks[1].series.push(serie);
+                } else if (serie.name.includes('Sun & Moon')) {
+                    blocks[2].series.push(serie);
+                } else if (serie.name.includes('XY')) {
+                    blocks[3].series.push(serie);
+                } else if (serie.name.includes('Black & White')) {
+                    blocks[4].series.push(serie);
+                }
+            });
+
+            return blocks.filter(block => block.series.length > 0);
         });
 
-        app.use(vuetify);
-        app.mount('#app');
-    </script>
-</body>
-</html>
+        // Rediriger vers l'inventaire avec le filtre de l'extension
+        function goToInventory(serie) {
+            const cardtraderName = serie.name; // Utilisez le mapping ou la correspondance approximative ici
+            window.location.href = `/inventory.html?extension=${encodeURIComponent(cardtraderName)}`;
+        }
+
+        // Basculer entre le thème sombre et clair
+        function toggleTheme() {
+            isDarkTheme.value = !isDarkTheme.value;
+            vuetify.theme.global.name.value = isDarkTheme.value ? 'dark' : 'light';
+        }
+
+        // Charger les séries au démarrage
+        fetchAllSeries();
+
+        return {
+            series,
+            searchQuery,
+            groupedSeries,
+            goToInventory,
+            toggleTheme,
+            isLoading,
+        };
+    },
+});
+
+app.use(vuetify);
+app.mount('#app');
