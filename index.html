@@ -3,156 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventaire Carameche</title>
+    <title>Admin - CardTrader</title>
     <!-- Material Design Icons -->
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Vos styles CSS ici */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: white;
-            margin: 0;
-            padding: 0;
-        }
-
-        .card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border-radius: 10px;
-            overflow: hidden;
+        .admin {
             background-color: #1E1E1E;
-            margin: 10px;
-        }
-
-        .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-
-        .card-details {
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 100%;
-        }
-
-        .card-name,
-        .card-expansion,
-        .card-price,
-        .card-rarity,
-        .card-condition,
-        .card-collector-number,
-        .card-quantity {
             color: white;
-        }
-
-        .card-condition {
-            font-size: 0.875rem;
-            font-weight: bold;
-            text-align: left;
-            margin: 4px 0;
-            opacity: 0.8;
-        }
-
-        .card-rarity {
-            font-size: 0.875rem;
-            font-weight: bold;
-            margin: 4px 0;
-        }
-
-        .card-collector-number {
-            font-size: 1rem;
-            font-weight: bold;
-            margin-left: 8px;
-            opacity: 0.8;
-        }
-
-        .card-expansion {
-            font-size: 0.875rem;
-            margin-top: 4px;
-            opacity: 0.8;
-        }
-
-        .card-price {
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-align: center;
-            margin: 8px 0;
-        }
-
-        .card-quantity {
-            display: inline-block;
-            padding: 4px 8px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            font-size: 0.875rem;
-            font-weight: bold;
-            text-align: center;
-            margin: 0 auto;
-        }
-
-        .ribbon-container {
-            position: relative;
-            overflow: visible;
-        }
-
-        .ribbon {
-            position: absolute;
-            top: 10px;
-            left: -10px;
-            background: blue;
-            color: white;
-            padding: 5px 15px;
-            font-size: 12px;
-            font-weight: bold;
-            transform: rotate(-20deg);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
-
-        .reverse-glow {
-            box-shadow: 0 0 10px rgba(0, 123, 255, 0.8);
-            border: 2px solid rgba(0, 123, 255, 0.5);
+            padding: 20px;
             border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
-
-        .cart-animation-icon {
-            position: fixed;
-            font-size: 24px;
-            color: #FFC107;
-            z-index: 1000;
-            transition: all 0.8s ease-in-out;
+        .list-item {
+            border-bottom: 1px solid #333;
+            padding: 12px 0;
         }
-
-        .slide-fade-enter-active {
-            transition: all 0.8s ease;
+        .list-item-title {
+            font-size: 1.1em;
+            font-weight: bold;
         }
-
-        .slide-fade-leave-active {
-            transition: all 0.5s ease;
+        .list-item-subtitle {
+            color: #888;
+            font-size: 0.9em;
         }
-
-        .slide-fade-enter-from,
-        .slide-fade-leave-to {
-            opacity: 0;
-            transform: translateY(20px);
+        .card-image {
+            border-radius: 8px;
         }
-
-        .fade-enter-active, .fade-leave-active {
-            transition: opacity 0.5s ease;
+        .highlight {
+            color: #FFD700; /* Couleur dorée pour mettre en avant */
+            font-weight: bold;
         }
-
-        .fade-enter-from, .fade-leave-to {
-            opacity: 0;
+        .full-width {
+            width: 100%;
         }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
-    <!-- Chargez React et ReactDOM via jsDelivr -->
+    <!-- Chargez React et ReactDOM -->
     <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <!-- Chargez Babel pour permettre l'utilisation de JSX -->
