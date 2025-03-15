@@ -266,7 +266,7 @@
                                     <v-col cols="12" md="3" lg="2">
                                         <v-card class="sidebar pa-3">
                                             <h2 class="text-warning mb-4">Filtres</h2>
-                                            <v-text-field v-model="searchQuery" label="Rechercher..." prepend-icon="mdi-magnify" outlined dense class="mb-3"></v-text-field>
+                                            <v-text-field v-model="searchQuery" label="Rechercher..." prepend-icon="mdi-magnify" outlined dense class="mb-3" @click:clear="selectedExpansion = ''"></v-text-field>
                                             <v-select v-model="selectedExpansion" :items="expansionOptions" label="Extension" outlined dense clearable class="mb-3"></v-select>
                                             <v-select v-model="selectedLanguage" :items="languageOptions" label="Langue" outlined dense clearable class="mb-3"></v-select>
                                             <v-select v-model="selectedRarity" :items="rarityOptions" label="Rareté" outlined dense clearable class="mb-3"></v-select>
@@ -554,9 +554,9 @@
                     console.log("Paginated Cards:", cards); // Vérifiez les données dans la console
                     return cards;
                 });
-                const cardsPerExtension = computed(() => {
+const cardsPerExtension = computed(() => {
     const counts = {};
-    filteredCards.value.forEach(card => {
+    inventory.value.forEach(card => { // Utilisez inventory.value au lieu de filteredCards.value
         const expansionId = card.expansion.id;
         if (!counts[expansionId]) {
             counts[expansionId] = 0;
@@ -566,7 +566,7 @@
     return counts;
 });
                 //const expansionOptions = computed(() => Object.entries(expansions.value).map(([id, code]) => ({ title: code, value: id })));
-                const expansionOptions = computed(() => {
+const expansionOptions = computed(() => {
     return Object.entries(expansions.value).map(([id, code]) => {
         const count = cardsPerExtension.value[id] || 0;
         return {
