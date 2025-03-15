@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventaire Carameche</title>
-    <!-- Vuetify CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.css" rel="stylesheet">
     <!-- Material Design Icons -->
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
     <!-- Supabase JS -->
@@ -16,25 +14,10 @@
             border-radius: 10px;
             overflow: hidden;
         }
-        /* Style pour l'image avec effet de zoom */
-       /* .card-image {
-            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Animation fluide */
-       /*     cursor: pointer; /* Curseur en forme de main */
-       /* }
-
-        /* Effet de zoom au survol */
-       /* .card-image:hover {
-            transform: scale(5); /* Agrandir l'image de 20% */
-        /*    z-index: 1000; /* Passer au premier plan */
-       /*     position: relative; /* Nécessaire pour z-index */
-        /*    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Ombre pour un effet de profondeur */
-       /* }*/
-
         .card:hover {
             transform: scale(1.05);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
-
         .card-details {
             padding: 16px;
             display: flex;
@@ -42,8 +25,6 @@
             justify-content: space-between;
             height: 100%;
         }
-
-        /* Couleur du texte en blanc */
         .card-name,
         .card-expansion,
         .card-price,
@@ -53,63 +34,49 @@
         .card-quantity {
             color: white;
         }
-
-        /* Style pour la condition de la carte */
         .card-condition {
             font-size: 0.875rem;
             font-weight: bold;
-            text-align: left; /* Alignement à gauche */
+            text-align: left;
             margin: 4px 0;
-            opacity: 0.8; /* Légère transparence */
+            opacity: 0.8;
         }
-
-        /* Style pour la rareté */
         .card-rarity {
             font-size: 0.875rem;
             font-weight: bold;
             margin: 4px 0;
         }
-
-        /* Style pour le numéro de collection */
         .card-collector-number {
-            font-size: 1rem; /* Taille augmentée */
+            font-size: 1rem;
             font-weight: bold;
-            margin-left: 8px; /* Espacement par rapport au nom */
-            opacity: 0.8; /* Légère transparence */
+            margin-left: 8px;
+            opacity: 0.8;
         }
-
-        /* Style pour l'extension */
         .card-expansion {
             font-size: 0.875rem;
             margin-top: 4px;
-            opacity: 0.8; /* Légère transparence pour l'extension */
+            opacity: 0.8;
         }
-
-        /* Style pour le prix */
         .card-price {
             font-size: 1.5rem;
             font-weight: bold;
-            text-align: center; /* Centrage du prix */
+            text-align: center;
             margin: 8px 0;
         }
-
-        /* Style pour la quantité disponible */
         .card-quantity {
             display: inline-block;
             padding: 4px 8px;
-            background-color: rgba(255, 255, 255, 0.1); /* Fond légèrement visible */
+            background-color: rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             font-size: 0.875rem;
             font-weight: bold;
             text-align: center;
             margin: 0 auto;
         }
-        /* Conteneur pour la ribbon */
         .ribbon-container {
             position: relative;
-            overflow: visible; /* Permet à l'image de déborder */
+            overflow: visible;
         }
-        /* Ribbon en haut à gauche */
         .ribbon {
             position: absolute;
             top: 10px;
@@ -122,21 +89,18 @@
             transform: rotate(-20deg);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
-        /* Effet lumineux sur les Reverse Foil */
         .reverse-glow {
             box-shadow: 0 0 10px rgba(0, 123, 255, 0.8);
             border: 2px solid rgba(0, 123, 255, 0.5);
             border-radius: 10px;
         }
-        /* Animation pour l'icône du panier */
         .cart-animation-icon {
             position: fixed;
             font-size: 24px;
-            color: #FFC107; /* Couleur de l'icône */
+            color: #FFC107;
             z-index: 1000;
-            transition: all 0.8s ease-in-out; /* Durée et effet de l'animation */
+            transition: all 0.8s ease-in-out;
         }
-        /* Animation d'entrée et de sortie */
         .slide-fade-enter-active {
             transition: all 0.8s ease;
         }
@@ -146,591 +110,521 @@
         .slide-fade-enter-from,
         .slide-fade-leave-to {
             opacity: 0;
-            transform: translateY(20px); /* Déplacement vers le bas */
+            transform: translateY(20px);
         }
-        /* Animation fade */
         .fade-enter-active, .fade-leave-active {
             transition: opacity 0.5s ease;
         }
         .fade-enter-from, .fade-leave-to {
             opacity: 0;
         }
-
-        /* Style pour le tableau */
         .v-data-table {
             margin-top: 20px;
-            background-color: #1E1E1E; /* Fond sombre pour le thème dark */
-            color: white; /* Texte en blanc */
+            background-color: #1E1E1E;
+            color: white;
         }
-
-        /* Style pour les en-têtes du tableau */
         .v-data-table-header {
-            background-color: #121212; /* Fond sombre pour les en-têtes */
-            color: white; /* Texte en blanc */
-            font-weight: bold; /* Texte en gras */
+            background-color: #121212;
+            color: white;
+            font-weight: bold;
         }
-
-        /* Style pour les lignes du tableau */
         .v-data-table__tr {
-            background-color: #1E1E1E; /* Fond sombre pour les lignes */
-            color: white; /* Texte en blanc */
+            background-color: #1E1E1E;
+            color: white;
         }
-
-        /* Style pour les lignes au survol */
         .v-data-table__tr:hover {
-            background-color: #2E2E2E; /* Fond légèrement plus clair au survol */
+            background-color: #2E2E2E;
         }
-
-        /* Style pour les cellules du tableau */
         .v-data-table__td {
-            padding: 12px; /* Espacement interne */
+            padding: 12px;
         }
-
-        /* Style pour l'image dans le tableau */
         .card-image {
-            border-radius: 5px; /* Coins arrondis */
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <div id="app">
-        <v-app>
-            <!-- Icône animée pour l'ajout au panier -->
-            <transition name="slide-fade">
-                <v-icon
-                    v-if="showCartAnimation"
-                    class="cart-animation-icon"
-                    :style="cartAnimationStyle"
-                >
-                    mdi-cart
-                </v-icon>
-            </transition>
-            <!-- Notifications visuelles (toasts) -->
-            <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
-                {{ snackbar.message }}
-                <template v-slot:action="{ attrs }">
-                    <v-btn text v-bind="attrs" @click="snackbar.show = false">Fermer</v-btn>
-                </template>
-            </v-snackbar>
-            <!-- Header avec barre de recherche et accès rapide -->
-            <v-app-bar app color="primary" dark>
-                <!-- Titre cliquable pour revenir à l'inventaire -->
-                <v-toolbar-title>
-                    <a href="/inventory.html" style="text-decoration: none; color: inherit;">
-                        <v-btn text>Carameche</v-btn>
-                    </a>
-                </v-toolbar-title>
-                <v-spacer></v-spacer>
-                <!-- Icône de bascule entre grille et tableau -->
-                <v-btn @click="toggleViewMode" icon class="mb-4">
-                    <v-icon>{{ viewMode === 'grid' ? 'mdi-view-list' : 'mdi-view-grid' }}</v-icon>
-                </v-btn>
-                <v-text-field
-                    v-model="searchQuery"
-                    label="Rechercher..."
-                    prepend-icon="mdi-magnify"
-                    outlined
-                    dense
-                    hide-details
-                    class="mr-4"
-                ></v-text-field>
-                <a href="/inventory.html" style="text-decoration: none; color: inherit;">
-                    <v-btn icon>
-                        <v-icon>mdi-home</v-icon>
-                    </v-btn>
-                </a>
-                <a href="/cart.html" style="text-decoration: none; color: inherit;">
-                    <v-btn icon>
-                        <v-icon>mdi-cart</v-icon>
-                        <span>{{ totalItemsInCart }}</span>
-                    </v-btn>
-                </a>
-            </v-app-bar>
-            <!-- Barre de navigation avec onglets -->
-            <v-tabs v-model="tab" grow>
-                <v-tab value="inventory">Inventaire</v-tab>
-                <v-tab value="cart">Panier</v-tab>
-            </v-tabs>
-            <v-main>
-                <v-container fluid>
-                    <v-btn @click="toggleViewMode" class="mb-4">
-                        {{ viewMode === 'grid' ? 'Vue Tableau' : 'Vue Grille' }}
-                    </v-btn>
-                    <!-- Contenu de l'onglet Inventaire -->
-                    <v-window v-model="tab">
-                        <transition name="fade" mode="out-in">
-                            <v-window-item value="inventory">
-                                <v-row>
-                                    <!-- Sidebar (Filtres) -->
-                                    <v-col cols="12" md="3" lg="2">
-                                        <v-card class="sidebar pa-3">
-                                            <h2 class="text-warning mb-4">Filtres</h2>
-                                            <v-text-field v-model="searchQuery" label="Rechercher..." prepend-icon="mdi-magnify" outlined dense class="mb-3"></v-text-field>
-                                            <v-select v-model="selectedExpansion" :items="expansionOptions" label="Extension" outlined dense clearable class="mb-3"></v-select>
-                                            <v-select v-model="selectedLanguage" :items="languageOptions" label="Langue" outlined dense clearable class="mb-3"></v-select>
-                                            <v-select v-model="selectedRarity" :items="rarityOptions" label="Rareté" outlined dense clearable class="mb-3"></v-select>
-                                            <v-select v-model="selectedReverse" :items="reverseOptions" label="Type de carte" outlined dense clearable class="mb-3"></v-select>
-                                            <v-select v-model="selectedCondition" :items="conditionOptions" label="Condition" outlined dense clearable class="mb-3"></v-select>
-                                            <v-select v-model="sortOrder" :items="sortOptions" label="Trier par" outlined dense clearable class="mb-3"></v-select>
-                                            <v-btn color="warning" block class="mb-3" @click="updateDisplay">Rechercher</v-btn>
-                                            <v-btn color="error" block class="mb-3" @click="resetFilters">Réinitialiser les filtres</v-btn>
-                                        </v-card>
-                                    </v-col>
-                                    <!-- Contenu Principal -->
-                                    <v-col cols="12" md="9" lg="10">
-                                        <v-card class="content pa-3">
-                                            <h2>Inventaire</h2>
-                                            <!-- Affichage des cartes en grille ou en tableau -->
-                                            <v-row v-if="viewMode === 'grid'" :key="viewMode">
-                                                <v-col v-for="card in paginatedCards" :key="card.blueprint_id" cols="12" sm="6" md="4" lg="3">
-                                                    <transition name="fade">
-                                                        <v-card class="card">
-                                                            <v-row no-gutters>
-                                                                <!-- Image de la carte -->
-                                                                <v-col cols="6">
-                                                                    <div class="ribbon-container">
-                                                                        <v-img
-                                                                            :src="`${imageBaseUrl}${card.blueprint_id}.jpg`"
-                                                                            :alt="card.name_fr || card.name_en"
+    <div id="root"></div>
+    <!-- React and ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <!-- Material-UI -->
+    <script src="https://unpkg.com/@mui/material@5.14.0/umd/material-ui.development.js" crossorigin></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        const {
+            AppBar,
+            Toolbar,
+            IconButton,
+            Typography,
+            Button,
+            TextField,
+            Tabs,
+            Tab,
+            Container,
+            Card,
+            CardContent,
+            CardActions,
+            CardMedia,
+            Grid,
+            Pagination,
+            Snackbar,
+            Alert,
+            Table,
+            TableBody,
+            TableCell,
+            TableContainer,
+            TableHead,
+            TableRow,
+            Paper,
+            MenuItem,
+            Select,
+            FormControl,
+            InputLabel
+        } = MaterialUI;
+
+        const API_PRODUCTS = 'YOUR_API_PRODUCTS_ENDPOINT';
+        const API_EXPANSIONS = 'YOUR_API_EXPANSIONS_ENDPOINT';
+        const API_TOKEN = 'YOUR_API_TOKEN';
+        const imageBaseUrl = 'https://www.cardtrader.com/images/blueprint/';
+
+        const App = () => {
+            const [inventory, setInventory] = useState([]);
+            const [expansions, setExpansions] = useState({});
+            const [cart, setCart] = useState(JSON.parse(localStorage.getItem('cart')) || []);
+            const [tab, setTab] = useState('inventory');
+            const [searchQuery, setSearchQuery] = useState('');
+            const [selectedExpansion, setSelectedExpansion] = useState('');
+            const [selectedLanguage, setSelectedLanguage] = useState('');
+            const [selectedRarity, setSelectedRarity] = useState('');
+            const [selectedReverse, setSelectedReverse] = useState('');
+            const [selectedCondition, setSelectedCondition] = useState('');
+            const [sortOrder, setSortOrder] = useState('');
+            const [currentPage, setCurrentPage] = useState(1);
+            const [showCartAnimation, setShowCartAnimation] = useState(false);
+            const [cartAnimationStyle, setCartAnimationStyle] = useState({});
+            const [snackbar, setSnackbar] = useState({ show: false, message: '', color: 'success' });
+            const [viewMode, setViewMode] = useState('grid');
+
+            const itemsPerPage = 100;
+
+            const tableHeaders = [
+                { text: 'Numéro de Collection', value: 'properties_hash.collector_number', align: 'start' },
+                { text: 'Image', value: 'image', sortable: false, align: 'center' },
+                { text: 'Nom du Pokémon', value: 'name', align: 'center' },
+                { text: 'Extension', value: 'expansion', align: 'center' },
+                { text: 'Quantité', value: 'quantity', align: 'center' },
+                { text: 'Langue', value: 'properties_hash.pokemon_language', align: 'center' },
+                { text: 'Condition', value: 'condition', align: 'center' },
+                { text: 'Prix', value: 'price_cents', align: 'center' },
+                { text: 'Version', value: 'properties_hash.pokemon_reverse', align: 'center' },
+                { text: 'Actions', value: 'actions', sortable: false, align: 'center' }
+            ];
+
+            const conditionOptions = [
+                { title: 'Mint', value: 'Mint' },
+                { title: 'Near Mint', value: 'Near Mint' },
+                { title: 'Slightly Played', value: 'Slightly Played' },
+                { title: 'Moderately Played', value: 'Moderately Played' },
+                { title: 'Played', value: 'Played' },
+                { title: 'Heavily Played', value: 'Heavily Played' },
+                { title: 'Poor', value: 'Poor' }
+            ];
+
+            const languageOptions = [
+                { title: 'Français', value: 'fr' },
+                { title: 'Anglais', value: 'en' },
+                { title: 'Japonais', value: 'jp' }
+            ];
+
+            const rarityOptions = [
+                { title: 'Commun', value: 'Common' },
+                { title: 'Peu Commun', value: 'Uncommon' },
+                { title: 'Rare', value: 'Rare' },
+                { title: 'Holo', value: 'Holo Rare' },
+                { title: 'Promo', value: 'Promo' },
+                { title: 'Ultra Rare', value: 'Ultra Rare' },
+                { title: 'Secret Rare', value: 'Secret Rare' },
+                { title: 'Rare Holo EX', value: 'Rare Holo EX' },
+                { title: 'Double Rare', value: 'Double Rare' },
+                { title: 'Triple Rare', value: 'Triple Rare' },
+                { title: 'Illustration Rare', value: 'Illustration Rare' }
+            ];
+
+            const reverseOptions = [
+                { title: 'Cartes Reverse', value: 'true' },
+                { title: 'Cartes Normales', value: 'false' }
+            ];
+
+            const sortOptions = [
+                { title: 'Tri Ascendant', value: 'asc' },
+                { title: 'Tri Descendant', value: 'desc' }
+            ];
+
+            const totalItemsInCart = useMemo(() => cart.reduce((total, item) => total + item.quantity, 0), [cart]);
+
+            const normalizeString = (str) => {
+                return str
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .toLowerCase()
+                    .trim();
+            };
+
+            const filteredCards = useMemo(() => {
+                let cards = inventory.filter(card => {
+                    if (searchQuery) {
+                        const searchTerm = normalizeString(searchQuery);
+                        const nameEn = normalizeString(card.name_en);
+                        const nameFr = normalizeString(card.name_fr);
+                        if (!nameEn.includes(searchTerm) && !nameFr.includes(searchTerm)) return false;
+                    }
+                    if (selectedExpansion && card.expansion.id != selectedExpansion) return false;
+                    if (selectedLanguage && card.properties_hash.pokemon_language != selectedLanguage) return false;
+                    if (selectedRarity && card.properties_hash.pokemon_rarity != selectedRarity) return false;
+                    if (selectedReverse !== "" && card.properties_hash.pokemon_reverse.toString() !== selectedReverse) return false;
+                    if (selectedCondition && card.condition !== selectedCondition) return false;
+                    return true;
+                });
+                if (sortOrder === 'asc') {
+                    cards.sort((a, b) => a.properties_hash.collector_number - b.properties_hash.collector_number);
+                } else if (sortOrder === 'desc') {
+                    cards.sort((a, b) => b.properties_hash.collector_number - a.properties_hash.collector_number);
+                }
+                return cards;
+            }, [inventory, searchQuery, selectedExpansion, selectedLanguage, selectedRarity, selectedReverse, selectedCondition, sortOrder]);
+
+            const totalPages = useMemo(() => Math.ceil(filteredCards.length / itemsPerPage), [filteredCards]);
+
+            const paginatedCards = useMemo(() => {
+                const start = (currentPage - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
+                return filteredCards.slice(start, end);
+            }, [filteredCards, currentPage]);
+
+            const expansionOptions = useMemo(() => Object.entries(expansions).map(([id, code]) => ({ title: code, value: id })), [expansions]);
+
+            const showNotification = (message, color = 'success') => {
+                setSnackbar({ show: true, message, color });
+                setTimeout(() => setSnackbar({ ...snackbar, show: false }), 3000);
+            };
+
+            const addToCart = (card, event) => {
+                const existingItem = cart.find(item => item.blueprintId === card.blueprint_id);
+                if (existingItem) {
+                    if (existingItem.quantity >= card.quantity) {
+                        showNotification("Quantité maximale atteinte pour cette carte.", 'error');
+                        return;
+                    }
+                    existingItem.quantity += 1;
+                } else {
+                    cart.push({
+                        blueprintId: card.blueprint_id,
+                        name: card.name_fr || card.name_en,
+                        extension: expansions[card.expansion.id],
+                        price: (card.price_cents / 100),
+                        quantity: 1,
+                        maxQuantity: card.quantity,
+                        condition: card.condition || 'Non spécifiée',
+                        collectorNumber: card.properties_hash.collector_number || 'N/A'
+                    });
+                }
+                showNotification(`${card.name_fr || card.name_en} ajoutée au panier.`, 'success');
+                triggerCartAnimation(event);
+                localStorage.setItem('cart', JSON.stringify(cart));
+            };
+
+            const triggerCartAnimation = (event) => {
+                const buttonRect = event.target.getBoundingClientRect();
+                const buttonX = buttonRect.left + buttonRect.width / 2;
+                const buttonY = buttonRect.top + buttonRect.height / 2;
+                setCartAnimationStyle({ left: `${buttonX}px`, top: `${buttonY}px` });
+                setShowCartAnimation(true);
+                setTimeout(() => setShowCartAnimation(false), 800);
+            };
+
+            const resetFilters = () => {
+                setSearchQuery('');
+                setSelectedExpansion('');
+                setSelectedLanguage('');
+                setSelectedRarity('');
+                setSelectedReverse('');
+                setSelectedCondition('');
+                setSortOrder('');
+            };
+
+            const fetchExpansions = async () => {
+                try {
+                    const response = await fetch(API_EXPANSIONS, {
+                        method: "GET",
+                        headers: { "Authorization": `Bearer ${API_TOKEN}` }
+                    });
+                    if (!response.ok) throw new Error(`Erreur API Expansions: ${response.status}`);
+                    const data = await response.json();
+                    const expansionsMap = {};
+                    data.forEach(exp => expansionsMap[exp.id] = exp.name);
+                    setExpansions(expansionsMap);
+                } catch (error) {
+                    console.error("Erreur lors du chargement des extensions :", error);
+                }
+            };
+
+            const fetchInventory = async () => {
+                try {
+                    const response = await fetch(API_PRODUCTS, {
+                        method: 'GET',
+                        headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+                    });
+                    if (!response.ok) throw new Error(`Erreur API Produits: ${response.status}`);
+                    const data = await response.json();
+                    const inventoryWithFrenchNames = await Promise.all(data.map(async (card) => {
+                        const frenchName = await fetchFrenchPokemonName(card.name_en.toLowerCase());
+                        return { ...card, name_fr: frenchName, condition: card.properties_hash.condition || 'Non spécifiée' };
+                    }));
+                    setInventory(inventoryWithFrenchNames);
+                } catch (error) {
+                    console.error("Erreur API :", error);
+                }
+            };
+
+            const fetchFrenchPokemonName = async (name) => {
+                // Implement your fetchFrenchPokemonName function here
+                return name;
+            };
+
+            useEffect(() => {
+                fetchExpansions();
+                fetchInventory();
+            }, []);
+
+            return (
+                <Container>
+                    <Snackbar open={snackbar.show} autoHideDuration={3000} onClose={() => setSnackbar({ ...snackbar, show: false })}>
+                        <Alert severity={snackbar.color}>{snackbar.message}</Alert>
+                    </Snackbar>
+                    <AppBar position="static">
+                        <Toolbar>
+                            <Typography variant="h6">
+                                <Button href="/inventory.html" color="inherit">Carameche</Button>
+                            </Typography>
+                            <IconButton onClick={() => setViewMode(viewMode === 'grid' ? 'table' : 'grid')}>
+                                {viewMode === 'grid' ? <span className="mdi mdi-view-list" /> : <span className="mdi mdi-view-grid" />}
+                            </IconButton>
+                            <TextField
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                label="Rechercher..."
+                                variant="outlined"
+                                size="small"
+                                style={{ marginRight: '16px' }}
+                            />
+                            <IconButton href="/inventory.html" color="inherit">
+                                <span className="mdi mdi-home" />
+                            </IconButton>
+                            <IconButton href="/cart.html" color="inherit">
+                                <span className="mdi mdi-cart" />
+                                <span>{totalItemsInCart}</span>
+                            </IconButton>
+                        </Toolbar>
+                    </AppBar>
+                    <Tabs value={tab} onChange={(e, newValue) => setTab(newValue)}>
+                        <Tab value="inventory" label="Inventaire" />
+                        <Tab value="cart" label="Panier" />
+                    </Tabs>
+                    <Container>
+                        <Button onClick={() => setViewMode(viewMode === 'grid' ? 'table' : 'grid')} style={{ marginBottom: '16px' }}>
+                            {viewMode === 'grid' ? 'Vue Tableau' : 'Vue Grille'}
+                        </Button>
+                        {tab === 'inventory' && (
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} md={3} lg={2}>
+                                    <Card style={{ padding: '16px' }}>
+                                        <Typography variant="h6" style={{ color: '#FFC107' }}>Filtres</Typography>
+                                        <TextField
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            label="Rechercher..."
+                                            variant="outlined"
+                                            size="small"
+                                            fullWidth
+                                            style={{ marginBottom: '16px' }}
+                                        />
+                                        <FormControl variant="outlined" fullWidth style={{ marginBottom: '16px' }}>
+                                            <InputLabel>Extension</InputLabel>
+                                            <Select
+                                                value={selectedExpansion}
+                                                onChange={(e) => setSelectedExpansion(e.target.value)}
+                                                label="Extension"
+                                            >
+                                                {expansionOptions.map(option => (
+                                                    <MenuItem key={option.value} value={option.value}>{option.title}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                        <FormControl variant="outlined" fullWidth style={{ marginBottom: '16px' }}>
+                                            <InputLabel>Langue</InputLabel>
+                                            <Select
+                                                value={selectedLanguage}
+                                                onChange={(e) => setSelectedLanguage(e.target.value)}
+                                                label="Langue"
+                                            >
+                                                {languageOptions.map(option => (
+                                                    <MenuItem key={option.value} value={option.value}>{option.title}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                        <FormControl variant="outlined" fullWidth style={{ marginBottom: '16px' }}>
+                                            <InputLabel>Rareté</InputLabel>
+                                            <Select
+                                                value={selectedRarity}
+                                                onChange={(e) => setSelectedRarity(e.target.value)}
+                                                label="Rareté"
+                                            >
+                                                {rarityOptions.map(option => (
+                                                    <MenuItem key={option.value} value={option.value}>{option.title}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                        <FormControl variant="outlined" fullWidth style={{ marginBottom: '16px' }}>
+                                            <InputLabel>Type de carte</InputLabel>
+                                            <Select
+                                                value={selectedReverse}
+                                                onChange={(e) => setSelectedReverse(e.target.value)}
+                                                label="Type de carte"
+                                            >
+                                                {reverseOptions.map(option => (
+                                                    <MenuItem key={option.value} value={option.value}>{option.title}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                        <FormControl variant="outlined" fullWidth style={{ marginBottom: '16px' }}>
+                                            <InputLabel>Condition</InputLabel>
+                                            <Select
+                                                value={selectedCondition}
+                                                onChange={(e) => setSelectedCondition(e.target.value)}
+                                                label="Condition"
+                                            >
+                                                {conditionOptions.map(option => (
+                                                    <MenuItem key={option.value} value={option.value}>{option.title}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                        <FormControl variant="outlined" fullWidth style={{ marginBottom: '16px' }}>
+                                            <InputLabel>Trier par</InputLabel>
+                                            <Select
+                                                value={sortOrder}
+                                                onChange={(e) => setSortOrder(e.target.value)}
+                                                label="Trier par"
+                                            >
+                                                {sortOptions.map(option => (
+                                                    <MenuItem key={option.value} value={option.value}>{option.title}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                        <Button variant="contained" color="warning" fullWidth style={{ marginBottom: '16px' }} onClick={resetFilters}>
+                                            Réinitialiser les filtres
+                                        </Button>
+                                    </Card>
+                                </Grid>
+                                <Grid item xs={12} md={9} lg={10}>
+                                    <Card style={{ padding: '16px' }}>
+                                        <Typography variant="h6">Inventaire</Typography>
+                                        {viewMode === 'grid' ? (
+                                            <Grid container spacing={2}>
+                                                {paginatedCards.map(card => (
+                                                    <Grid item key={card.blueprint_id} xs={12} sm={6} md={4} lg={3}>
+                                                        <Card className="card">
+                                                            <Grid container>
+                                                                <Grid item xs={6}>
+                                                                    <div className="ribbon-container">
+                                                                        <CardMedia
+                                                                            component="img"
+                                                                            image={`${imageBaseUrl}${card.blueprint_id}.jpg`}
+                                                                            alt={card.name_fr || card.name_en}
                                                                             height="200"
-                                                                            contain
-                                                                            class="card-image"
-                                                                            :class="{ 'reverse-glow': card.properties_hash.pokemon_reverse }"
-                                                                            loading="lazy"
-                                                                        ></v-img>
-                                                                        <!-- Ribbon "Reverse Foil" -->
-                                                                        <div v-if="card.properties_hash.pokemon_reverse" class="ribbon">Reverse</div>
+                                                                            className={`card-image ${card.properties_hash.pokemon_reverse ? 'reverse-glow' : ''}`}
+                                                                        />
+                                                                        {card.properties_hash.pokemon_reverse && (
+                                                                            <div className="ribbon">Reverse</div>
+                                                                        )}
                                                                     </div>
-                                                                </v-col>
-                                                                <!-- Détails de la carte -->
-                                                                <v-col cols="6" class="card-details">
-                                                                    <!-- Nom de la carte et numéro de collection -->
-                                                                    <div style="display: flex; align-items: center;">
-                                                                        <h3 class="card-name">{{ card.name_fr || card.name_en }}</h3>
-                                                                        <span class="card-collector-number">#{{ card.properties_hash.collector_number || 'N/A' }}</span>
+                                                                </Grid>
+                                                                <Grid item xs={6} className="card-details">
+                                                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                                        <Typography variant="h6" className="card-name">{card.name_fr || card.name_en}</Typography>
+                                                                        <span className="card-collector-number">#{card.properties_hash.collector_number || 'N/A'}</span>
                                                                     </div>
-                                                                    <!-- Extension -->
-                                                                    <p class="card-expansion">{{ expansions[card.expansion.id] }}</p>
-                                                                    <!-- Rareté -->
-                                                                    <p class="card-rarity">{{ card.properties_hash.pokemon_rarity }}</p>
-                                                                    <!-- Condition de la carte (alignée à gauche) -->
-                                                                    <p class="card-condition">{{ card.condition || 'Non spécifiée' }}</p>
-                                                                    <!-- Prix (centré) -->
-                                                                    <p class="card-price">{{ (card.price_cents / 100).toFixed(2) }} €</p>
-                                                                    <!-- Quantité disponible -->
-                                                                    <div class="card-quantity">{{ card.quantity || 0 }} disponible(s)</div>
-                                                                </v-col>
-                                                            </v-row>
-                                                            <!-- Bouton "Ajouter au panier" -->
-                                                            <v-card-actions>
-                                                                <v-btn color="warning" block @click="addToCart(card, $event)">
-                                                                    <v-icon left>mdi-cart</v-icon>
+                                                                    <Typography className="card-expansion">{expansions[card.expansion.id]}</Typography>
+                                                                    <Typography className="card-rarity">{card.properties_hash.pokemon_rarity}</Typography>
+                                                                    <Typography className="card-condition">{card.condition || 'Non spécifiée'}</Typography>
+                                                                    <Typography className="card-price">{(card.price_cents / 100).toFixed(2)} €</Typography>
+                                                                    <div className="card-quantity">{card.quantity || 0} disponible(s)</div>
+                                                                </Grid>
+                                                            </Grid>
+                                                            <CardActions>
+                                                                <Button variant="contained" color="warning" fullWidth onClick={(e) => addToCart(card, e)}>
+                                                                    <span className="mdi mdi-cart" />
                                                                     Ajouter au panier
-                                                                </v-btn>
-                                                            </v-card-actions>
-                                                        </v-card>
-                                                    </transition>
-                                                </v-col>
-                                            </v-row>
+                                                                </Button>
+                                                            </CardActions>
+                                                        </Card>
+                                                    </Grid>
+                                                ))}
+                                            </Grid>
+                                        ) : (
+                                            <TableContainer component={Paper}>
+                                                <Table>
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            {tableHeaders.map(header => (
+                                                                <TableCell key={header.value} align={header.align}>{header.text}</TableCell>
+                                                            ))}
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {paginatedCards.map(card => (
+                                                            <TableRow key={card.blueprint_id}>
+                                                                <TableCell>{card.properties_hash.collector_number || 'N/A'}</TableCell>
+                                                                <TableCell>
+                                                                    <CardMedia
+                                                                        component="img"
+                                                                        image={`${imageBaseUrl}${card.blueprint_id}.jpg`}
+                                                                        alt={card.name_fr || card.name_en}
+                                                                        height="50"
+                                                                        className="card-image"
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell>{card.name_fr || card.name_en}</TableCell>
+                                                                <TableCell>{expansions[card.expansion.id]}</TableCell>
+                                                                <TableCell>{card.quantity || 0}</TableCell>
+                                                                <TableCell>{card.properties_hash.pokemon_language}</TableCell>
+                                                                <TableCell>{card.condition || 'Non spécifiée'}</TableCell>
+                                                                <TableCell>{(card.price_cents / 100).toFixed(2)} €</TableCell>
+                                                                <TableCell>{card.properties_hash.pokemon_reverse ? 'Reverse' : 'Normale'}</TableCell>
+                                                                <TableCell>
+                                                                    <IconButton onClick={(e) => addToCart(card, e)}>
+                                                                        <span className="mdi mdi-cart" />
+                                                                    </IconButton>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))}
+                                                    </TableBody>
+                                                </Table>
+                                            </TableContainer>
+                                        )}
+                                        <Pagination count={totalPages} page={currentPage} onChange={(e, page) => setCurrentPage(page)} style={{ marginTop: '16px' }} />
+                                    </Card>
+                                </Grid>
+                            </Grid>
+                        )}
+                    </Container>
+                </Container>
+            );
+        };
 
-                                            <!-- Section Tableau -->
-                                            <v-row v-if="viewMode === 'table'" :key="viewMode">
-                                                <v-col cols="12">
-                                                    <v-card class="pa-3">
-                                                        <v-data-table
-                                                            :headers="tableHeaders"
-                                                            :items="paginatedCards"
-                                                            :items-per-page="itemsPerPage"
-                                                            :page.sync="currentPage"
-                                                            hide-default-footer
-                                                            class="elevation-1"
-                                                        >
-                                                            <!-- Colonne pour l'image de la carte -->
-                                                            <template v-slot:item.image="{ item }">
-                                                                <v-img
-                                                                    :src="`${imageBaseUrl}${item.blueprint_id}.jpg`"
-                                                                    :alt="item.name_fr || item.name_en"
-                                                                    height="50"
-                                                                    contain
-                                                                    class="card-image"
-                                                                    loading="lazy"
-                                                                ></v-img>
-                                                            </template>
-
-                                                            <!-- Colonne pour le nom du Pokémon -->
-                                                            <template v-slot:item.name="{ item }">
-                                                                {{ item.name_fr || item.name_en }}
-                                                            </template>
-
-                                                            <!-- Colonne pour l'extension -->
-                                                            <template v-slot:item.expansion="{ item }">
-                                                                {{ expansions[item.expansion?.id] || 'N/A' }}
-                                                            </template>
-
-                                                            <!-- Colonne pour le prix formaté -->
-                                                            <template v-slot:item.price_cents="{ item }">
-                                                                {{ (item.price_cents / 100).toFixed(2) }} €
-                                                            </template>
-
-                                                            <!-- Colonne pour la version (Reverse ou Normale) -->
-                                                            <template v-slot:item.properties_hash.pokemon_reverse="{ item }">
-                                                                {{ item.properties_hash?.pokemon_reverse ? 'Reverse' : 'Normale' }}
-                                                            </template>
-
-                                                            <!-- Colonne pour les actions (ajout au panier) -->
-                                                            <template v-slot:item.actions="{ item }">
-                                                                <v-btn icon @click="addToCart(item, $event)">
-                                                                    <v-icon>mdi-cart</v-icon>
-                                                                </v-btn>
-                                                            </template>
-                                                        </v-data-table>
-                                                        <!-- Pagination pour le tableau -->
-                                                        <!--   <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>-->
-                                                    </v-card>
-                                                </v-col>
-                                            </v-row>
-                                            <!-- Pagination -->
-                                            <v-pagination v-model="currentPage" :length="totalPages" class="mt-4"></v-pagination>
-                                        </v-card>
-                                    </v-col>
-                                </v-row>
-                            </v-window-item>
-                        </transition>
-                    </v-window>
-                </v-container>
-            </v-main>
-        </v-app>
-    </div>
-    <!-- Vue.js -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <!-- Vuetify JS -->
-    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js"></script>
-    <!-- Shared JS -->
-    <script type="module">
-        import { fetchFrenchPokemonName, generateUserId, saveCartToLocalStorage, getCartFromLocalStorage, saveCartToSupabase, validateCart, API_PRODUCTS, API_EXPANSIONS, API_TOKEN, supabaseClient } from './shared.js';
-        const { createApp, ref, reactive, computed, watch } = Vue;
-        const vuetify = Vuetify.createVuetify({
-            theme: {
-                defaultTheme: 'dark',
-                themes: {
-                    dark: {
-                        colors: {
-                            primary: '#FFD700',
-                            secondary: '#1E1E1E',
-                            background: '#121212',
-                            surface: '#1E1E1E',
-                            error: '#FF5252',
-                            info: '#2196F3',
-                            success: '#4CAF50',
-                            warning: '#FFC107',
-                        },
-                    },
-                },
-            },
-        });
-
-        const app = createApp({
-            setup() {
-                const inventory = ref([]);
-                const expansions = ref({});
-                const cart = ref(getCartFromLocalStorage());
-                const userId = ref(generateUserId());
-                const tab = ref('inventory');
-                const searchQuery = ref('');
-                const selectedExpansion = ref('');
-                const selectedLanguage = ref('');
-                const selectedRarity = ref('');
-                const selectedReverse = ref('');
-                const selectedCondition = ref('');
-                const sortOrder = ref('');
-                const imageBaseUrl = ref('https://www.cardtrader.com/images/blueprint/');
-                const currentPage = ref(1);
-                const itemsPerPage = 100;
-                // Animation pour l'ajout au panier
-                const showCartAnimation = ref(false);
-                const cartAnimationStyle = ref({});
-                // Notifications visuelles (toasts)
-                const snackbar = reactive({
-                    show: false,
-                    message: '',
-                    color: 'success',
-                });
-                const tableHeaders = ref([
-                    { text: 'Numéro de Collection', value: 'properties_hash.collector_number', align: 'start' },
-                    { text: 'Image', value: 'image', sortable: false, align: 'center' }, // Colonne pour l'image
-                    { text: 'Nom du Pokémon', value: 'name', align: 'center' }, // Nouvelle colonne pour le nom
-                    { text: 'Extension', value: 'expansion', align: 'center' }, // Colonne pour l'extension
-                    { text: 'Quantité', value: 'quantity', align: 'center' },
-                    { text: 'Langue', value: 'properties_hash.pokemon_language', align: 'center' },
-                    { text: 'Condition', value: 'condition', align: 'center' },
-                    { text: 'Prix', value: 'price_cents', align: 'center' },
-                    { text: 'Version', value: 'properties_hash.pokemon_reverse', align: 'center' },
-                    { text: 'Actions', value: 'actions', sortable: false, align: 'center' }
-                ]);
-                // Options de condition
-                const conditionOptions = [
-                    { title: 'Mint', value: 'Mint' },
-                    { title: 'Near Mint', value: 'Near Mint' },
-                    { title: 'Slightly Played', value: 'Slightly Played' },
-                    { title: 'Moderately Played', value: 'Moderately Played' },
-                    { title: 'Played', value: 'Played' },
-                    { title: 'Heavily Played', value: 'Heavily Played' },
-                    { title: 'Poor', value: 'Poor' }
-                ];
-
-                const viewMode = ref('grid'); // 'grid' ou 'table'
-                // Fonction pour afficher des notifications
-                function showNotification(message, color = 'success') {
-                    snackbar.message = message;
-                    snackbar.color = color;
-                    snackbar.show = true;
-                    // Masquer la notification après 3 secondes
-                    setTimeout(() => {
-                        snackbar.show = false;
-                    }, 3000);
-                }
-                // Fonction pour ajouter une carte au panier
-                function addToCart(card, event) {
-                    const existingItem = cart.value.find(item => item.blueprintId === card.blueprint_id);
-                    if (existingItem) {
-                        if (existingItem.quantity >= card.quantity) {
-                            showNotification("Quantité maximale atteinte pour cette carte.", 'error');
-                            return;
-                        }
-                        existingItem.quantity += 1;
-                    } else {
-                        cart.value.push({
-                            blueprintId: card.blueprint_id,
-                            name: card.name_fr || card.name_en,
-                            extension: expansions.value[card.expansion.id], // Ajout de l'extension
-                            price: (card.price_cents / 100),
-                            quantity: 1,
-                            maxQuantity: card.quantity, // Quantité maximale disponible
-                            condition: card.condition || 'Non spécifiée',
-                            collectorNumber: card.properties_hash.collector_number || 'N/A'
-                        });
-                    }
-                    // Afficher une notification
-                    showNotification(`${card.name_fr || card.name_en} ajoutée au panier.`, 'success');
-                    // Déclencher l'animation
-                    triggerCartAnimation(event);
-                    saveCartToLocalStorage(cart.value); // Sauvegarder le panier dans le localStorage
-                }
-                // Fonction pour déclencher l'animation
-                function triggerCartAnimation(event) {
-                    // Récupérer la position du bouton cliqué
-                    const buttonRect = event.target.getBoundingClientRect();
-                    const buttonX = buttonRect.left + buttonRect.width / 2;
-                    const buttonY = buttonRect.top + buttonRect.height / 2;
-                    // Position de départ de l'icône animée
-                    cartAnimationStyle.value = {
-                        left: `${buttonX}px`,
-                        top: `${buttonY}px`,
-                    };
-                    // Afficher l'icône animée
-                    showCartAnimation.value = true;
-                    // Masquer l'icône après l'animation
-                    setTimeout(() => {
-                        showCartAnimation.value = false;
-                    }, 800); // Durée de l'animation
-                }
-                // Fonction pour réinitialiser les filtres
-                function resetFilters() {
-                    searchQuery.value = '';
-                    selectedExpansion.value = '';
-                    selectedLanguage.value = '';
-                    selectedRarity.value = '';
-                    selectedReverse.value = '';
-                    selectedCondition.value = '';
-                    sortOrder.value = '';
-                }
-                // Calcul des propriétés calculées
-                const totalPages = computed(() => Math.ceil(filteredCards.value.length / itemsPerPage));
-                const paginatedCards = computed(() => {
-                    const start = (currentPage.value - 1) * itemsPerPage;
-                    const end = start + itemsPerPage;
-                    const cards = filteredCards.value.slice(start, end);
-                    console.log("Paginated Cards:", cards); // Vérifiez les données dans la console
-                    return cards;
-                });
-                const expansionOptions = computed(() => Object.entries(expansions.value).map(([id, code]) => ({ title: code, value: id })));
-                const languageOptions = [
-                    { title: 'Français', value: 'fr' },
-                    { title: 'Anglais', value: 'en' },
-                    { title: 'Japonais', value: 'jp' }
-                ];
-                const rarityOptions = [
-                    { title: 'Commun', value: 'Common' },
-                    { title: 'Peu Commun', value: 'Uncommon' },
-                    { title: 'Rare', value: 'Rare' },
-                    { title: 'Holo', value: 'Holo Rare' },
-                    { title: 'Promo', value: 'Promo' },
-                    { title: 'Holo', value: 'Holo Rare' },
-                    { title: 'Ultra Rare', value: 'Ultra Rare' },
-                    { title: 'Secret Rare', value: 'Secret Rare' },
-                    { title: 'Rare Holo EX', value: 'Rare Holo EX' },
-                    { title: 'Double Rare', value: 'Double Rare' },
-                    { title: 'Triple Rare', value: 'Triple Rare' },
-                    { title: 'Illustration Rare', value: 'Illustration Rare' }
-                ];
-                const reverseOptions = [
-                    { title: 'Cartes Reverse', value: 'true' },
-                    { title: 'Cartes Normales', value: 'false' }
-                ];
-                const sortOptions = [
-                    { title: 'Tri Ascendant', value: 'asc' },
-                    { title: 'Tri Descendant', value: 'desc' }
-                ];
-                const totalItemsInCart = computed(() => cart.value.reduce((total, item) => total + item.quantity, 0));
-                // Fonction pour filtrer les cartes
-                const normalizeString = (str) => {
-                    return str
-                        .normalize("NFD")
-                        .replace(/[\u0300-\u036f]/g, "")
-                        .toLowerCase()
-                        .trim();
-                };
-
-                const filteredCards = computed(() => {
-                    let cards = inventory.value.filter(card => {
-                        if (searchQuery.value) {
-                            const searchTerm = normalizeString(searchQuery.value);
-                            const nameEn = normalizeString(card.name_en);
-                            const nameFr = normalizeString(card.name_fr);
-                            if (!nameEn.includes(searchTerm) && !nameFr.includes(searchTerm)) return false;
-                        }
-                        if (selectedExpansion.value && card.expansion.id != selectedExpansion.value) return false;
-                        if (selectedLanguage.value && card.properties_hash.pokemon_language != selectedLanguage.value) return false;
-                        if (selectedRarity.value && card.properties_hash.pokemon_rarity != selectedRarity.value) return false;
-                        if (selectedReverse.value !== "" && card.properties_hash.pokemon_reverse.toString() !== selectedReverse.value) return false;
-                        if (selectedCondition.value && card.condition !== selectedCondition.value) return false;
-                        return true;
-                    });
-                    if (sortOrder.value === 'asc') {
-                        cards.sort((a, b) => a.properties_hash.collector_number - b.properties_hash.collector_number);
-                    } else if (sortOrder.value === 'desc') {
-                        cards.sort((a, b) => b.properties_hash.collector_number - a.properties_hash.collector_number);
-                    }
-                    return cards;
-                });
-
-                // Watch pour réinitialiser la pagination et forcer la mise à jour
-                watch(searchQuery, () => {
-                    currentPage.value = 1; // Réinitialiser la pagination à la première page
-                });
-
-                const suggestions = ref([]);
-
-                function updateSuggestions() {
-                    if (searchQuery.value.length > 1) {
-                        suggestions.value = inventory.value
-                            .filter(card => {
-                                const searchTerm = normalizeString(searchQuery.value);
-                                const nameEn = normalizeString(card.name_en);
-                                const nameFr = normalizeString(card.name_fr);
-                                return nameEn.includes(searchTerm) || nameFr.includes(searchTerm);
-                            })
-                            .map(card => card.name_fr || card.name_en)
-                            .slice(0, 5); // Limite à 5 suggestions
-                    } else {
-                        suggestions.value = [];
-                    }
-                }
-                // Charger les extensions et l'inventaire
-                async function fetchExpansions() {
-                    try {
-                        const response = await fetch(API_EXPANSIONS, {
-                            method: "GET",
-                            headers: { "Authorization": `Bearer ${API_TOKEN}` }
-                        });
-                        if (!response.ok) throw new Error(`Erreur API Expansions: ${response.status}`);
-                        const data = await response.json();
-                        data.forEach(exp => expansions.value[exp.id] = exp.name);
-                    } catch (error) {
-                        console.error("Erreur lors du chargement des extensions :", error);
-                    }
-                }
-                async function fetchInventory() {
-                    try {
-                        const response = await fetch(API_PRODUCTS, {
-                            method: 'GET',
-                            headers: { 'Authorization': `Bearer ${API_TOKEN}` }
-                        });
-                        if (!response.ok) throw new Error(`Erreur API Produits: ${response.status}`);
-                        const data = await response.json();
-                        inventory.value = await Promise.all(data.map(async (card) => {
-                            const frenchName = await fetchFrenchPokemonName(card.name_en.toLowerCase());
-                            return { ...card, name_fr: frenchName, condition: card.properties_hash.condition || 'Non spécifiée' }; // Ajouter la condition
-                        }));
-                    } catch (error) {
-                        console.error("Erreur API :", error);
-                    }
-                }
-
-                async function fetchTranslations() {
-                    try {
-                        const response = await fetch('/translations.json');
-                        if (!response.ok) throw new Error(`Erreur lors du chargement des traductions: ${response.status}`);
-                        const translations = await response.json();
-                        console.log("Traductions chargées:", translations);
-                        return translations;
-                    } catch (error) {
-                        console.error("Erreur lors du chargement des traductions:", error);
-                        return {};
-                    }
-                }
-
-                // Initialisation
-                fetchExpansions().then(async () => {
-                    const translations = await fetchTranslations();
-                    Object.keys(expansions.value).forEach(key => {
-                        if (translations[expansions.value[key]]) {
-                            expansions.value[key] = translations[expansions.value[key]];
-                        }
-                    });
-                    fetchInventory();
-                });
-
-                return {
-                    inventory,
-                    expansions,
-                    cart,
-                    tab,
-                    searchQuery,
-                    selectedExpansion,
-                    selectedLanguage,
-                    selectedRarity,
-                    selectedReverse,
-                    selectedCondition,
-                    sortOrder,
-                    imageBaseUrl,
-                    currentPage,
-                    itemsPerPage,
-                    totalPages,
-                    paginatedCards,
-                    tableHeaders,
-                    expansionOptions,
-                    languageOptions,
-                    rarityOptions,
-                    reverseOptions,
-                    conditionOptions,
-                    sortOptions,
-                    totalItemsInCart,
-                    snackbar,
-                    showCartAnimation,
-                    cartAnimationStyle,
-                    addToCart,
-                    resetFilters,
-                    showNotification,
-                    viewMode,
-                    toggleViewMode() {
-                        viewMode.value = viewMode.value === 'grid' ? 'table' : 'grid';
-                    },
-                };
-            }
-        });
-        app.use(vuetify);
-        app.mount('#app');
+        ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
 </html>
