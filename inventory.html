@@ -540,7 +540,8 @@
                 });
                 app.use(vuetify);
                 app.mount('#app');
-            }).catch((error) => {
+            });
+                .catch((error) => {
                 console.error('Erreur lors du chargement du module shared.js:', error);
             });
         });
