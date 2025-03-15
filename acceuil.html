@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCGdex - Toutes les séries</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .series-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .serie-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .serie-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        .serie-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        .serie-card h3 {
+            font-size: 18px;
+            margin: 10px 0;
+            color: #555;
+        }
+        #searchSeries {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>TCGdex - Toutes les séries</h1>
+    <input type="text" id="searchSeries" placeholder="Rechercher une série..." oninput="filterSeries()">
+    <div id="series" class="series-container"></div>
+
+    <script>
+        // Fonction pour récupérer toutes les séries
+        async function fetchAllSeries() {
+            try {
+                const response = await fetch('https://api.tcgdex.net/v2/fr/sets');
+                if (!response.ok) {
+                    throw new Error('Impossible de récupérer les séries');
+                }
+                const series = await response.json();
+                displaySeries(series);
+            } catch (error) {
+                console.error('Erreur:', error.message);
+                document.getElementById('series').innerHTML = `<p style="color: red;">Erreur : ${error.message}</p>`;
+            }
+        }
+
+        // Fonction pour afficher les séries
+        function displaySeries(series) {
+            const seriesContainer = document.getElementById('series');
+            seriesContainer.innerHTML = ''; // Vider le conteneur
+
+            series.forEach(serie => {
+                const serieCard = document.createElement('div');
+                serieCard.className = 'serie-card';
+
+                // Utiliser l'URL du logo fournie par l'API et ajouter l'extension .png
+                const logoURL = `${serie.logo}.png`;
+
+                // Vérifier si l'image existe
+                const img = new Image();
+                img.src = logoURL;
+                img.onload = () => {
+                    // Si l'image est chargée, l'afficher
+                    serieCard.innerHTML = `
+                        <img src="${logoURL}" alt="${serie.name}">
+                        <h3>${serie.name}</h3>
+                        <p>Cartes : ${serie.cardCount.total} (Officielles : ${serie.cardCount.official})</p>
+                    `;
+                };
+                img.onerror = () => {
+                    // Si l'image ne se charge pas, afficher un placeholder
+                    serieCard.innerHTML = `
+                        <img src="https://via.placeholder.com/200?text=Logo+non+disponible" alt="${serie.name}">
+                        <h3>${serie.name}</h3>
+                        <p>Cartes : ${serie.cardCount.total} (Officielles : ${serie.cardCount.official})</p>
+                    `;
+                };
+
+                // Rediriger vers l'inventaire avec le filtre de l'extension
+                serieCard.addEventListener('click', () => {
+                    window.location.href = `/inventory.html?extension=${serie.id}`;
+                });
+
+                seriesContainer.appendChild(serieCard);
+            });
+        }
+
+        // Fonction pour filtrer les séries
+        function filterSeries() {
+            const searchTerm = document.getElementById('searchSeries').value.toLowerCase();
+            const seriesCards = document.querySelectorAll('.serie-card');
+
+            seriesCards.forEach(card => {
+                const name = card.querySelector('h3').textContent.toLowerCase();
+                if (name.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Charger toutes les séries au démarrage
+        fetchAllSeries();
+    </script>
+</body>
+</html>
