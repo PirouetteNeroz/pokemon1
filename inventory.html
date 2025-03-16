@@ -17,7 +17,19 @@
             border-radius: 10px;
             overflow: hidden;
         }
+        /* Style pour l'image avec effet de zoom */
+       /* .card-image {
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Animation fluide */
+       /*     cursor: pointer; /* Curseur en forme de main */
+       /* }
 
+        /* Effet de zoom au survol */
+       /* .card-image:hover {
+            transform: scale(5); /* Agrandir l'image de 20% */
+        /*    z-index: 1000; /* Passer au premier plan */
+       /*     position: relative; /* Nécessaire pour z-index */
+        /*    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Ombre pour un effet de profondeur */
+       /* }*/
 
         .card:hover {
             transform: scale(1.05);
@@ -472,7 +484,7 @@
 const urlParams = new URLSearchParams(window.location.search);
 const selectedExtension = urlParams.get('extension');
 
-             
+                
                 // Fonction pour afficher des notifications
                 function showNotification(message, color = 'success') {
                     snackbar.message = message;
@@ -685,13 +697,12 @@ const expansionOptions = computed(() => {
                     }
                 }
 function updateDisplay() {
+    // Appliquer les filtres et mettre à jour l'affichage
     filteredCards.value = inventory.value.filter(card => {
-        if (selectedExpansion.value && card.expansion.name !== selectedExpansion.value) return false;
+        if (selectedExpansion.value && card.expansion.id != selectedExpansion.value) return false;
+        // Ajoutez ici les autres filtres (langue, rareté, etc.)
         return true;
     });
-    currentPage.value = 1; // Réinitialise la pagination
-    console.log("Cartes filtrées :", filteredCards.value); // Vérifie les cartes filtrées
-}
 
     // Réinitialiser la pagination
     currentPage.value = 1;
