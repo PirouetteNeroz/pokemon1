@@ -165,33 +165,36 @@
                 }
 
                 // Grouper les séries par blocs
-                const groupedSeries = computed(() => {
-                    if (!series.value || series.value.length === 0) return []; // Retourne un tableau vide si series.value est vide
-                    const blocks = [
-                        { name: 'Scarlet & Violet', series: [] },
-                        { name: 'Sword & Shield', series: [] },
-                        { name: 'Sun & Moon', series: [] },
-                        { name: 'XY', series: [] },
-                        { name: 'Black & White', series: [] },
-                    ];
+const groupedSeries = computed(() => {
+    if (!series.value || series.value.length === 0) return [];
+    const blocks = [
+        { name: 'Scarlet & Violet', series: [] },
+        { name: 'Sword & Shield', series: [] },
+        { name: 'Sun & Moon', series: [] },
+        { name: 'XY', series: [] },
+        { name: 'Black & White', series: [] },
+        { name: 'Autres', series: [] }, // Bloc pour les séries non classées
+    ];
 
-                    series.value.forEach(serie => {
-                        if (!serie.name || !serie.logo) return; // Ignorer les séries sans nom ou logo
-                        if (serie.name.includes('Scarlet & Violet')) {
-                            blocks[0].series.push(serie);
-                        } else if (serie.name.includes('Sword & Shield')) {
-                            blocks[1].series.push(serie);
-                        } else if (serie.name.includes('Sun & Moon')) {
-                            blocks[2].series.push(serie);
-                        } else if (serie.name.includes('XY')) {
-                            blocks[3].series.push(serie);
-                        } else if (serie.name.includes('Black & White')) {
-                            blocks[4].series.push(serie);
-                        }
-                    });
+    series.value.forEach(serie => {
+        if (!serie.name || !serie.logo) return;
+        if (serie.name.includes('Scarlet & Violet') || serie.name.includes('Paldea')) {
+            blocks[0].series.push(serie);
+        } else if (serie.name.includes('Sword & Shield') || serie.name.includes('Rebel Clash')) {
+            blocks[1].series.push(serie);
+        } else if (serie.name.includes('Sun & Moon') || serie.name.includes('Ultra Prism')) {
+            blocks[2].series.push(serie);
+        } else if (serie.name.includes('XY') || serie.name.includes('Steam Siege')) {
+            blocks[3].series.push(serie);
+        } else if (serie.name.includes('Black & White') || serie.name.includes('Plasma Storm')) {
+            blocks[4].series.push(serie);
+        } else {
+            blocks[5].series.push(serie); // Ajoute les séries non classées dans "Autres"
+        }
+    });
 
-                    return blocks.filter(block => block.series.length > 0);
-                });
+    return blocks.filter(block => block.series.length > 0);
+});
 
                 // Rediriger vers l'inventaire avec le filtre de l'extension
                 function goToInventory(serie) {
