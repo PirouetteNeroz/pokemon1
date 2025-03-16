@@ -472,10 +472,7 @@
 const urlParams = new URLSearchParams(window.location.search);
 const selectedExtension = urlParams.get('extension');
 
- if (selectedExtension) {
-    selectedExpansion.value = selectedExtension; // Applique le filtre
-    updateDisplay(); // Met à jour l'affichage
-}               
+             
                 // Fonction pour afficher des notifications
                 function showNotification(message, color = 'success') {
                     snackbar.message = message;
